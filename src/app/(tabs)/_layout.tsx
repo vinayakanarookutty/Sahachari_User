@@ -1,4 +1,4 @@
-import { Redirect, Tabs } from "expo-router";
+      import { Redirect, Tabs } from "expo-router";
 import {
   Home,
   Receipt,
