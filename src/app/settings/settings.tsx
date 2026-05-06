@@ -90,9 +90,9 @@ export default function Settings() {
         body[field] =
           typeof value === "string"
             ? value
-                .split(",")
-                .map((p) => p.trim())
-                .filter((p) => p.length > 0)
+              .split(",")
+              .map((p) => p.trim())
+              .filter((p) => p.length > 0)
             : value;
       } else {
         body[field] = value;
@@ -117,7 +117,7 @@ export default function Settings() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["currentUser"] });
       setShowEditModal(false);
-      
+
       if (Platform.OS === "android") {
         ToastAndroid.show("Profile updated successfully!", ToastAndroid.SHORT);
       } else {
@@ -153,8 +153,8 @@ export default function Settings() {
         fileExtension === "png"
           ? "image/png"
           : fileExtension === "webp"
-          ? "image/webp"
-          : "image/jpeg";
+            ? "image/webp"
+            : "image/jpeg";
 
       // Get presigned URL
       const presignedResponse = await fetch(`${API_BASE_URL}/s3/presigned-url`, {
@@ -211,7 +211,7 @@ export default function Settings() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["currentUser"] });
-      
+
       if (Platform.OS === "android") {
         ToastAndroid.show("Profile picture updated!", ToastAndroid.SHORT);
       } else {
@@ -282,18 +282,51 @@ export default function Settings() {
     }
   };
 
-  const handleLogout = () => {
-    Alert.alert("Logout", "Are you sure you want to logout?", [
-      { text: "Cancel", style: "cancel" },
-      {
-        text: "Logout",
-        style: "destructive",
-        onPress: async () => {
-          await logout();
-          router.replace("/(auth)/login");
-        },
-      },
-    ]);
+  // const handleLogout = () => {
+  //   window.alert("TEST ALERT");
+  //   Alert.alert("Logout", "Are you sure you want to logout?", [
+  //     { text: "Cancel", style: "cancel" },
+  //     {
+  //       text: "Logout",
+  //       style: "destructive",
+  //       onPress: async () => {
+  //         // testing
+  //         console.log("BEFORE LOGOUT:", useAuthStore.getState());
+  //         await logout();
+  //         console.log("AFTER LOGOUT:", useAuthStore.getState());
+  //         // testing
+  //         router.replace("/(auth)/login");
+  //         console.log("FINAL STATE:", useAuthStore.getState());
+  //       },
+  //     },
+  //   ]);
+  // };
+
+  const handleLogout = async () => {
+    try {
+      const doLogout = async () => {
+        // console.log("BEFORE LOGOUT:", useAuthStore.getState()); 
+
+        await logout();
+
+        // console.log("AFTER LOGOUT:", useAuthStore.getState());
+
+        router.replace("/(auth)/login");
+      };
+
+      if (Platform.OS === "web") {
+        const confirm = window.confirm("Are you sure you want to logout?");
+        if (confirm) await doLogout();
+        return;
+      }
+
+      Alert.alert("Logout", "Are you sure you want to logout?", [
+        { text: "Cancel", style: "cancel" },
+        { text: "Logout", style: "destructive", onPress: doLogout },
+      ]);
+    } catch (err) {
+      console.error("Logout failed:", err);
+    }
   };
 
   if (isLoading) {
@@ -353,7 +386,13 @@ export default function Settings() {
         <View className="px-6">
           <View className="flex-row items-center justify-between">
             <Pressable
-              onPress={() => router.back()}
+              onPress={() => {
+                if (router.canGoBack()) {
+                  router.back();
+                } else {
+                  router.replace("/home"); // navigate to home screen
+                }
+              }}
               className="bg-white/20 rounded-full p-2.5 backdrop-blur-sm"
             >
               <ArrowLeft size={24} color="#FFFFFF" strokeWidth={2.5} />
@@ -496,7 +535,13 @@ export default function Settings() {
 
           {/* Logout Button */}
           <Pressable
-            onPress={handleLogout}
+            // onPress={handleLogout}
+
+            onPress={() => {
+              // console.log("HANDLE CALLED");
+              handleLogout();
+            }}
+
             className="rounded-2xl overflow-hidden shadow-lg active:scale-[0.98]"
           >
             <LinearGradient
@@ -516,6 +561,7 @@ export default function Settings() {
               </Text>
             </LinearGradient>
           </Pressable>
+
         </View>
 
         {/* Bottom Spacing */}
