@@ -232,7 +232,8 @@ export default function ProductsScreen() {
             {item.images && item.images.length > 0 ? (
               <>
                 <Image
-                   source={{ uri: `${S3_BASE_URL}/${item.images[0]}` }}
+                  //  source={{ uri: `${S3_BASE_URL}/${item.images[0]}` }} // this normalizes image twice
+                  source={{ uri: item.images[0] }}
                   className="w-full h-full"
                   resizeMode="cover"
                 />
