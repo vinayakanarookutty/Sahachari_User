@@ -96,10 +96,33 @@ export function useCart() {
     setShowSuccessModal,
     address,
     setAddress,
-    handleQuantityChange: (id: string, cur: number, d: number) => {
+    // handleQuantityChange: (id: string, cur: number, d: number) => {
+    //   const next = cur + d;
+    //   if (next >= 1)
+    //     updateQuantityMutation.mutate({ itemId: id, quantity: next });
+    // },
+    handleQuantityChange: (
+      id: string,
+      cur: number,
+      d: number,
+      availableQuantity: number
+    ) => {
+
       const next = cur + d;
-      if (next >= 1)
-        updateQuantityMutation.mutate({ itemId: id, quantity: next });
+
+      // Prevent below 1
+      if (next < 1) return;
+
+      // Prevent exceeding stock
+      if (next > availableQuantity) {
+        alert("Cannot add more than available stock");
+        return;
+      }
+
+      updateQuantityMutation.mutate({
+        itemId: id,
+        quantity: next,
+      });
     },
     handleRemoveItem: (id: string) => removeItemMutation.mutate(id),
     handleCheckout: () => {
