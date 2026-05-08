@@ -74,7 +74,6 @@ export function CheckoutModal({
   }, [visible]);
 
   const paymentOptions = [
-    { label: 'UPI', value: 'UPI' },
     { label: 'Cash on Delivery', value: 'CASH_ON_DELIVERY' },
     { label: 'Self Pickup', value: 'SELF_PICKUP' },
   ];

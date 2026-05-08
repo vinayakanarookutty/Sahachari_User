@@ -16,6 +16,7 @@ export function useProductActions(product: any) {
     zipCode: "",
     phone: "",
     notes: "",
+    paymentMethod: "",
   });
 
   const handleAddToCart = async (quantity: number) => {
@@ -55,6 +56,7 @@ export function useProductActions(product: any) {
         productId: product.id,
         quantity,
         deliveryAddress: address,
+        paymentMethod: address.paymentMethod,
       });
       await queryClient.invalidateQueries({ queryKey: ["orders"] });
       setShowAddressModal(false);
