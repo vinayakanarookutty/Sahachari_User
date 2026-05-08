@@ -6,13 +6,15 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { OrderCard } from "../../components/orders/OrderCard";
 import { OrderDetailsModal } from "../../components/orders/OrderDetailsModal";
 import { useOrders } from "../../hooks/useOrders";
+import { ArrowLeft } from "lucide-react-native";
+import { LinearGradient } from "expo-linear-gradient";
 
 export default function Orders() {
   const router = useRouter();
-  const { 
-    orders, isLoading, error, selectedOrder, isLoadingDetails, 
-    showDetailsModal, isCancelling, handleOrderPress, handleCancelOrder, 
-    handleCloseModal, refetch 
+  const {
+    orders, isLoading, error, selectedOrder, isLoadingDetails,
+    showDetailsModal, isCancelling, handleOrderPress, handleCancelOrder,
+    handleCloseModal, refetch
   } = useOrders();
 
   if (isLoading) {
@@ -37,19 +39,19 @@ export default function Orders() {
               <ShoppingBag size={48} color="#2563eb" />
             )}
           </View>
-          
+
           <Text className="text-2xl font-bold text-gray-800 mb-3 text-center">
             {error ? "Oops! Something went wrong" : "No orders yet"}
           </Text>
-          
+
           <Text className="text-gray-500 text-center mb-6 leading-6">
-            {error 
-              ? "We couldn't load your orders. Please try again." 
+            {error
+              ? "We couldn't load your orders. Please try again."
               : "Start shopping and your orders will appear here"}
           </Text>
-          
-          <Pressable 
-            onPress={() => error ? refetch() : router.push("/(tabs)/home")} 
+
+          <Pressable
+            onPress={() => error ? refetch() : router.push("/(tabs)/home")}
             className="bg-blue-600 px-8 py-4 rounded-2xl shadow-lg active:bg-blue-700 flex-row items-center"
           >
             {error && <RefreshCw size={20} color="white" className="mr-2" />}
@@ -65,12 +67,32 @@ export default function Orders() {
   return (
     <SafeAreaView edges={["top"]} className="flex-1 bg-gray-50">
       {/* Premium Header */}
-      <View className="bg-white px-6 py-5 shadow-sm border-b border-gray-100">
+      {/* <View className="bg-white px-6 py-5 shadow-sm border-b border-gray-100">
         <Text className="text-3xl font-bold text-gray-800 mb-1">My Orders</Text>
         <Text className="text-gray-500 font-medium">
           {orders.length} {orders.length === 1 ? 'order' : 'orders'} in total
         </Text>
-      </View>
+      </View> */}
+      {/* HEADER */}
+      <LinearGradient colors={["#2563EB", "#1D4ED8"]} style={{ paddingBottom: 16 }} >
+        <View className="flex-row items-center px-4 pt-4">
+          {/* BACK BUTTON */}
+          <Pressable onPress={() => router.back()} className="bg-white/20 p-2 rounded-full" >
+            <ArrowLeft size={22} color="#fff" />
+          </Pressable>
+          {/* TITLE */}
+          <View className="flex-1 items-center">
+            <Text className="text-2xl font-bold text-white">
+              My Orders
+            </Text>
+            <Text className="text-blue-100 text-sm mt-1">
+              {orders.length}{" "}
+              {orders.length === 1 ? "order" : "orders"}
+            </Text>
+          </View>
+          <View className="w-10" />
+        </View>
+      </LinearGradient>
 
       <FlatList
         data={orders}
@@ -80,7 +102,7 @@ export default function Orders() {
         showsVerticalScrollIndicator={false}
         ItemSeparatorComponent={() => <View className="h-3" />}
       />
-      
+
       <OrderDetailsModal
         visible={showDetailsModal}
         order={selectedOrder}
