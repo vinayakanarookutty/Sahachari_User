@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { Alert } from "react-native";
+import { Alert, Platform } from "react-native";
 import { getOrders, getOrderById, cancelOrder } from "../services/orders.api";
 
 export function useOrders() {
@@ -21,12 +21,38 @@ export function useOrders() {
 
   const cancelMutation = useMutation({
     mutationFn: cancelOrder,
+
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["orders"] });
-      queryClient.invalidateQueries({ queryKey: ["order", selectedOrderId] });
-      Alert.alert("Success", "Order cancelled successfully");
+      queryClient.invalidateQueries({
+        queryKey: ["orders"],
+      });
+
+      queryClient.invalidateQueries({
+        queryKey: ["order", selectedOrderId],
+      });
+
+      handleCloseModal();
+
+      if (Platform.OS === "web") {
+        window.alert("Order cancelled successfully");
+      } else {
+        Alert.alert(
+          "Success",
+          "Order cancelled successfully"
+        );
+      }
     },
-    onError: () => Alert.alert("Error", "Unable to cancel order"),
+
+    onError: () => {
+      if (Platform.OS === "web") {
+        window.alert("Unable to cancel order");
+      } else {
+        Alert.alert(
+          "Error",
+          "Unable to cancel order"
+        );
+      }
+    },
   });
 
   const handleOrderPress = (orderId: string) => {
@@ -34,11 +60,46 @@ export function useOrders() {
     setShowDetailsModal(true);
   };
 
-  const handleCancelOrder = (orderId: string) => {
-    Alert.alert("Cancel Order", "Are you sure you want to cancel this order?", [
-      { text: "No", style: "cancel" },
-      { text: "Yes, Cancel", style: "destructive", onPress: () => cancelMutation.mutate(orderId) },
-    ]);
+  // const handleCancelOrder = (orderId: string) => {
+  //   Alert.alert("Cancel Order", "Are you sure you want to cancel this order?", [
+  //     { text: "No", style: "cancel" },
+  //     { text: "Yes, Cancel", style: "destructive", onPress: () => cancelMutation.mutate(orderId) },
+  //   ]);
+  // };
+
+  const handleCancelOrder = async (orderId: string) => {
+    try {
+      const doCancelOrder = async () => {
+        cancelMutation.mutate(orderId);
+      };
+
+      if (Platform.OS === "web") {
+        const confirm = window.confirm(
+          "Are you sure you want to cancel this order?"
+        );
+
+        if (confirm) {
+          await doCancelOrder();
+        }
+
+        return;
+      }
+
+      Alert.alert(
+        "Cancel Order",
+        "Are you sure you want to cancel this order?",
+        [
+          { text: "No", style: "cancel" },
+          {
+            text: "Yes, Cancel",
+            style: "destructive",
+            onPress: doCancelOrder,
+          },
+        ]
+      );
+    } catch (err) {
+      console.error("Cancel order failed:", err);
+    }
   };
 
   const handleCloseModal = () => {
