@@ -200,7 +200,7 @@ export default function ProductDetails() {
         style={{ paddingTop: insets.top + 12 }}
       >
         <Pressable
-          onPress={() => router.back()}
+          onPress={() => router.back() ?? router.push("/(tabs)/products")}
           className="bg-white/90 backdrop-blur-sm rounded-full p-2.5 shadow-lg"
         >
           <ArrowLeft size={24} color="#1F2937" strokeWidth={2.5} />
@@ -314,11 +314,10 @@ export default function ProductDetails() {
                 <Pressable
                   key={index}
                   onPress={() => scrollToImage(index)}
-                  className={`h-2 rounded-full ${
-                    activeImageIndex === index
+                  className={`h-2 rounded-full ${activeImageIndex === index
                       ? "bg-white w-8"
                       : "bg-white/50 w-2"
-                  }`}
+                    }`}
                 />
               ))}
             </View>
@@ -423,46 +422,56 @@ export default function ProductDetails() {
 
           {/* Quantity Selector - Only for Products with Buy Now */}
           {!isService && product.quantity && product.quantity > 0 && (
-            <View className="mt-6">
-              <Text className="text-lg font-bold text-gray-900 mb-3">
+            <View className="mt-6 bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+              <Text className="text-lg font-bold text-gray-900 mb-4">
                 Quantity (for Buy Now)
               </Text>
-              <View className="flex-row items-center">
+
+              <View className="flex-row items-center justify-between">
+                {/* Decrease */}
                 <Pressable
                   onPress={decrementQuantity}
                   disabled={quantity <= 1}
-                  className={`bg-gray-100 rounded-full p-3 ${
-                    quantity <= 1 ? "opacity-50" : ""
-                  }`}
+                  className={`w-12 h-12 items-center justify-center rounded-full bg-gray-100 ${quantity <= 1 ? "opacity-40" : ""
+                    }`}
                 >
                   <Minus size={20} color="#1F2937" strokeWidth={2.5} />
                 </Pressable>
-                <View className="mx-6 bg-blue-50 px-8 py-3 rounded-2xl">
+
+                {/* Quantity Display */}
+                <View className="px-8 py-3 bg-blue-50 rounded-2xl">
                   <Text className="text-2xl font-bold text-blue-600">
                     {quantity}
                   </Text>
                 </View>
+
+                {/* Increase */}
                 <Pressable
                   onPress={incrementQuantity}
                   disabled={quantity >= product.quantity}
-                  className={`bg-gray-100 rounded-full p-3 ${
-                    quantity >= product.quantity ? "opacity-50" : ""
-                  }`}
+                  className={`w-12 h-12 items-center justify-center rounded-full bg-gray-100 ${quantity >= product.quantity ? "opacity-40" : ""
+                    }`}
                 >
                   <Plus size={20} color="#1F2937" strokeWidth={2.5} />
                 </Pressable>
-                <Text className="ml-4 text-gray-600">
-                  Total: <Text className="font-bold text-blue-600">₹{totalPrice.toFixed(2)}</Text>
+              </View>
+
+              {/* Total */}
+              <View className="mt-4 pt-4 border-t border-gray-100 flex-row justify-between items-center">
+                <Text className="text-gray-600">Total Amount</Text>
+                <Text className="text-lg font-bold text-blue-600">
+                  ₹{totalPrice.toFixed(2)}
                 </Text>
               </View>
             </View>
           )}
 
           {/* Description */}
-          <View className="mt-6">
-            <Text className="text-xl font-bold text-gray-900 mb-3">
+          <View className="mt-6 bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+            <Text className="text-lg font-bold text-gray-900 mb-3">
               Description
             </Text>
+
             <Text className="text-gray-600 leading-7 text-base">
               {product.description}
             </Text>
@@ -492,9 +501,8 @@ export default function ProductDetails() {
             <Pressable
               disabled={loading}
               onPress={handleAddToCartClick}
-              className={`flex-1 rounded-2xl overflow-hidden ${
-                loading ? "opacity-50" : ""
-              }`}
+              className={`flex-1 rounded-2xl overflow-hidden ${loading ? "opacity-50" : ""
+                }`}
             >
               <View className="bg-gray-100 py-4 flex-row items-center justify-center">
                 <ShoppingCart size={20} color="#1F2937" strokeWidth={2.5} />
@@ -507,9 +515,8 @@ export default function ProductDetails() {
             <Pressable
               disabled={loading}
               onPress={handleBuyNowClick}
-              className={`flex-1 rounded-2xl overflow-hidden ${
-                loading ? "opacity-50" : ""
-              }`}
+              className={`flex-1 rounded-2xl overflow-hidden ${loading ? "opacity-50" : ""
+                }`}
             >
               <LinearGradient
                 colors={["#EA580C", "#DC2626"]}
