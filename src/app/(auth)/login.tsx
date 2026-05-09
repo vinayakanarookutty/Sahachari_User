@@ -13,7 +13,8 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-
+import { useEffect } from "react";
+import { useAuthStore } from "@/store/auth.store";
 import { useLogin } from "@/hooks/useAuth";
 
 export default function Login() {
@@ -21,8 +22,18 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
+
   const loginMutation = useLogin();
   const isLoading = loginMutation.isPending;
+  const token = useAuthStore((s) => s.token);
+  const hydrated = useAuthStore((s) => s.hydrated);
+
+  // if already logged in, skip login screen
+  useEffect(() => {
+    if (hydrated && token) {
+      router.replace("/(tabs)/home");
+    }
+  }, [hydrated, token]);
 
   const submit = () => {
     setErrorMsg(null);
@@ -36,8 +47,8 @@ export default function Login() {
         onError: (err: any) => {
           setErrorMsg(
             err?.response?.data?.message ||
-              err?.message ||
-              "Invalid credentials or server error"
+            err?.message ||
+            "Invalid credentials or server error"
           );
         },
       }
@@ -46,11 +57,11 @@ export default function Login() {
 
   return (
     <View className="flex-1 bg-white">
-      <KeyboardAvoidingView 
+      <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         className="flex-1"
       >
-        <ScrollView 
+        <ScrollView
           contentContainerStyle={{ flexGrow: 1 }}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
@@ -60,12 +71,12 @@ export default function Login() {
             <View className="items-center mb-12">
               {/* Accent Line */}
               <View className="w-16 h-1 bg-blue-600 mb-10 rounded-full" />
-              
+
               {/* Title */}
               <Text className="text-[42px] font-bold text-gray-900 mb-3 tracking-tight">
                 Welcome Back
               </Text>
-              
+
               {/* Subtitle */}
               <Text className="text-base text-gray-500 text-center font-normal">
                 Sign in to access your account
@@ -99,7 +110,7 @@ export default function Login() {
                   <Text className="text-sm font-semibold text-gray-700 ml-1">
                     Password
                   </Text>
-                
+
                 </View>
                 <TextInput
                   className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-4 text-base text-gray-900"
@@ -127,9 +138,8 @@ export default function Login() {
             {/* Login Button */}
             <View className="mb-8">
               <TouchableOpacity
-                className={`rounded-xl py-4 items-center justify-center ${
-                  isLoading ? 'bg-blue-400' : 'bg-blue-600'
-                }`}
+                className={`rounded-xl py-4 items-center justify-center ${isLoading ? 'bg-blue-400' : 'bg-blue-600'
+                  }`}
                 onPress={submit}
                 disabled={isLoading}
                 activeOpacity={0.8}
