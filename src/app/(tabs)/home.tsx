@@ -102,7 +102,7 @@ export default function Home() {
   const { profile } = useProfile();
   const [activeSlide, setActiveSlide] = useState(0);
   const scrollViewRef = useRef<ScrollView>(null);
-  
+
   const [searchQuery, setSearchQuery] = useState("");
   const { data, isLoading } = useProducts(
     searchQuery ? { search: searchQuery } : undefined,
@@ -111,7 +111,7 @@ export default function Home() {
   // Extract unique categories from products data
   const categories = useMemo(() => {
     if (!data || data.length === 0) return [];
-    
+
     const uniqueCategories = new Set<string>();
     data.forEach((product: any) => {
       if (product.category) {
@@ -123,7 +123,7 @@ export default function Home() {
     return Array.from(uniqueCategories).map((category, index) => {
       const colors = CATEGORY_GRADIENTS[category] || CATEGORY_GRADIENTS["default"];
       const icon = CATEGORY_ICONS[category] || CATEGORY_ICONS["default"];
-      
+
       return {
         id: `category-${index}`,
         name: category,
@@ -189,7 +189,7 @@ export default function Home() {
         style={{ paddingTop: insets.top + 24, paddingBottom: 32 }}
       >
         {/* Decorative overlay pattern */}
-        <View 
+        <View
           style={{
             position: 'absolute',
             top: 0,
@@ -199,19 +199,19 @@ export default function Home() {
             opacity: 0.1,
           }}
         >
-          <View style={{ 
-            width: 200, 
-            height: 200, 
-            borderRadius: 100, 
+          <View style={{
+            width: 200,
+            height: 200,
+            borderRadius: 100,
             backgroundColor: 'white',
             position: 'absolute',
             top: -50,
             right: -50,
           }} />
-          <View style={{ 
-            width: 150, 
-            height: 150, 
-            borderRadius: 75, 
+          <View style={{
+            width: 150,
+            height: 150,
+            borderRadius: 75,
             backgroundColor: 'white',
             position: 'absolute',
             bottom: -30,
@@ -223,10 +223,10 @@ export default function Home() {
           <View className="flex-row items-center justify-between">
             <View className="flex-1">
               <View className="flex-row items-center mb-1">
-                
-                <Text 
-                  className="text-4xl font-black text-white ml-2" 
-                  style={{ 
+
+                <Text
+                  className="text-4xl font-black text-white ml-2"
+                  style={{
                     letterSpacing: 1,
                     textShadowColor: 'rgba(0, 0, 0, 0.1)',
                     textShadowOffset: { width: 0, height: 2 },
@@ -249,19 +249,30 @@ export default function Home() {
               onPress={() => router.push("/settings/settings")}
               className="relative"
             >
-              <View 
+              <View
                 className="rounded-full"
                 style={{
+                  width: 72,
+                  height: 72,
+                  borderRadius: 36,
                   shadowColor: "#1E40AF",
                   shadowOffset: { width: 0, height: 6 },
                   shadowOpacity: 0.3,
                   shadowRadius: 12,
                   elevation: 10,
+                  overflow: "hidden",
                 }}
               >
                 <LinearGradient
                   colors={["#FFFFFF", "#EFF6FF"]}
                   className="rounded-full p-1"
+                  style={{
+                    flex: 1,
+                    borderRadius: 36,
+                    alignItems: "center",
+                    justifyContent: "center",
+                    padding: 4,
+                  }}
                 >
                   {profile?.image ? (
                     <Image
@@ -273,7 +284,7 @@ export default function Home() {
                       }}
                     />
                   ) : (
-                    <View 
+                    <View
                       className="w-16 h-16 rounded-full items-center justify-center"
                       style={{
                         backgroundColor: '#FFFFFF',
@@ -291,7 +302,7 @@ export default function Home() {
         </View>
       </LinearGradient>
 
-      <ScrollView 
+      <ScrollView
         showsVerticalScrollIndicator={false}
         className="flex-1"
         contentContainerStyle={{ paddingBottom: 32 }}
@@ -312,7 +323,7 @@ export default function Home() {
                 style={{ width }}
                 className="items-center px-6"
               >
-                <View 
+                <View
                   className="rounded-3xl overflow-hidden bg-white"
                   style={{
                     shadowColor: "#2563EB",
@@ -324,13 +335,13 @@ export default function Home() {
                     borderColor: '#EFF6FF',
                   }}
                 >
-                 <Image
-  source={image}
-  // Keep your dimensions
-  style={{ width: width - 48, height: 220 }} 
-  // CHANGE THIS LINE:
-  resizeMode="contain" 
-/>
+                  <Image
+                    source={image}
+                    // Keep your dimensions
+                    style={{ width: width - 48, height: 220 }}
+                    // CHANGE THIS LINE:
+                    resizeMode="contain"
+                  />
                   {/* Elegant overlay */}
                   <LinearGradient
                     colors={["transparent", "rgba(30, 58, 138, 0.2)"]}
@@ -388,7 +399,7 @@ export default function Home() {
             transform: [{ scale: pressed ? 0.97 : 1 }],
           })}
         >
-          <View 
+          <View
             className="rounded-3xl overflow-hidden bg-white"
             style={{
               shadowColor: "#2563EB",
@@ -409,7 +420,7 @@ export default function Home() {
               <View className="flex-row items-center justify-between">
                 <View className="flex-1 mr-4">
                   <View className="flex-row items-center mb-3">
-                   
+
                   </View>
                   <Text className="text-3xl font-black text-blue-900 mb-2" style={{ letterSpacing: 0.5 }}>
                     Happy 60
@@ -418,15 +429,19 @@ export default function Home() {
                     Exclusive for senior citizens
                   </Text>
                 </View>
-                
-                <View 
+
+                <View
                   className="rounded-2xl"
                   style={{
+                    width: 68,
+                    height: 68,
+                    borderRadius: 20,
                     shadowColor: "#2563EB",
                     shadowOffset: { width: 0, height: 6 },
                     shadowOpacity: 0.3,
                     shadowRadius: 10,
                     elevation: 8,
+                    overflow: "hidden",
                   }}
                 >
                   <LinearGradient
@@ -434,6 +449,12 @@ export default function Home() {
                     start={{ x: 0, y: 0 }}
                     end={{ x: 1, y: 1 }}
                     className="rounded-2xl p-5"
+                    style={{
+                      flex: 1,
+                      borderRadius: 20,
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
                   >
                     <Phone size={26} color="#FFFFFF" strokeWidth={2.5} />
                   </LinearGradient>
@@ -457,7 +478,7 @@ export default function Home() {
                 </Text>
               </View>
             </View>
-            <View 
+            <View
               className="bg-blue-50 rounded-2xl p-3"
               style={{
                 shadowColor: "#2563EB",
@@ -497,7 +518,7 @@ export default function Home() {
                       onPressIn={() => handleCategoryPressIn(index)}
                       onPressOut={() => handleCategoryPressOut(index)}
                     >
-                      <View 
+                      <View
                         className="rounded-3xl overflow-hidden"
                         style={{
                           shadowColor: category.shadowColor,
@@ -516,7 +537,7 @@ export default function Home() {
                           style={{ padding: 24 }}
                         >
                           <View className="items-center">
-                            <View 
+                            <View
                               className="rounded-2xl p-4 mb-4"
                               style={{
                                 backgroundColor: '#FFFFFF',
@@ -553,7 +574,7 @@ export default function Home() {
           )}
 
           {/* Premium Empty State */}
-          
+
         </View>
       </ScrollView>
     </View>
