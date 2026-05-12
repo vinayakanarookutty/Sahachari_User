@@ -46,7 +46,7 @@ export function OrderCard({ item, onPress }: any) {
   };
 
   return (
-    <Pressable 
+    <Pressable
       onPress={() => onPress(item._id)}
       className="bg-white rounded-3xl shadow-lg overflow-hidden active:scale-98"
     >
@@ -81,11 +81,16 @@ export function OrderCard({ item, onPress }: any) {
               {item.items?.length} {item.items?.length === 1 ? 'Item' : 'Items'}
             </Text>
           </View>
-          
+
           {item.items?.slice(0, 2).map((orderItem: any, idx: number) => (
             <View key={idx} className="flex-row items-center mb-2">
               <Image
-                source={{ uri: orderItem.productId?.images?.[0] }}
+                // source={{ uri: orderItem.productId?.images?.[0] }}
+                source={{
+                  uri: orderItem.productId?.images?.[0]?.startsWith("http")
+                    ? orderItem.productId.images[0]
+                    : `${process.env.EXPO_PUBLIC_S3_BASE_URL}/${orderItem.productId?.images?.[0]}`
+                }}
                 className="w-12 h-12 rounded-lg bg-gray-100"
               />
               <View className="flex-1 ml-3">
@@ -101,7 +106,7 @@ export function OrderCard({ item, onPress }: any) {
               </Text>
             </View>
           ))}
-          
+
           {item.items?.length > 2 && (
             <Text className="text-xs text-blue-600 font-semibold text-center mt-1">
               +{item.items.length - 2} more items

@@ -128,8 +128,8 @@ export function OrderDetailsModal({
                 <Text className="text-gray-500 text-sm mb-2">
                   Order Status
                 </Text>
-                <View className={`px-4 py-2 rounded-full self-start ${getStatusColor( order.status )}`} >
-                  <Text className={`font-bold text-sm ${getStatusTextColor( order.status )}`} >
+                <View className={`px-4 py-2 rounded-full self-start ${getStatusColor(order.status)}`} >
+                  <Text className={`font-bold text-sm ${getStatusTextColor(order.status)}`} >
                     {getStatusEmoji(order.status)} {order.status}
                   </Text>
                 </View>
@@ -151,12 +151,30 @@ export function OrderDetailsModal({
               {order.items?.map(
                 (item: any, idx: number) => (
                   <View key={idx} className="flex-row items-center bg-gray-50 rounded-2xl p-3 mb-3" >
-                    <Image
+                    {/* <Image
                       source={{
+                        // uri:
+                        //   item.productId?.images?.[0],
                         uri:
-                          item.productId?.images?.[0],
+                          item.productId?.images?.[0]?.startsWith("http")
+                            ? item.productId.images[0]
+                            : `${process.env.EXPO_PUBLIC_S3_BASE_URL}/${item.productId?.images?.[0]}`,
                       }}
                       className="w-20 h-20 rounded-xl bg-gray-100"
+                    /> */}
+                    <Image
+                      source={{
+                        uri: item.productId?.images?.[0]?.startsWith("http")
+                          ? item.productId.images[0]
+                          : `${process.env.EXPO_PUBLIC_S3_BASE_URL}/${item.productId?.images?.[0]}`
+                      }}
+                      style={{
+                        width: 80,
+                        height: 80,
+                        borderRadius: 12,
+                        backgroundColor: "#f3f4f6",
+                      }}
+                      resizeMode="cover"
                     />
 
                     <View className="flex-1 ml-3 justify-between">
@@ -217,7 +235,7 @@ export function OrderDetailsModal({
                 {order.deliveryAddress?.notes && (
                   <View className="mt-3 pt-3 border-t border-gray-200">
                     <View className="flex-row items-start">
-                      <StickyNote size={16} color="#F59E0B"/>
+                      <StickyNote size={16} color="#F59E0B" />
 
                       <View className="flex-1 ml-2">
                         <Text className="text-gray-500 text-xs font-semibold mb-1 uppercase tracking-wide">
@@ -264,7 +282,7 @@ export function OrderDetailsModal({
                     paddingVertical: 16,
                   }}
                 >
-                  {isCancelling ? ( <ActivityIndicator color="white" />) : (
+                  {isCancelling ? (<ActivityIndicator color="white" />) : (
                     <View className="flex-row items-center justify-center">
                       <X size={20} color="white" />
                       <Text className="text-white text-center font-bold text-lg ml-2">
