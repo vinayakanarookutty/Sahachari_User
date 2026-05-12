@@ -1,7 +1,7 @@
 // app/(tabs)/orders/index.tsx
 import { useRouter } from "expo-router";
 import { AlertCircle, RefreshCw, ShoppingBag } from "lucide-react-native";
-import { ActivityIndicator, FlatList, Pressable, Text, View } from "react-native";
+import { ActivityIndicator, FlatList, Pressable, Text, View, RefreshControl } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { OrderCard } from "../../components/orders/OrderCard";
 import { OrderDetailsModal } from "../../components/orders/OrderDetailsModal";
@@ -94,13 +94,26 @@ export default function Orders() {
         </View>
       </LinearGradient>
 
+
       <FlatList
         data={orders}
         contentContainerStyle={{ padding: 16, paddingBottom: 24 }}
         keyExtractor={(item) => item._id}
-        renderItem={({ item }) => <OrderCard item={item} onPress={handleOrderPress} />}
+        renderItem={({ item }) => (
+          <OrderCard
+            item={item}
+            onPress={handleOrderPress}
+          />
+        )}
         showsVerticalScrollIndicator={false}
         ItemSeparatorComponent={() => <View className="h-3" />}
+
+        refreshControl={
+          <RefreshControl
+            refreshing={isLoading}
+            onRefresh={refetch}
+          />
+        }
       />
 
       <OrderDetailsModal
