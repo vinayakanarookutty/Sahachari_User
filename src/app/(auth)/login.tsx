@@ -12,6 +12,7 @@ import {
   TextInput,
   TouchableOpacity,
   View,
+  Image,
 } from "react-native";
 import { useEffect } from "react";
 import { useAuthStore } from "@/store/auth.store";
@@ -69,6 +70,12 @@ export default function Login() {
           <View className="flex-1 justify-center px-6 py-8">
             {/* Premium Header */}
             <View className="items-center mb-12">
+              {/* logo */}
+              <Image
+                source={require("../../../assets/sahachari.jpeg")}
+                style={{ width: 100, height: 100 }}
+                resizeMode="contain"
+              />
               {/* Accent Line */}
               <View className="w-16 h-1 bg-blue-600 mb-10 rounded-full" />
 

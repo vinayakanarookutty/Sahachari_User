@@ -10,6 +10,7 @@ import {
   TextInput,
   ActivityIndicator,
   TouchableOpacity,
+  Image,
 } from "react-native";
 
 import { useRegister } from "../../hooks/useAuth";
@@ -83,6 +84,12 @@ export default function Register() {
           <View className="flex-1 justify-center px-6 py-8">
             {/* Compact Header */}
             <View className="items-center mb-8">
+              {/* logo */}
+              <Image
+                source={require("../../../assets/sahachari.jpeg")}
+                style={{ width: 100, height: 100 }}
+                resizeMode="contain"
+              />
               <View className="w-12 h-1 bg-blue-600 mb-6 rounded-full" />
               <Text className="text-3xl font-bold text-gray-900 mb-2 tracking-tight">
                 Create Account
@@ -198,9 +205,8 @@ export default function Register() {
 
             {/* Register Button */}
             <TouchableOpacity
-              className={`rounded-xl py-4 items-center justify-center ${
-                register.isPending ? "bg-blue-400" : "bg-blue-600"
-              }`}
+              className={`rounded-xl py-4 items-center justify-center ${register.isPending ? "bg-blue-400" : "bg-blue-600"
+                }`}
               onPress={submit}
               disabled={register.isPending}
               activeOpacity={0.8}
