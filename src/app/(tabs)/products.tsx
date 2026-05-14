@@ -10,26 +10,13 @@ import {
   Pressable,
   Text,
   TextInput,
-  View
+  View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useCategoryStores } from "../../hooks/Usecategorystores";
-// import { useProducts } from "../../hooks/useProducts";
-import { useStoreProducts } from "../../hooks/useStoreProducts";
-import {
-  Briefcase,
-  ChevronRight,
-  Fish,
-  Utensils,
-  HomeIcon,
-  Leaf,
-  Package,
-  ShoppingCart,
-} from "lucide-react-native";
-
-import { Animated } from "react-native";
-import { useMemo, useRef } from "react";
 import { useProducts } from "../../hooks/useProducts";
+import { useStoreProducts } from "../../hooks/useStoreProducts";
+
 interface Store {
   _id: string;
   name: string;
@@ -54,128 +41,87 @@ interface Product {
   storeId?: string;
 }
 
-const CATEGORY_ICONS: Record<string, any> = {
-  Food: Utensils,
-  "Vegetables and fruits": Leaf,
-  Groceries: ShoppingCart,
-  "Home made": HomeIcon,
-  Service: Briefcase,
-  "Fish meat": Fish,
-  default: Package,
-};
-
-const CATEGORY_GRADIENTS: Record<
-  string,
-  { gradient: string[]; iconColor: string; shadowColor: string }
-> = {
-  Food: {
-    gradient: ["#FFFFFF", "#FFF7ED"],
-    iconColor: "#9A3412",
-    shadowColor: "#FDBA74",
-  },
-
-  "Vegetables and fruits": {
-    gradient: ["#FFFFFF", "#ECFDF5"],
-    iconColor: "#047857",
-    shadowColor: "#6EE7B7",
-  },
-
-  Groceries: {
-    gradient: ["#FFFFFF", "#F0F9FF"],
-    iconColor: "#0369A1",
-    shadowColor: "#7DD3FC",
-  },
-
-  "Home made": {
-    gradient: ["#FFFFFF", "#FFF1F2"],
-    iconColor: "#9F1239",
-    shadowColor: "#FDA4AF",
-  },
-
-  Service: {
-    gradient: ["#FFFFFF", "#ECFEFF"],
-    iconColor: "#0E7490",
-    shadowColor: "#67E8F9",
-  },
-
-  "Fish meat": {
-    gradient: ["#FFFFFF", "#EFF6FF"],
-    iconColor: "#1D4ED8",
-    shadowColor: "#93C5FD",
-  },
-
-  default: {
-    gradient: ["#FFFFFF", "#F1F5F9"],
-    iconColor: "#475569",
-    shadowColor: "#94A3B8",
-  },
-};
-
 export default function ProductsScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const params = useLocalSearchParams();
-  const categoryFilter = params.category as string | undefined;
-  const storeId = params.storeId as string | undefined;
 
+  // const categoryFilter = params.category as string | undefined;
+  const categoryFilter = params.category as string | undefined;
+  const activeCategory = categoryFilter ?? "Service";
+
+  const storeId = params.storeId as string | undefined;
   const [searchQuery, setSearchQuery] = useState("");
   const { token } = useAuthStore();
-  // Your auth token - replace with actual token from your auth system
-  const AUTH_TOKEN = token
-  const S3_BASE_URL = process.env.EXPO_PUBLIC_S3_BASE_URL
+
+  const isDefaultServiceMode = !params.category;
+
+  const isStoreMode = !!categoryFilter && !storeId;
+  const isProductMode = !!storeId;
+
+  const AUTH_TOKEN = token;
+  const S3_BASE_URL = process.env.EXPO_PUBLIC_S3_BASE_URL;
+
   // Fetch category stores when category is provided but no storeId
   const { data: stores = [], isLoading: isLoadingStores } = useCategoryStores(
-    categoryFilter && !storeId ? categoryFilter : undefined,
+    //   categoryFilter && !storeId ? categoryFilter : undefined,
+    isStoreMode
+      ? activeCategory
+      : isDefaultServiceMode
+        ? "Service"
+        : undefined,
     AUTH_TOKEN
   );
 
-  // Fetch products by storeId if provided, otherwise fetch all products
+  // Fetch products by search query or all products
   // const { data: allProducts, isLoading: isLoadingAllProducts } = useProducts(
   //   searchQuery ? { search: searchQuery } : undefined
   // );
 
-  const { data: storeProducts, isLoading: isLoadingStoreProducts } = useStoreProducts(storeId);
+  const effectiveCategory = categoryFilter ?? "Service";
+  const { data: allProducts = [], isLoading: isLoadingAllProducts } =
+    useProducts({
+      category: effectiveCategory,
+      search: searchQuery || undefined,
+    });
 
+
+  const { data: storeProducts, isLoading: isLoadingStoreProducts } =
+    useStoreProducts(storeId);
+
+  //filter products based on category
+  const filteredProducts = (storeProducts ?? allProducts ?? []).filter(
+    (p) =>
+      activeCategory
+        ? p.category === activeCategory
+        : true
+  );
   // Determine which products to show
   // const displayProducts = storeId ? storeProducts : allProducts;
-  // const isLoadingProducts = storeId ? isLoadingStoreProducts : isLoadingAllProducts;
+  const displayProducts = storeId ? filteredProducts : allProducts;
+  // const displayProducts = storeId
+  //   ? storeProducts ?? []
+  //   : allProducts ?? [];
 
-  // const displayProducts = storeProducts || [];
-  const displayProducts = useMemo(() => {
-    if (!storeProducts) return [];
+  // const isLoadingProducts = storeId
+  //   ? isLoadingStoreProducts
+  //   : isLoadingAllProducts;
+  const isLoadingProducts = storeId
+    ? !!isLoadingStoreProducts
+    : !!isLoadingAllProducts;
 
-    // filter by selected category
-    let filtered = storeProducts;
-
-    if (categoryFilter) {
-      filtered = filtered.filter(
-        (item: Product) => item.category === categoryFilter
-      );
-    }
-
-    // filter by search
-    if (searchQuery.trim()) {
-      filtered = filtered.filter((item: Product) =>
-        item.name.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-    }
-
-    return filtered;
-  }, [storeProducts, categoryFilter, searchQuery]);
-  const isLoadingProducts = isLoadingStoreProducts;
 
   const handleStorePress = (selectedStoreId: string) => {
     router.push({
       pathname: "/products",
       params: {
         category: categoryFilter,
-        storeId: selectedStoreId
-      }
+        storeId: selectedStoreId,
+      },
     } as any);
   };
 
   const handleProductPress = (product: any) => {
-    // Use _id if available, fallback to id
     const productId = product._id || product.id;
     router.push(`/product/${productId}` as any);
   };
@@ -255,7 +201,7 @@ export default function ProductsScreen() {
             {/* Status Badge */}
             <View className="absolute bottom-2 right-2">
               <View
-                className={`px-2 py-1 rounded-full ${item.status === 'ACTIVE' ? 'bg-green-500' : 'bg-gray-500'
+                className={`px-2 py-1 rounded-full ${item.status === "ACTIVE" ? "bg-green-500" : "bg-gray-500"
                   }`}
               >
                 <Text className="text-white text-xs font-semibold">
@@ -267,7 +213,6 @@ export default function ProductsScreen() {
 
           {/* Store Details */}
           <View className="flex-1 p-4 justify-between">
-            {/* Name and Address */}
             <View>
               <Text className="text-lg font-bold text-gray-900" numberOfLines={1}>
                 {item.name}
@@ -279,8 +224,6 @@ export default function ProductsScreen() {
                 ✉️ {item.email}
               </Text>
             </View>
-
-            {/* View Products Button */}
             <View className="mt-3">
               <View className="bg-blue-50 self-start px-4 py-2 rounded-full">
                 <Text className="text-xs text-blue-700 font-semibold">
@@ -297,14 +240,13 @@ export default function ProductsScreen() {
   const renderProduct = ({ item }: { item: Product }) => {
     const isService = item.category === "Service";
     const hasDiscount = item.offers && item.offers.length > 0;
-
-    // Calculate final price - use finalPrice if it exists, otherwise use price
     const displayPrice = item.finalPrice || parseFloat(item.price);
     const originalPrice = parseFloat(item.price);
 
-    const discountPercent = hasDiscount && item.finalPrice
-      ? Math.round(((originalPrice - item.finalPrice) / originalPrice) * 100)
-      : 0;
+    const discountPercent =
+      hasDiscount && item.finalPrice
+        ? Math.round(((originalPrice - item.finalPrice) / originalPrice) * 100)
+        : 0;
 
     return (
       <Pressable
@@ -324,12 +266,10 @@ export default function ProductsScreen() {
             {item.images && item.images.length > 0 ? (
               <>
                 <Image
-                  source={{ uri: `${S3_BASE_URL}/${item.images[0]}` }}
-                  // source={{ uri: item.images[0] }}
+                  source={{ uri: item.images[0] }}
                   className="w-full h-full"
                   resizeMode="cover"
                 />
-                {/* Gradient Overlay on Image */}
                 <LinearGradient
                   colors={["transparent", "rgba(0,0,0,0.3)"]}
                   style={{
@@ -340,7 +280,6 @@ export default function ProductsScreen() {
                     height: 40,
                   }}
                 />
-                {/* Multiple Images Indicator */}
                 {item.images.length > 1 && (
                   <View className="absolute bottom-2 right-2 bg-black/70 px-2 py-1 rounded-full">
                     <Text className="text-white text-xs font-semibold">
@@ -355,7 +294,6 @@ export default function ProductsScreen() {
               </View>
             )}
 
-            {/* Service Badge */}
             {isService && (
               <View className="absolute top-2 left-2">
                 <LinearGradient
@@ -368,14 +306,11 @@ export default function ProductsScreen() {
                     borderRadius: 12,
                   }}
                 >
-                  <Text className="text-white text-xs font-bold">
-                    Service
-                  </Text>
+                  <Text className="text-white text-xs font-bold">Service</Text>
                 </LinearGradient>
               </View>
             )}
 
-            {/* Discount Badge - Only for Products */}
             {!isService && hasDiscount && discountPercent > 0 && (
               <View className="absolute top-2 left-2">
                 <LinearGradient
@@ -398,7 +333,6 @@ export default function ProductsScreen() {
 
           {/* Product Details */}
           <View className="flex-1 p-4 justify-between">
-            {/* Name and Description */}
             <View>
               <Text className="text-lg font-bold text-gray-900" numberOfLines={1}>
                 {item.name}
@@ -408,16 +342,13 @@ export default function ProductsScreen() {
               </Text>
             </View>
 
-            {/* Price and Stock/Availability */}
             <View className="mt-3">
               <View className="flex-row items-baseline">
                 <Text className="text-2xl font-bold text-blue-600">
                   ₹{displayPrice}
                 </Text>
                 {isService && (
-                  <Text className="text-xs text-gray-600 ml-1">
-                    /hr
-                  </Text>
+                  <Text className="text-xs text-gray-600 ml-1">/hr</Text>
                 )}
                 {!isService && hasDiscount && item.finalPrice && (
                   <Text className="text-sm text-gray-400 line-through ml-2">
@@ -426,7 +357,6 @@ export default function ProductsScreen() {
                 )}
               </View>
 
-              {/* Stock Status - Only for Products */}
               {!isService && (
                 <View className="mt-2">
                   {item.quantity > 0 ? (
@@ -445,7 +375,6 @@ export default function ProductsScreen() {
                 </View>
               )}
 
-              {/* Availability Badge - Only for Services */}
               {isService && (
                 <View className="mt-2">
                   <View className="bg-blue-50 self-start px-3 py-1 rounded-full">
@@ -462,15 +391,11 @@ export default function ProductsScreen() {
     );
   };
 
-  // Determine what to show based on params
-  // const showingStores = categoryFilter && !storeId;
-  // const showingProducts = storeId || !categoryFilter;
-  const showingStores = !!categoryFilter && !storeId;
-  const showingProducts = !!storeId;
+  const showingStores = categoryFilter && !storeId;
+  const showingProducts = storeId || !categoryFilter;
 
   return (
     <View className="flex-1 bg-gray-50">
-      {/* Premium Header with Gradient */}
       <LinearGradient
         colors={["#2563EB", "#1D4ED8"]}
         start={{ x: 0, y: 0 }}
@@ -487,18 +412,11 @@ export default function ProductsScreen() {
             </Pressable>
             <View className="flex-1 items-center">
               <Text className="text-2xl font-bold text-white">
-                {/* {showingStores
+                {showingStores
                   ? `${categoryFilter} Stores`
                   : storeId
                     ? "Products"
-                    : "All Products"
-                } */}
-                {showingStores
-                  ? `${categoryFilter} Stores`
-                  : showingProducts
-                    ? "Services"
-                    : "All Services"
-                }
+                    : "All Products"}
               </Text>
               {showingStores && stores.length > 0 && (
                 <Text className="text-blue-100 text-sm mt-0.5">
@@ -514,7 +432,6 @@ export default function ProductsScreen() {
             <View className="w-12" />
           </View>
 
-          {/* Premium Search Bar - Only show for products */}
           {showingProducts && (
             <View
               className="bg-white rounded-2xl flex-row items-center px-4 py-3.5"
@@ -528,8 +445,7 @@ export default function ProductsScreen() {
             >
               <Search size={20} color="#9CA3AF" strokeWidth={2} />
               <TextInput
-                // placeholder="Search products..."
-                placeholder="Search services..."
+                placeholder="Search products..."
                 value={searchQuery}
                 onChangeText={setSearchQuery}
                 className="flex-1 ml-3 text-gray-900 text-base"
@@ -548,7 +464,6 @@ export default function ProductsScreen() {
         </View>
       </LinearGradient>
 
-      {/* Breadcrumb Filters */}
       {(categoryFilter || storeId) && (
         <View className="px-4 pt-4 pb-2 flex-row flex-wrap gap-2">
           {categoryFilter && (
@@ -593,102 +508,14 @@ export default function ProductsScreen() {
         </View>
       )}
 
-      {/* Stores List */}
-      {/* Categories Grid */}
-      {!categoryFilter && !storeId && (
-        <View className="flex-1 px-6 pt-6">
-
-          {/* Categories */}
-          <View className="flex-row flex-wrap justify-between">
-            {Object.keys(CATEGORY_ICONS).filter(
-              (category) => category !== "default"
-            ).map((category, index) => {
-              const IconComponent =
-                CATEGORY_ICONS[category] || CATEGORY_ICONS.default;
-
-              const colors =
-                CATEGORY_GRADIENTS[category] ||
-                CATEGORY_GRADIENTS.default;
-
-              return (
-                <Animated.View
-                  key={category}
-                  style={{
-                    width: "48%",
-                    marginBottom: 18,
-                  }}
-                >
-                  <Pressable
-                    onPress={() =>
-                      router.push({
-                        pathname: "/products",
-                        params: { category },
-                      } as any)
-                    }
-                  >
-                    <View
-                      className="rounded-3xl overflow-hidden"
-                      style={{
-                        shadowColor: colors.shadowColor,
-                        shadowOffset: { width: 0, height: 6 },
-                        shadowOpacity: 0.15,
-                        shadowRadius: 14,
-                        elevation: 8,
-                        borderWidth: 1,
-                        borderColor: "#F1F5F9",
-                      }}
-                    >
-                      <LinearGradient
-                        colors={colors.gradient}
-                        start={{ x: 0, y: 0 }}
-                        end={{ x: 1, y: 1 }}
-                        style={{ padding: 24 }}
-                      >
-                        <View className="items-center">
-                          <View
-                            className="rounded-2xl p-4 mb-4"
-                            style={{
-                              backgroundColor: "#FFFFFF",
-                              shadowColor: colors.iconColor,
-                              shadowOffset: { width: 0, height: 4 },
-                              shadowOpacity: 0.2,
-                              shadowRadius: 8,
-                              elevation: 6,
-                              borderWidth: 1,
-                              borderColor: "#F1F5F9",
-                            }}
-                          >
-                            <IconComponent
-                              size={32}
-                              color={colors.iconColor}
-                              strokeWidth={2.5}
-                            />
-                          </View>
-
-                          <Text
-                            className="text-gray-900 font-black text-base text-center"
-                            numberOfLines={1}
-                            style={{ letterSpacing: 0.5 }}
-                          >
-                            {category}
-                          </Text>
-                        </View>
-                      </LinearGradient>
-                    </View>
-                  </Pressable>
-                </Animated.View>
-              );
-            })}
-          </View>
-        </View>
-      )}
-
       {showingStores && (
         <>
           {isLoadingStores ? (
             <View className="flex-1 items-center justify-center">
               <ActivityIndicator size="large" color="#2563EB" />
-              <Text className="text-gray-500 mt-4 font-medium">Loading stores...</Text>
+              <Text className="text-gray-500 mt-4 font-medium">
+                Loading stores...
+              </Text>
             </View>
           ) : stores.length > 0 ? (
             <FlatList
@@ -714,13 +541,14 @@ export default function ProductsScreen() {
         </>
       )}
 
-      {/* Products List */}
       {showingProducts && (
         <>
           {isLoadingProducts ? (
             <View className="flex-1 items-center justify-center">
               <ActivityIndicator size="large" color="#2563EB" />
-              <Text className="text-gray-500 mt-4 font-medium">Loading products...</Text>
+              <Text className="text-gray-500 mt-4 font-medium">
+                Loading products...
+              </Text>
             </View>
           ) : displayProducts && displayProducts.length > 0 ? (
             <FlatList
@@ -735,15 +563,12 @@ export default function ProductsScreen() {
               <View className="bg-white rounded-3xl p-8 items-center shadow-lg">
                 <Text className="text-7xl mb-4">📦</Text>
                 <Text className="text-xl font-bold text-gray-900 mb-2">
-                  {/* No products found */}
-                  "No services found"
+                  No products found
                 </Text>
                 <Text className="text-gray-500 text-center text-base leading-6">
                   {searchQuery
                     ? "Try searching with different keywords"
-                    : "No services available at the moment"
-                    // : "No products available at the moment"
-                  }
+                    : "No products available at the moment"}
                 </Text>
               </View>
             </View>

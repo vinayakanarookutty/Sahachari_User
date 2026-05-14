@@ -106,7 +106,8 @@ export default function ProductDetails() {
   const handleShareProduct = async () => {
     try {
       await Share.share({
-        message: `Check out ${product?.name} - ₹${finalPrice}${isService ? ' per hour' : ''}`,
+        // message: `Check out ${product?.name} - ₹${finalPrice}${isService ? ' per hour' : ''}`,
+        message: `Check out ${product?.name} - ₹${finalPrice}${isBookable ? ' per hour' : ''}`,
       });
     } catch (error) {
       console.log(error);
@@ -127,7 +128,8 @@ export default function ProductDetails() {
 
   const handleAddToCartClick = () => {
     // For services, automatically use quantity 1
-    if (isService) {
+    // if (isService) {
+    if (isBookable) {
       handleAddToCart(1).then((success) => {
         if (success) {
           router.push("/(tabs)/cart");
@@ -155,7 +157,10 @@ export default function ProductDetails() {
     return (
       <View className="flex-1 bg-gray-50 items-center justify-center">
         <ActivityIndicator size="large" color="#2563EB" />
-        <Text className="text-gray-500 mt-4 font-medium">Loading {isService ? 'service' : 'product'}...</Text>
+        {/* <Text className="text-gray-500 mt-4 font-medium">Loading {isService ? 'service' : 'product'}...</Text> */}
+        <Text className="text-gray-500 mt-4 font-medium">
+          Loading {isBookable ? 'booking item' : 'product'}...
+        </Text>
       </View>
     );
   }
@@ -166,7 +171,8 @@ export default function ProductDetails() {
         <View className="bg-white rounded-3xl p-8 items-center shadow-lg">
           <Text className="text-6xl mb-4">😔</Text>
           <Text className="text-xl font-bold text-gray-900 mb-2">
-            Unable to load {isService ? 'service' : 'product'}
+            {/* Unable to load {isService ? 'service' : 'product'} */}
+            Unable to load {isBookable ? 'booking item' : 'product'}
           </Text>
           <Text className="text-gray-500 text-center mb-6">
             Something went wrong. Please try again.
@@ -288,7 +294,8 @@ export default function ProductDetails() {
           )}
 
           {/* Service Badge on Image */}
-          {isService && (
+          {/* {isService && ( */}
+          {isBookable && (
             <View className="absolute top-6 left-6">
               <LinearGradient
                 colors={["#3B82F6", "#2563EB"]}
@@ -363,24 +370,29 @@ export default function ProductDetails() {
             <View className="flex-row items-center justify-between">
               <View className="flex-1">
                 <Text className="text-gray-600 text-sm mb-1">
-                  {isService ? 'Rate' : 'Price'}
+                  {/* {isService ? 'Rate' : 'Price'} */}
+                  {isBookable ? 'Rate' : 'Price'}
                 </Text>
                 <View className="flex-row items-baseline">
                   <Text className="text-4xl font-bold text-blue-600">
                     ₹{finalPrice}
                   </Text>
-                  {isService && (
+                  {/* {isService && ( */}
+                  {isBookable && (
                     <Text className="text-lg text-gray-600 ml-2">
                       per hour
                     </Text>
                   )}
-                  {!isService && hasDiscount && (
+                  {/* {!isService && hasDiscount && ( */}
+
+                  {!isBookable && hasDiscount && (
                     <Text className="text-xl text-gray-400 line-through ml-3">
                       ₹{originalPrice}
                     </Text>
                   )}
                 </View>
-                {!isService && hasDiscount && (
+                {/* {!isService && hasDiscount && ( */}
+                {!isBookable && hasDiscount && (
                   <Text className="text-green-600 font-semibold mt-1">
                     You save ₹{(originalPrice - finalPrice).toFixed(2)}
                   </Text>
@@ -388,7 +400,8 @@ export default function ProductDetails() {
               </View>
 
               {/* Stock Status - Only for Products */}
-              {!isService && (
+              {/* {!isService && ( */}
+              {isPurchasable && (
                 <View>
                   {product.quantity && product.quantity > 0 ? (
                     <View className="bg-green-100 px-4 py-2 rounded-full flex-row items-center">
@@ -414,7 +427,8 @@ export default function ProductDetails() {
               )}
 
               {/* Service Availability Badge */}
-              {isService && (
+              {/* {isService && ( */}
+              {!isPurchasable && (
                 <View className="bg-green-100 px-4 py-2 rounded-full flex-row items-center">
                   <CheckCircle size={18} color="#16A34A" strokeWidth={2.5} />
                   <Text className="text-green-700 font-bold ml-2">
@@ -426,7 +440,8 @@ export default function ProductDetails() {
           </View>
 
           {/* Quantity Selector - Only for Products with Buy Now */}
-          {!isService && product.quantity && product.quantity > 0 && (
+          {/* {!isService && product.quantity && product.quantity > 0 && ( */}
+          {isPurchasable && product.quantity && product.quantity > 0 && (
             <View className="mt-6 bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
               <Text className="text-lg font-bold text-gray-900 mb-4">
                 Quantity (for Buy Now)
@@ -672,8 +687,11 @@ export default function ProductDetails() {
         // onConfirm={() => handleBuyNow(isService ? 1 : quantity)}
         onConfirm={() => handleBuyNow(isBookable ? 1 : quantity)}
         isPending={loading}
-        total={isService ? finalPrice : totalPrice}
-        itemSCount={isService ? 1 : quantity}
+        // total={isService ? finalPrice : totalPrice}
+        // itemSCount={isService ? 1 : quantity}
+        total={isBookable ? finalPrice : totalPrice}
+        itemSCount={isBookable ? 1 : quantity}
+        isBookable={isBookable}
       />
 
       {/* Success Modal */}

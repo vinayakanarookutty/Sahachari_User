@@ -1,11 +1,21 @@
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import {
+  Briefcase,
+  ChevronRight,
+  Fish,
+  HomeIcon,
+  Leaf,
+  Package,
   Phone,
+  ShoppingCart,
   User,
+  Utensils
 } from "lucide-react-native";
-import { useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import {
+  ActivityIndicator,
+  Animated,
   Dimensions,
   Image,
   Linking,
@@ -15,6 +25,7 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useProducts } from "../../hooks/useProducts";
 import { useProfile } from "../../hooks/useProfile";
 
 const { width } = Dimensions.get("window");
@@ -26,6 +37,64 @@ const CAROUSEL_IMAGES = [
   require("../../../assets/im3.jpg"),
 ];
 
+// Icon mapping for different categories
+const CATEGORY_ICONS: Record<string, any> = {
+  "Food": Utensils,
+  "Vegetables and fruits": Leaf,
+  "Groceries": ShoppingCart,
+  "Home made": HomeIcon,
+  "Service": Briefcase,
+  "Fish meat": Fish,
+  "default": Package,
+};
+// Premium white and blue color gradients
+const CATEGORY_GRADIENTS: Record<
+  string,
+  { gradient: string[]; iconColor: string; shadowColor: string }
+> = {
+  "Food": {
+    gradient: ["#FFFFFF", "#FFF7ED"],
+    iconColor: "#9A3412",
+    shadowColor: "#FDBA74",
+  },
+
+  "Vegetables and fruits": {
+    gradient: ["#FFFFFF", "#ECFDF5"],
+    iconColor: "#047857",
+    shadowColor: "#6EE7B7",
+  },
+
+  "Groceries": {
+    gradient: ["#FFFFFF", "#F0F9FF"],
+    iconColor: "#0369A1",
+    shadowColor: "#7DD3FC",
+  },
+
+  "Home made": {
+    gradient: ["#FFFFFF", "#FFF1F2"],
+    iconColor: "#9F1239",
+    shadowColor: "#FDA4AF",
+  },
+
+  "Service": {
+    gradient: ["#FFFFFF", "#ECFEFF"],
+    iconColor: "#0E7490",
+    shadowColor: "#67E8F9",
+  },
+
+  "Fish meat": {
+    gradient: ["#FFFFFF", "#EFF6FF"],
+    iconColor: "#1D4ED8",
+    shadowColor: "#93C5FD",
+  },
+
+  "default": {
+    gradient: ["#FFFFFF", "#F1F5F9"],
+    iconColor: "#475569",
+    shadowColor: "#94A3B8",
+  },
+};
+
 
 export default function Home() {
   const router = useRouter();
@@ -34,41 +103,41 @@ export default function Home() {
   const [activeSlide, setActiveSlide] = useState(0);
   const scrollViewRef = useRef<ScrollView>(null);
 
-  // const [searchQuery, setSearchQuery] = useState("");
-  // const { data, isLoading } = useProducts(
-  //   searchQuery ? { search: searchQuery } : undefined,
-  // );
+  const [searchQuery, setSearchQuery] = useState("");
+  const { data, isLoading } = useProducts(
+    searchQuery ? { search: searchQuery } : undefined,
+  );
 
   // Extract unique categories from products data
-  // const categories = useMemo(() => {
-  //   if (!data || data.length === 0) return [];
+  const categories = useMemo(() => {
+    if (!data || data.length === 0) return [];
 
-  //   const uniqueCategories = new Set<string>();
-  //   data.forEach((product: any) => {
-  //     if (product.category) {
-  //       const cleanCategory = product.category.trim();
-  //       uniqueCategories.add(cleanCategory);
-  //     }
-  //   });
+    const uniqueCategories = new Set<string>();
+    data.forEach((product: any) => {
+      if (product.category) {
+        const cleanCategory = product.category.trim();
+        uniqueCategories.add(cleanCategory);
+      }
+    });
 
-  //   return Array.from(uniqueCategories).map((category, index) => {
-  //     const colors = CATEGORY_GRADIENTS[category] || CATEGORY_GRADIENTS["default"];
-  //     const icon = CATEGORY_ICONS[category] || CATEGORY_ICONS["default"];
+    return Array.from(uniqueCategories).map((category, index) => {
+      const colors = CATEGORY_GRADIENTS[category] || CATEGORY_GRADIENTS["default"];
+      const icon = CATEGORY_ICONS[category] || CATEGORY_ICONS["default"];
 
-  //     return {
-  //       id: `category-${index}`,
-  //       name: category,
-  //       icon: icon,
-  //       gradient: colors.gradient,
-  //       iconColor: colors.iconColor,
-  //       shadowColor: colors.shadowColor,
-  //     };
-  //   });
-  // }, [data]);
+      return {
+        id: `category-${index}`,
+        name: category,
+        icon: icon,
+        gradient: colors.gradient,
+        iconColor: colors.iconColor,
+        shadowColor: colors.shadowColor,
+      };
+    });
+  }, [data]);
 
-  // const scaleAnims = useRef(
-  //   Array(10).fill(0).map(() => new Animated.Value(1))
-  // ).current;
+  const scaleAnims = useRef(
+    Array(10).fill(0).map(() => new Animated.Value(1))
+  ).current;
 
   const handleScroll = (event: any) => {
     const slideSize = event.nativeEvent.layoutMeasurement.width;
@@ -81,32 +150,32 @@ export default function Home() {
     Linking.openURL("tel:9567771549");
   };
 
-  // const handleCategoryPressIn = (index: number) => {
-  //   if (scaleAnims[index]) {
-  //     Animated.spring(scaleAnims[index], {
-  //       toValue: 0.95,
-  //       useNativeDriver: true,
-  //     }).start();
-  //   }
-  // };
+  const handleCategoryPressIn = (index: number) => {
+    if (scaleAnims[index]) {
+      Animated.spring(scaleAnims[index], {
+        toValue: 0.95,
+        useNativeDriver: true,
+      }).start();
+    }
+  };
 
-  // const handleCategoryPressOut = (index: number) => {
-  //   if (scaleAnims[index]) {
-  //     Animated.spring(scaleAnims[index], {
-  //       toValue: 1,
-  //       friction: 4,
-  //       tension: 50,
-  //       useNativeDriver: true,
-  //     }).start();
-  //   }
-  // };
+  const handleCategoryPressOut = (index: number) => {
+    if (scaleAnims[index]) {
+      Animated.spring(scaleAnims[index], {
+        toValue: 1,
+        friction: 4,
+        tension: 50,
+        useNativeDriver: true,
+      }).start();
+    }
+  };
 
-  // const handleCategoryPress = (categoryName: string) => {
-  //   router.push({
-  //     pathname: "/products",
-  //     params: { category: categoryName },
-  //   });
-  // };
+  const handleCategoryPress = (categoryName: string) => {
+    router.push({
+      pathname: "/products",
+      params: { category: categoryName },
+    });
+  };
 
   const S3_BASE_URL = process.env.EXPO_PUBLIC_S3_BASE_URL;
 
@@ -399,17 +468,17 @@ export default function Home() {
         <View className="mt-10 px-6">
           <View className="flex-row items-center justify-between mb-7">
             <View className="flex-1">
-              {/* <Text className="text-3xl font-black text-gray-900 tracking-tight" style={{ letterSpacing: 0.3 }}>
+              <Text className="text-3xl font-black text-gray-900 tracking-tight" style={{ letterSpacing: 0.3 }}>
                 Our Services
-              </Text> */}
+              </Text>
               <View className="flex-row items-center mt-2">
-                {/* <View className="w-8 h-0.5 bg-blue-500 rounded-full mr-2" /> */}
-                {/* <Text className="text-blue-600 text-sm font-bold tracking-wide">
+                <View className="w-8 h-0.5 bg-blue-500 rounded-full mr-2" />
+                <Text className="text-blue-600 text-sm font-bold tracking-wide">
                   Discover Excellence
-                </Text> */}
+                </Text>
               </View>
             </View>
-            {/* <View
+            <View
               className="bg-blue-50 rounded-2xl p-3"
               style={{
                 shadowColor: "#2563EB",
@@ -419,19 +488,19 @@ export default function Home() {
               }}
             >
               <ChevronRight size={22} color="#2563EB" strokeWidth={2.5} />
-            </View> */}
+            </View>
           </View>
 
           {/* Loading State */}
-          {/* {isLoading && (
+          {isLoading && (
             <View className="py-20 items-center">
               <ActivityIndicator size="large" color="#2563EB" />
               <Text className="text-blue-400 mt-6 font-semibold text-base">Loading services...</Text>
             </View>
-          )} */}
+          )}
 
           {/* Luxurious Categories Grid */}
-          {/* {!isLoading && categories.length > 0 && (
+          {!isLoading && categories.length > 0 && (
             <View className="flex-row flex-wrap justify-between">
               {categories.map((category, index) => {
                 const IconComponent = category.icon;
@@ -502,7 +571,7 @@ export default function Home() {
                 );
               })}
             </View>
-          )} */}
+          )}
 
           {/* Premium Empty State */}
 

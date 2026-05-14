@@ -21,6 +21,7 @@ export function CheckoutModal({
   isPending,
   total,
   itemSCount,
+  isBookable = false,
 }: any) {
   const [showPaymentDropdown, setShowPaymentDropdown] = useState(false);
 
@@ -60,12 +61,21 @@ export function CheckoutModal({
     if (profile && visible) {
       setAddress((prev: any) => ({
         ...prev,
-        street: prev.street || profile.address || '',
-        phone: prev.phone || profile.mobileNumber || '',
-        paymentMethod: prev.paymentMethod || '',
+
+        // Auto fill user details
+        street: profile.address || '',
+        city: prev.city || '',
+        zipCode:
+          profile.serviceablePincodes?.[0] || prev.zipCode || '',
+        phone: profile.mobileNumber || '',
+
+        // Services/Rentals => Self Pickup only
+        paymentMethod: isBookable
+          ? 'SELF_PICKUP'
+          : prev.paymentMethod || '',
       }));
     }
-  }, [profile, visible]);
+  }, [profile, visible, isBookable]);
 
   useEffect(() => {
     if (!visible) {
@@ -73,10 +83,23 @@ export function CheckoutModal({
     }
   }, [visible]);
 
-  const paymentOptions = [
-    { label: 'Cash on Delivery', value: 'CASH_ON_DELIVERY' },
-    { label: 'Self Pickup', value: 'SELF_PICKUP' },
-  ];
+  const paymentOptions = isBookable
+    ? [
+      {
+        label: 'Self Pickup',
+        value: 'SELF_PICKUP',
+      },
+    ]
+    : [
+      {
+        label: 'Cash on Delivery',
+        value: 'CASH_ON_DELIVERY',
+      },
+      {
+        label: 'Self Pickup',
+        value: 'SELF_PICKUP',
+      },
+    ];
 
   return (
     <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
@@ -116,8 +139,19 @@ export function CheckoutModal({
                 {[
                   { label: 'Street Address *', key: 'street', placeholder: '123 Main Street' },
                   { label: 'City *', key: 'city', placeholder: 'Mumbai' },
-                  { label: 'Zip Code *', key: 'zipCode', placeholder: '400001', keyboard: 'numeric' },
-                  { label: 'Phone Number *', key: 'phone', placeholder: '+919876543210', keyboard: 'phone-pad' },
+                  {
+                    label: 'Zip Code *',
+                    key: 'zipCode',
+                    placeholder: '400001',
+                    keyboard: 'numeric',
+                    readOnly: true,
+                  },
+                  {
+                    label: 'Phone Number *',
+                    key: 'phone',
+                    placeholder: '+919876543210',
+                    keyboard: 'phone-pad',
+                  },
                 ].map((f) => (
                   <View key={f.key} className="mb-4">
                     <Text className="text-gray-700 font-semibold mb-2">
@@ -125,10 +159,15 @@ export function CheckoutModal({
                     </Text>
                     <TextInput
                       value={address[f.key]}
+                      editable={!f.readOnly}
                       onChangeText={(v) => updateField(f.key, v)}
                       placeholder={f.placeholder}
                       keyboardType={f.keyboard as any}
-                      className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-gray-800"
+                      // className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-gray-800"
+                      className={`border rounded-xl px-4 py-3 text-gray-800 ${f.readOnly
+                        ? 'bg-gray-100 border-gray-300'
+                        : 'bg-gray-50 border-gray-200'
+                        }`}
                     />
                   </View>
                 ))}
@@ -149,48 +188,61 @@ export function CheckoutModal({
                 </View>
 
                 {/* Payment Dropdown */}
-                <View className="mb-4 relative z-20">
-                  <Text className="text-gray-700 font-semibold mb-2">
-                    Payment Method *
-                  </Text>
-
-                  <Pressable
-                    onPress={() => setShowPaymentDropdown(!showPaymentDropdown)}
-                    className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 flex-row justify-between items-center"
-                  >
-                    <Text className="text-gray-800">
-                      {address.paymentMethod
-                        ? paymentOptions.find(p => p.value === address.paymentMethod)?.label
-                        : 'Select payment method'}
+                {!isBookable ? (
+                  <View className="mb-4 relative z-20">
+                    <Text className="text-gray-700 font-semibold mb-2">
+                      Payment Method *
                     </Text>
-                    <Text className="text-gray-500">▼</Text>
-                  </Pressable>
 
-                  {showPaymentDropdown && (
-                    <View className="bg-white border border-gray-200 rounded-xl mt-2 overflow-hidden">
-                      {paymentOptions.map((item) => (
-                        <Pressable
-                          key={item.value}
-                          onPress={() => {
-                            updateField('paymentMethod', item.value);
-                            setShowPaymentDropdown(false);
-                          }}
-                          className="px-4 py-3 border-b border-gray-100"
-                        >
-                          <Text
-                            className={`${
-                              address.paymentMethod === item.value
+                    <Pressable
+                      onPress={() => setShowPaymentDropdown(!showPaymentDropdown)}
+                      className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 flex-row justify-between items-center"
+                    >
+                      <Text className="text-gray-800">
+                        {address.paymentMethod
+                          ? paymentOptions.find(p => p.value === address.paymentMethod)?.label
+                          : 'Select payment method'}
+                      </Text>
+                      <Text className="text-gray-500">▼</Text>
+                    </Pressable>
+
+                    {showPaymentDropdown && (
+                      <View className="bg-white border border-gray-200 rounded-xl mt-2 overflow-hidden">
+                        {paymentOptions.map((item) => (
+                          <Pressable
+                            key={item.value}
+                            onPress={() => {
+                              updateField('paymentMethod', item.value);
+                              setShowPaymentDropdown(false);
+                            }}
+                            className="px-4 py-3 border-b border-gray-100"
+                          >
+                            <Text
+                              className={`${address.paymentMethod === item.value
                                 ? 'text-blue-600 font-bold'
                                 : 'text-gray-800'
-                            }`}
-                          >
-                            {item.label}
-                          </Text>
-                        </Pressable>
-                      ))}
+                                }`}
+                            >
+                              {item.label}
+                            </Text>
+                          </Pressable>
+                        ))}
+                      </View>
+                    )}
+                  </View>
+                ) : (
+                  <View className="mb-4">
+                    <Text className="text-gray-700 font-semibold mb-2">
+                      Pickup Method
+                    </Text>
+
+                    <View className="bg-blue-50 border border-blue-200 rounded-xl px-4 py-4">
+                      <Text className="text-blue-700 font-bold">
+                        Self Pickup
+                      </Text>
                     </View>
-                  )}
-                </View>
+                  </View>
+                )}
 
                 {/* Summary */}
                 <View className="bg-blue-50 rounded-xl p-4 mb-6">
@@ -237,6 +289,6 @@ export function CheckoutModal({
           )}
         </View>
       </View>
-    </Modal>
+    </Modal >
   );
 }
