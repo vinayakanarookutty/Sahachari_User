@@ -1,4 +1,4 @@
-      import { Redirect, Tabs } from "expo-router";
+import { Redirect, Tabs } from "expo-router";
 import {
   Home,
   Receipt,
@@ -61,9 +61,8 @@ export default function TabsLayout() {
                   <Text
                     numberOfLines={1}
                     ellipsizeMode="tail"
-                    className={`text-[11px] mt-1 ${
-                      focused ? "text-blue-600 font-semibold" : "text-gray-500"
-                    }`}
+                    className={`text-[11px] mt-1 ${focused ? "text-blue-600 font-semibold" : "text-gray-500"
+                      }`}
                   >
                     {label}
                   </Text>
@@ -79,7 +78,8 @@ export default function TabsLayout() {
 
 const TABS = [
   { name: "home", label: "Home", Icon: Home },
-  { name: "products", label: "Products", Icon: ShoppingBag },
+  // { name: "products", label: "Products", Icon: ShoppingBag },
+  { name: "products", label: "Services", Icon: ShoppingBag },
   { name: "cart", label: "Cart", Icon: ShoppingCart },
   { name: "orders", label: "Orders", Icon: Receipt },
   { name: "services", label: "Services", Icon: Wrench },
