@@ -68,6 +68,11 @@ export default function ProductDetails() {
   // Check if product is a service
   const isService = product?.category === "Service";
 
+  const isRental = product?.category === "Rental";
+
+  const isBookable = isService || isRental;
+  const isPurchasable = !isBookable;
+
   const handleImageScroll = (event: any) => {
     const slideSize = event.nativeEvent.layoutMeasurement.width;
     const offset = event.nativeEvent.contentOffset.x;
@@ -315,8 +320,8 @@ export default function ProductDetails() {
                   key={index}
                   onPress={() => scrollToImage(index)}
                   className={`h-2 rounded-full ${activeImageIndex === index
-                      ? "bg-white w-8"
-                      : "bg-white/50 w-2"
+                    ? "bg-white w-8"
+                    : "bg-white/50 w-2"
                     }`}
                 />
               ))}
@@ -484,7 +489,66 @@ export default function ProductDetails() {
 
       {/* Floating Action Buttons */}
       {/* Show for services (always available) or products with stock */}
-      {(isService || (product.quantity && product.quantity > 0)) && (
+      {/* {(isService || (product.quantity && product.quantity > 0)) && ( */}
+      {(isBookable || (isPurchasable && product.quantity && product.quantity > 0)) && (
+        // <View
+        //   className="absolute bottom-0 left-0 right-0 px-6 bg-white border-t border-gray-100"
+        //   style={{
+        //     paddingBottom: insets.bottom + 16,
+        //     paddingTop: 16,
+        //     shadowColor: "#000",
+        //     shadowOffset: { width: 0, height: -4 },
+        //     shadowOpacity: 0.1,
+        //     shadowRadius: 12,
+        //     elevation: 10,
+        //   }}
+        // >
+        //   <View className="flex-row gap-3"> 
+        //     <Pressable
+        //       disabled={loading}
+        //       onPress={handleAddToCartClick}
+        //       className={`flex-1 rounded-2xl overflow-hidden ${loading ? "opacity-50" : ""
+        //         }`}
+        //     >
+        //       <View className="bg-gray-100 py-4 flex-row items-center justify-center">
+        //         <ShoppingCart size={20} color="#1F2937" strokeWidth={2.5} />
+        //         <Text className="text-gray-900 font-bold text-base ml-2">
+        //           Add to Cart
+        //         </Text>
+        //       </View>
+        //     </Pressable>
+
+        //     <Pressable
+        //       disabled={loading}
+        //       onPress={handleBuyNowClick}
+        //       className={`flex-1 rounded-2xl overflow-hidden ${loading ? "opacity-50" : ""
+        //         }`}
+        //     >
+        //       <LinearGradient
+        //         colors={["#EA580C", "#DC2626"]}
+        //         start={{ x: 0, y: 0 }}
+        //         end={{ x: 1, y: 1 }}
+        //         style={{
+        //           paddingVertical: 16,
+        //           flexDirection: "row",
+        //           alignItems: "center",
+        //           justifyContent: "center",
+        //         }}
+        //       >
+        //         {loading ? (
+        //           <ActivityIndicator color="#FFFFFF" />
+        //         ) : (
+        //           <>
+        //             <Package size={20} color="#FFFFFF" strokeWidth={2.5} />
+        //             <Text className="text-white font-bold text-base ml-2">
+        //               {isService ? 'Book Now' : 'Buy Now'}
+        //             </Text>
+        //           </>
+        //         )}
+        //       </LinearGradient>
+        //     </Pressable>
+        //   </View>
+        // </View>
         <View
           className="absolute bottom-0 left-0 right-0 px-6 bg-white border-t border-gray-100"
           style={{
@@ -497,29 +561,57 @@ export default function ProductDetails() {
             elevation: 10,
           }}
         >
-          <View className="flex-row gap-3">
-            <Pressable
-              disabled={loading}
-              onPress={handleAddToCartClick}
-              className={`flex-1 rounded-2xl overflow-hidden ${loading ? "opacity-50" : ""
-                }`}
-            >
-              <View className="bg-gray-100 py-4 flex-row items-center justify-center">
-                <ShoppingCart size={20} color="#1F2937" strokeWidth={2.5} />
-                <Text className="text-gray-900 font-bold text-base ml-2">
-                  Add to Cart
-                </Text>
-              </View>
-            </Pressable>
+          {/* PRODUCTS */}
+          {isPurchasable ? (
+            <View className="flex-row gap-3">
+              <Pressable
+                disabled={loading}
+                onPress={handleAddToCartClick}
+                className={`flex-1 rounded-2xl overflow-hidden ${loading ? "opacity-50" : ""
+                  }`}
+              >
+                <View className="bg-gray-100 py-4 flex-row items-center justify-center">
+                  <ShoppingCart size={20} color="#1F2937" strokeWidth={2.5} />
+                  <Text className="text-gray-900 font-bold text-base ml-2">
+                    Add to Cart
+                  </Text>
+                </View>
+              </Pressable>
 
+              <Pressable
+                disabled={loading}
+                onPress={handleBuyNowClick}
+                className={`flex-1 rounded-2xl overflow-hidden ${loading ? "opacity-50" : ""
+                  }`}
+              >
+                <LinearGradient
+                  colors={["#EA580C", "#DC2626"]}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={{
+                    paddingVertical: 16,
+                    flexDirection: "row",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <Package size={20} color="#FFFFFF" strokeWidth={2.5} />
+                  <Text className="text-white font-bold text-base ml-2">
+                    Buy Now
+                  </Text>
+                </LinearGradient>
+              </Pressable>
+            </View>
+          ) : (
+            /* SERVICES + RENTALS */
             <Pressable
               disabled={loading}
               onPress={handleBuyNowClick}
-              className={`flex-1 rounded-2xl overflow-hidden ${loading ? "opacity-50" : ""
+              className={`rounded-2xl overflow-hidden ${loading ? "opacity-50" : ""
                 }`}
             >
               <LinearGradient
-                colors={["#EA580C", "#DC2626"]}
+                colors={["#2563EB", "#1D4ED8"]}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
                 style={{
@@ -535,18 +627,28 @@ export default function ProductDetails() {
                   <>
                     <Package size={20} color="#FFFFFF" strokeWidth={2.5} />
                     <Text className="text-white font-bold text-base ml-2">
-                      {isService ? 'Book Now' : 'Buy Now'}
+                      Book Now
                     </Text>
                   </>
                 )}
               </LinearGradient>
             </Pressable>
-          </View>
+          )}
+
+          {/* Self Pickup Note */}
+          {isBookable && (
+            <View className="mt-3 bg-blue-50 rounded-2xl p-3">
+              <Text className="text-blue-700 text-center font-semibold text-sm">
+                Self Pickup Only
+              </Text>
+            </View>
+          )}
         </View>
       )}
 
       {/* Add to Cart Modal - Only for Products */}
-      {!isService && (
+      {/* {!isService && ( */}
+      {isPurchasable && (
         <AddToCartModal
           visible={showQuantityModal}
           onClose={() => setShowQuantityModal(false)}
@@ -567,7 +669,8 @@ export default function ProductDetails() {
         onClose={() => setShowAddressModal(false)}
         address={address}
         setAddress={setAddress}
-        onConfirm={() => handleBuyNow(isService ? 1 : quantity)}
+        // onConfirm={() => handleBuyNow(isService ? 1 : quantity)}
+        onConfirm={() => handleBuyNow(isBookable ? 1 : quantity)}
         isPending={loading}
         total={isService ? finalPrice : totalPrice}
         itemSCount={isService ? 1 : quantity}
