@@ -98,10 +98,14 @@ export default function ProductsScreen() {
   );
   // Determine which products to show
   // const displayProducts = storeId ? storeProducts : allProducts;
-  const displayProducts = storeId ? filteredProducts : allProducts;
-  // const displayProducts = storeId
-  //   ? storeProducts ?? []
-  //   : allProducts ?? [];
+  // const displayProducts = storeId ? filteredProducts : allProducts;
+  const allowedStoreIds = stores.map((s) => s._id);
+
+  const displayProducts = storeId
+    ? filteredProducts
+    : allProducts.filter((p) =>
+      allowedStoreIds.includes(p.storeId || "")
+    );
 
   // const isLoadingProducts = storeId
   //   ? isLoadingStoreProducts
@@ -248,6 +252,10 @@ export default function ProductsScreen() {
         ? Math.round(((originalPrice - item.finalPrice) / originalPrice) * 100)
         : 0;
 
+    const imageUrl = item.images?.[0]?.startsWith("http")
+      ? item.images[0]
+      : `${S3_BASE_URL?.replace(/\/$/, "")}/${item.images?.[0]}`;
+
     return (
       <Pressable
         onPress={() => handleProductPress(item)}
@@ -265,8 +273,11 @@ export default function ProductsScreen() {
           <View className="w-32 h-32 relative">
             {item.images && item.images.length > 0 ? (
               <>
+
                 <Image
-                  source={{ uri: item.images[0] }}
+
+                  // source={{ uri: item.images[0] }}
+                  source={{ uri: imageUrl }}
                   className="w-full h-full"
                   resizeMode="cover"
                 />
@@ -392,7 +403,9 @@ export default function ProductsScreen() {
   };
 
   const showingStores = categoryFilter && !storeId;
-  const showingProducts = storeId || !categoryFilter;
+  // const showingProducts = storeId || !categoryFilter;
+  const showingProducts =
+    !!storeId || (!categoryFilter && !isLoadingStores);
 
   return (
     <View className="flex-1 bg-gray-50">
@@ -415,8 +428,8 @@ export default function ProductsScreen() {
                 {showingStores
                   ? `${categoryFilter} Stores`
                   : storeId
-                    ? "Products"
-                    : "All Products"}
+                    ? "Service"
+                    : "All Services"}
               </Text>
               {showingStores && stores.length > 0 && (
                 <Text className="text-blue-100 text-sm mt-0.5">

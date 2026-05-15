@@ -10,7 +10,9 @@ import {
   Phone,
   ShoppingCart,
   User,
-  Utensils
+  Utensils,
+  Wrench,
+  Plug,
 } from "lucide-react-native";
 import { useMemo, useRef, useState } from "react";
 import {
@@ -45,6 +47,8 @@ const CATEGORY_ICONS: Record<string, any> = {
   "Home made": HomeIcon,
   "Service": Briefcase,
   "Fish meat": Fish,
+  "rent": Wrench,
+  "electronics": Plug,
   "default": Package,
 };
 // Premium white and blue color gradients
@@ -87,6 +91,17 @@ const CATEGORY_GRADIENTS: Record<
     iconColor: "#1D4ED8",
     shadowColor: "#93C5FD",
   },
+  "rent": {
+    gradient: ["#FFFFFF", "#FEFCE8"],
+    iconColor: "#CA8A04",
+    shadowColor: "#FDE047",
+  },
+
+  "electronics": {
+    gradient: ["#FFFFFF", "#F5F3FF"],
+    iconColor: "#7C3AED",
+    shadowColor: "#C4B5FD",
+  },
 
   "default": {
     gradient: ["#FFFFFF", "#F1F5F9"],
@@ -121,8 +136,38 @@ export default function Home() {
     });
 
     return Array.from(uniqueCategories).map((category, index) => {
-      const colors = CATEGORY_GRADIENTS[category] || CATEGORY_GRADIENTS["default"];
-      const icon = CATEGORY_ICONS[category] || CATEGORY_ICONS["default"];
+      // const colors = CATEGORY_GRADIENTS[category] || CATEGORY_GRADIENTS["default"];
+      // const icon = CATEGORY_ICONS[category] || CATEGORY_ICONS["default"];
+      const normalizedCategory = category.trim().toLowerCase();
+
+      const iconMap: Record<string, any> = {
+        "food": Utensils,
+        "vegetables and fruits": Leaf,
+        "groceries": ShoppingCart,
+        "home made": HomeIcon,
+        "service": Briefcase,
+        "fish & meat": Fish,
+        "rent": Wrench,
+        "electronics": Plug,
+      };
+
+      const gradientMap: Record<string, any> = {
+        "food": CATEGORY_GRADIENTS["Food"],
+        "vegetables and fruits":
+          CATEGORY_GRADIENTS["Vegetables and fruits"],
+        "groceries": CATEGORY_GRADIENTS["Groceries"],
+        "home made": CATEGORY_GRADIENTS["Home made"],
+        "service": CATEGORY_GRADIENTS["Service"],
+        "fish & meat": CATEGORY_GRADIENTS["Fish meat"],
+        "rent": CATEGORY_GRADIENTS["rent"],
+        "electronics": CATEGORY_GRADIENTS["electronics"],
+      };
+
+      const icon = iconMap[normalizedCategory] || Package;
+
+      const colors =
+        gradientMap[normalizedCategory] ||
+        CATEGORY_GRADIENTS["default"];
 
       return {
         id: `category-${index}`,

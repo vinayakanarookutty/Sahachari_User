@@ -13,7 +13,11 @@ export function ProductCard({
   const finalPrice = product.finalPrice ?? originalPrice;
   const hasDiscount = finalPrice < originalPrice;
 
-  const imageUri = product.images?.[0];
+  const S3_BASE_URL = process.env.EXPO_PUBLIC_S3_BASE_URL;
+
+  const imageUri = product.images?.[0]
+    ? `${S3_BASE_URL}/${product.images[0]}`
+    : null;
   const [imgSrc, setImgSrc] = useState<any>(null);
 
   useEffect(() => {
