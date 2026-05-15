@@ -242,15 +242,48 @@ export default function ProductsScreen() {
   };
 
   const renderProduct = ({ item }: { item: Product }) => {
-    const isService = item.category === "Service";
-    const hasDiscount = item.offers && item.offers.length > 0;
-    const displayPrice = item.finalPrice || parseFloat(item.price);
-    const originalPrice = parseFloat(item.price);
+    // const isService = item.category === "Service";
+    // const hasDiscount = item.offers && item.offers.length > 0;
+    // const displayPrice = item.finalPrice || parseFloat(item.price);
+    // const originalPrice = parseFloat(item.price);
 
-    const discountPercent =
-      hasDiscount && item.finalPrice
-        ? Math.round(((originalPrice - item.finalPrice) / originalPrice) * 100)
-        : 0;
+    // const discountPercent =
+    //   hasDiscount && item.finalPrice
+    //     ? Math.round(((originalPrice - item.finalPrice) / originalPrice) * 100)
+    //     : 0;
+    const isService = item.category === "Service";
+
+    const extractPrice = (value: any) => {
+      if (!value) return 0;
+
+      const match = String(value).match(/\d+(\.\d+)?/);
+
+      return match ? Number(match[0]) : 0;
+    };
+
+    const originalPrice = extractPrice(item.price);
+
+    const finalPrice =
+      item.finalPrice !== undefined
+        ? Number(item.finalPrice)
+        : originalPrice;
+
+    const hasDiscount =
+      originalPrice > 0 && finalPrice < originalPrice;
+
+    const discountPercent = hasDiscount
+      ? Math.round(
+        ((originalPrice - finalPrice) / originalPrice) * 100
+      )
+      : 0;
+
+    const displayPrice = finalPrice;
+
+    const unit =
+      typeof item.price === "string" &&
+        item.price.includes("/")
+        ? item.price.split("/")[1].trim()
+        : "";
 
     const imageUrl = item.images?.[0]?.startsWith("http")
       ? item.images[0]
@@ -322,8 +355,9 @@ export default function ProductsScreen() {
               </View>
             )}
 
-            {!isService && hasDiscount && discountPercent > 0 && (
-              <View className="absolute top-2 left-2">
+            {/* {!isService && hasDiscount && discountPercent > 0 && ( */}
+            {hasDiscount && discountPercent > 0 && (
+              <View className="absolute top-2 right-2">
                 <LinearGradient
                   colors={["#EF4444", "#DC2626"]}
                   start={{ x: 0, y: 0 }}
@@ -355,15 +389,26 @@ export default function ProductsScreen() {
 
             <View className="mt-3">
               <View className="flex-row items-baseline">
-                <Text className="text-2xl font-bold text-blue-600">
-                  ₹{displayPrice}
-                </Text>
-                {isService && (
-                  <Text className="text-xs text-gray-600 ml-1">/hr</Text>
-                )}
-                {!isService && hasDiscount && item.finalPrice && (
+                <View className="flex-row items-end">
+                  <Text className="text-2xl font-bold text-blue-600">
+                    ₹{displayPrice}
+                  </Text>
+
+                  {isService ? (
+                    <Text className="text-xs text-gray-600 ml-1 mb-1">
+                      /hr
+                    </Text>
+                  ) : unit ? (
+                    <Text className="text-xs text-gray-600 ml-1 mb-1">
+                      /{unit}
+                    </Text>
+                  ) : null}
+                </View>
+                {/* {!isService && hasDiscount && item.finalPrice && ( */}
+                {hasDiscount && (
                   <Text className="text-sm text-gray-400 line-through ml-2">
-                    ₹{item.price}
+                    {/* ₹{item.price} */}
+                    ₹{originalPrice}
                   </Text>
                 )}
               </View>

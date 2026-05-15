@@ -9,23 +9,46 @@ export function ProductCard({
   product: Product;
   onPress?: (id: string) => void;
 }) {
-  const originalPrice = Number(product.price) || 0;
-  const finalPrice = product.finalPrice ?? originalPrice;
+  // Extract numeric price
+  const extractPrice = (value: any) => {
+    if (!value) return 0;
+
+    const match = String(value).match(/\d+(\.\d+)?/);
+
+    return match ? Number(match[0]) : 0;
+  };
+
+  const originalPrice = extractPrice(product.price);
+
+  const finalPrice =
+    product.finalPrice ?? originalPrice;
+
   const hasDiscount = finalPrice < originalPrice;
+
+  // Extract unit from strings like "100/Kg"
+  const unit =
+    typeof product.price === "string" &&
+      product.price.includes("/")
+      ? product.price.split("/")[1].trim()
+      : "";
 
   const S3_BASE_URL = process.env.EXPO_PUBLIC_S3_BASE_URL;
 
   const imageUri = product.images?.[0]
     ? `${S3_BASE_URL}/${product.images[0]}`
     : null;
+
   const [imgSrc, setImgSrc] = useState<any>(null);
 
   useEffect(() => {
     if (!imageUri) return;
+
     setImgSrc(null);
+
     const t = setTimeout(() => {
       setImgSrc({ uri: imageUri });
     }, 30);
+
     return () => clearTimeout(t);
   }, [imageUri]);
 
@@ -54,12 +77,26 @@ export function ProductCard({
           />
         )}
 
-        <Text className="font-semibold mt-2">{product.name}</Text>
+        <Text className="font-semibold mt-2">
+          {product.name}
+        </Text>
 
-        <View className="flex-row items-center mt-1">
-          <Text className="font-bold">₹{finalPrice}</Text>
+        {/* Price */}
+        <View className="mt-1">
+          <View className="flex-row items-end">
+            <Text className="font-bold text-lg">
+              ₹{finalPrice}
+            </Text>
+
+            {unit ? (
+              <Text className="text-gray-500 text-sm ml-1 mb-0.5">
+                /{unit}
+              </Text>
+            ) : null}
+          </View>
+
           {hasDiscount && (
-            <Text className="ml-2 text-gray-500 line-through">
+            <Text className="text-gray-500 line-through">
               ₹{originalPrice}
             </Text>
           )}
