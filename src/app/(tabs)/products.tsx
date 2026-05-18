@@ -11,6 +11,7 @@ import {
   Text,
   TextInput,
   View,
+  RefreshControl,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useCategoryStores } from "../../hooks/Usecategorystores";
@@ -45,6 +46,7 @@ export default function ProductsScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const params = useLocalSearchParams();
+  const [refreshing, setRefreshing] = useState(false);
 
   // const categoryFilter = params.category as string | undefined;
   const categoryFilter = params.category as string | undefined;
@@ -63,8 +65,7 @@ export default function ProductsScreen() {
   const S3_BASE_URL = process.env.EXPO_PUBLIC_S3_BASE_URL;
 
   // Fetch category stores when category is provided but no storeId
-  const { data: stores = [], isLoading: isLoadingStores } = useCategoryStores(
-    //   categoryFilter && !storeId ? categoryFilter : undefined,
+  const { data: stores = [], isLoading: isLoadingStores, refetch: refetchStores, } = useCategoryStores(
     isStoreMode
       ? activeCategory
       : isDefaultServiceMode
@@ -79,14 +80,14 @@ export default function ProductsScreen() {
   // );
 
   const effectiveCategory = categoryFilter ?? "Service";
-  const { data: allProducts = [], isLoading: isLoadingAllProducts } =
+  const { data: allProducts = [], isLoading: isLoadingAllProducts, refetch: refetchProducts, } =
     useProducts({
       category: effectiveCategory,
       search: searchQuery || undefined,
     });
 
 
-  const { data: storeProducts, isLoading: isLoadingStoreProducts } =
+  const { data: storeProducts, isLoading: isLoadingStoreProducts, refetch: refetchStoreProducts, } =
     useStoreProducts(storeId);
 
   //filter products based on category
@@ -113,6 +114,23 @@ export default function ProductsScreen() {
   const isLoadingProducts = storeId
     ? !!isLoadingStoreProducts
     : !!isLoadingAllProducts;
+
+  // refresh page
+  const onRefresh = async () => {
+    setRefreshing(true);
+
+    try {
+      await Promise.all([
+        refetchProducts?.(),
+        refetchStoreProducts?.(),
+        refetchStores?.(),
+      ]);
+    } catch (error) {
+      console.log("Refresh error:", error);
+    } finally {
+      setRefreshing(false);
+    }
+  };
 
 
   const handleStorePress = (selectedStoreId: string) => {
@@ -263,10 +281,19 @@ export default function ProductsScreen() {
 
     const originalPrice = extractPrice(item.price);
 
-    const finalPrice =
-      item.finalPrice !== undefined
-        ? Number(item.finalPrice)
-        : originalPrice;
+    let finalPrice = originalPrice;
+
+    // Find active offer
+    const activeOffer = item.offers?.find(
+      (offer: any) => offer.isActive
+    );
+
+    // Apply percentage discount
+    if (activeOffer?.type === "PERCENTAGE") {
+      finalPrice =
+        originalPrice -
+        (originalPrice * activeOffer.value) / 100;
+    }
 
     const hasDiscount =
       originalPrice > 0 && finalPrice < originalPrice;
@@ -582,6 +609,13 @@ export default function ProductsScreen() {
               keyExtractor={(item) => item._id}
               contentContainerStyle={{ paddingTop: 16, paddingBottom: 24 }}
               showsVerticalScrollIndicator={false}
+              refreshControl={
+                <RefreshControl
+                  refreshing={refreshing}
+                  onRefresh={onRefresh}
+                  colors={["#2563EB"]}
+                />
+              }
             />
           ) : (
             <View className="flex-1 items-center justify-center px-6">
@@ -615,6 +649,13 @@ export default function ProductsScreen() {
               keyExtractor={(item) => item._id || item.id}
               contentContainerStyle={{ paddingTop: 16, paddingBottom: 24 }}
               showsVerticalScrollIndicator={false}
+              refreshControl={
+                <RefreshControl
+                  refreshing={refreshing}
+                  onRefresh={onRefresh}
+                  colors={["#2563EB"]}
+                />
+              }
             />
           ) : (
             <View className="flex-1 items-center justify-center px-6">

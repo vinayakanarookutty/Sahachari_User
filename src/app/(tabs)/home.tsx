@@ -25,6 +25,7 @@ import {
   ScrollView,
   Text,
   View,
+  RefreshControl,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useProducts } from "../../hooks/useProducts";
@@ -114,14 +115,30 @@ const CATEGORY_GRADIENTS: Record<
 export default function Home() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { profile } = useProfile();
+  const { profile, refetch: refetchProfile } = useProfile();
   const [activeSlide, setActiveSlide] = useState(0);
   const scrollViewRef = useRef<ScrollView>(null);
 
   const [searchQuery, setSearchQuery] = useState("");
-  const { data, isLoading } = useProducts(
+  const { data, isLoading, refetch: refetchProducts, } = useProducts(
     searchQuery ? { search: searchQuery } : undefined,
   );
+  const [refreshing, setRefreshing] = useState(false);
+
+  const onRefresh = async () => {
+    try {
+      setRefreshing(true);
+
+      await Promise.all([
+        refetchProducts?.(),
+        refetchProfile?.(),
+      ]);
+    } catch (error) {
+      console.log("Refresh error:", error);
+    } finally {
+      setRefreshing(false);
+    }
+  };
 
   // Extract unique categories from products data
   const categories = useMemo(() => {
@@ -351,6 +368,14 @@ export default function Home() {
         showsVerticalScrollIndicator={false}
         className="flex-1"
         contentContainerStyle={{ paddingBottom: 32 }}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={["#2563EB"]}
+            tintColor="#2563EB"
+          />
+        }
       >
         {/* Ultra Premium Carousel */}
         <View className="mt-8">

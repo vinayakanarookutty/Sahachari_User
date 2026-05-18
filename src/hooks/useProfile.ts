@@ -8,7 +8,7 @@ export function useProfile() {
   const [editField, setEditField] = useState("");
   const [editValue, setEditValue] = useState("");
 
-  const { data: profile, isLoading } = useQuery({
+  const { data: profile, isLoading, refetch, } = useQuery({
     queryKey: ["userProfile"],
     queryFn: getUserProfile,
   });
@@ -49,5 +49,6 @@ export function useProfile() {
     openEditModal,
     closeEditModal,
     handleSave,
+    refetch,
   };
 }
