@@ -22,7 +22,7 @@ export function useCart() {
     notes: "",
   });
 
-  const { data: cart, isLoading } = useQuery({
+  const { data: cart, isLoading, refetch, } = useQuery({
     queryKey: ["cart"],
     queryFn: getCart,
   });
@@ -88,6 +88,7 @@ export function useCart() {
   return {
     cart,
     isLoading,
+    refetch,
     total,
     updatingItems,
     showCheckoutModal,

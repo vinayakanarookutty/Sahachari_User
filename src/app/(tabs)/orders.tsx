@@ -8,9 +8,11 @@ import { OrderDetailsModal } from "../../components/orders/OrderDetailsModal";
 import { useOrders } from "../../hooks/useOrders";
 import { ArrowLeft } from "lucide-react-native";
 import { LinearGradient } from "expo-linear-gradient";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function Orders() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const {
     orders, isLoading, error, selectedOrder, isLoadingDetails,
     showDetailsModal, isCancelling, handleOrderPress, handleCancelOrder,
@@ -74,7 +76,11 @@ export default function Orders() {
         </Text>
       </View> */}
       {/* HEADER */}
-      <LinearGradient colors={["#2563EB", "#1D4ED8"]} style={{ paddingBottom: 16 }} >
+      <LinearGradient
+        colors={["#2563EB", "#1D4ED8"]}
+        // style={{ paddingBottom: 16 }
+        style={{ paddingTop: insets.top + 16, paddingBottom: 20 }
+        } >
         <View className="flex-row items-center px-4 pt-4">
           {/* BACK BUTTON */}
           <Pressable onPress={() => router.back()} className="bg-white/20 p-2 rounded-full" >

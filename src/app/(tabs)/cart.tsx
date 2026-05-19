@@ -5,6 +5,7 @@ import {
   View,
   Pressable,
   ActivityIndicator,
+  RefreshControl
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
@@ -19,9 +20,12 @@ import { useCart } from "../../hooks/useCart";
 import { CartItem } from "../../components/cart/CartItem";
 import { CheckoutModal } from "../../components/cart/CheckoutModal";
 import { SuccessModal } from "../../components/cart/SuccessModal";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function Cart() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
+  const [refreshing, setRefreshing] = React.useState(false);
 
   const {
     cart,
@@ -39,6 +43,7 @@ export default function Cart() {
     handleCheckout,
     isPlacingOrder,
     parseNumber,
+    refetch,
   } = useCart();
 
   if (isLoading) {
@@ -52,13 +57,25 @@ export default function Cart() {
 
   const isEmpty = !cart || !cart.items?.length;
 
+  const onRefresh = async () => {
+    try {
+      setRefreshing(true);
+      await refetch?.();
+    } catch (error) {
+      console.log("Refresh error:", error);
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
   return (
     <SafeAreaView edges={["top", "bottom"]} className="flex-1 bg-gray-50">
 
       {/* HEADER */}
       <LinearGradient
         colors={["#2563EB", "#1D4ED8"]}
-        style={{ paddingBottom: 16 }}
+        // style={{ paddingBottom: 16 }
+        style={{ paddingTop: insets.top + 16, paddingBottom: 20 }}
       >
         <View className="flex-row items-center px-4 pt-4">
 
@@ -117,6 +134,14 @@ export default function Cart() {
           {/* CART ITEMS */}
           <FlatList
             data={cart.items}
+            refreshControl={
+              <RefreshControl
+                refreshing={refreshing}
+                onRefresh={onRefresh}
+                colors={["#2563EB"]}
+                tintColor="#2563EB"
+              />
+            }
             keyExtractor={(item) => item._id}
             contentContainerStyle={{
               padding: 16,
