@@ -67,69 +67,75 @@ export default function Orders() {
   }
 
   return (
-    <SafeAreaView edges={["top"]} className="flex-1 bg-gray-50">
-      {/* Premium Header */}
-      {/* <View className="bg-white px-6 py-5 shadow-sm border-b border-gray-100">
+    // <SafeAreaView edges={["top"]} className="flex-1 bg-gray-50">
+    <SafeAreaView
+      edges={["top"]}
+      style={{ flex: 1, backgroundColor: "#2563EB" }}
+    >
+      <View className="flex-1 bg-gray-50">
+        {/* Premium Header */}
+        {/* <View className="bg-white px-6 py-5 shadow-sm border-b border-gray-100">
         <Text className="text-3xl font-bold text-gray-800 mb-1">My Orders</Text>
         <Text className="text-gray-500 font-medium">
           {orders.length} {orders.length === 1 ? 'order' : 'orders'} in total
         </Text>
       </View> */}
-      {/* HEADER */}
-      <LinearGradient
-        colors={["#2563EB", "#1D4ED8"]}
-        // style={{ paddingBottom: 16 }
-        style={{ paddingTop: insets.top + 16, paddingBottom: 20 }
-        } >
-        <View className="flex-row items-center px-4 pt-4">
-          {/* BACK BUTTON */}
-          <Pressable onPress={() => router.back()} className="bg-white/20 p-2 rounded-full" >
-            <ArrowLeft size={22} color="#fff" />
-          </Pressable>
-          {/* TITLE */}
-          <View className="flex-1 items-center">
-            <Text className="text-2xl font-bold text-white">
-              My Orders
-            </Text>
-            <Text className="text-blue-100 text-sm mt-1">
-              {orders.length}{" "}
-              {orders.length === 1 ? "order" : "orders"}
-            </Text>
+        {/* HEADER */}
+        <LinearGradient
+          colors={["#2563EB", "#1D4ED8"]}
+          // style={{ paddingBottom: 16 }
+          style={{ paddingTop: insets.top + 16, paddingBottom: 20 }
+          } >
+          <View className="flex-row items-center px-4 pt-4">
+            {/* BACK BUTTON */}
+            <Pressable onPress={() => router.back()} className="bg-white/20 p-2 rounded-full" >
+              <ArrowLeft size={22} color="#fff" />
+            </Pressable>
+            {/* TITLE */}
+            <View className="flex-1 items-center">
+              <Text className="text-2xl font-bold text-white">
+                My Orders
+              </Text>
+              <Text className="text-blue-100 text-sm mt-1">
+                {orders.length}{" "}
+                {orders.length === 1 ? "order" : "orders"}
+              </Text>
+            </View>
+            <View className="w-10" />
           </View>
-          <View className="w-10" />
-        </View>
-      </LinearGradient>
+        </LinearGradient>
 
 
-      <FlatList
-        data={orders}
-        contentContainerStyle={{ padding: 16, paddingBottom: 24 }}
-        keyExtractor={(item) => item._id}
-        renderItem={({ item }) => (
-          <OrderCard
-            item={item}
-            onPress={handleOrderPress}
-          />
-        )}
-        showsVerticalScrollIndicator={false}
-        ItemSeparatorComponent={() => <View className="h-3" />}
+        <FlatList
+          data={orders}
+          contentContainerStyle={{ padding: 16, paddingBottom: 24 }}
+          keyExtractor={(item) => item._id}
+          renderItem={({ item }) => (
+            <OrderCard
+              item={item}
+              onPress={handleOrderPress}
+            />
+          )}
+          showsVerticalScrollIndicator={false}
+          ItemSeparatorComponent={() => <View className="h-3" />}
 
-        refreshControl={
-          <RefreshControl
-            refreshing={isLoading}
-            onRefresh={refetch}
-          />
-        }
-      />
+          refreshControl={
+            <RefreshControl
+              refreshing={isLoading}
+              onRefresh={refetch}
+            />
+          }
+        />
 
-      <OrderDetailsModal
-        visible={showDetailsModal}
-        order={selectedOrder}
-        isLoading={isLoadingDetails}
-        onClose={handleCloseModal}
-        onCancel={handleCancelOrder}
-        isCancelling={isCancelling}
-      />
+        <OrderDetailsModal
+          visible={showDetailsModal}
+          order={selectedOrder}
+          isLoading={isLoadingDetails}
+          onClose={handleCloseModal}
+          onCancel={handleCancelOrder}
+          isCancelling={isCancelling}
+        />
+      </View>
     </SafeAreaView>
   );
 }
