@@ -68,7 +68,7 @@ export default function ProductDetails() {
   // Check if product is a service
   const isService = product?.category === "Service";
 
-  const isRental = product?.category === "Rental";
+  const isRental = product?.category === "Rent";
 
   const isBookable = isService || isRental;
   const isPurchasable = !isBookable;
@@ -427,13 +427,31 @@ export default function ProductDetails() {
               )}
 
               {/* Service Availability Badge */}
-              {/* {isService && ( */}
-              {!isPurchasable && (
+              {/* {!isPurchasable && ( */}
+              {isService && (
                 <View className="bg-green-100 px-4 py-2 rounded-full flex-row items-center">
                   <CheckCircle size={18} color="#16A34A" strokeWidth={2.5} />
                   <Text className="text-green-700 font-bold ml-2">
                     Available
                   </Text>
+                </View>
+              )}
+
+              {/* Rental Quantity */}
+              {isRental && (
+                <View>
+                  <View className="bg-green-100 px-4 py-2 rounded-full flex-row items-center">
+                    <CheckCircle size={18} color="#16A34A" strokeWidth={2.5} />
+                    <Text className="text-green-700 font-bold ml-2">
+                      Available
+                    </Text>
+                  </View>
+
+                  {product.quantity && (
+                    <Text className="text-gray-500 text-sm mt-2 text-right">
+                      {product.quantity} units available
+                    </Text>
+                  )}
                 </View>
               )}
             </View>

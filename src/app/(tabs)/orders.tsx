@@ -84,7 +84,7 @@ export default function Orders() {
         <LinearGradient
           colors={["#2563EB", "#1D4ED8"]}
           // style={{ paddingBottom: 16 }
-          style={{ paddingTop: insets.top + 16, paddingBottom: 20 }
+          style={{ paddingTop: insets.top + 10, paddingBottom: 20 }
           } >
           <View className="flex-row items-center px-4 pt-4">
             {/* BACK BUTTON */}
