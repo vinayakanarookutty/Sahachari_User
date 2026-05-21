@@ -11,6 +11,7 @@ import {
   TextInput,
   View,
 } from 'react-native';
+import { useMemo } from 'react';
 
 export function CheckoutModal({
   visible,
@@ -24,6 +25,8 @@ export function CheckoutModal({
   isBookable = false,
 }: any) {
   const [showPaymentDropdown, setShowPaymentDropdown] = useState(false);
+  const [places, setPlaces] = useState<string[]>([]);
+  const [showPlaceDropdown, setShowPlaceDropdown] = useState(false);
 
   interface UserProfile {
     _id: string;
@@ -101,6 +104,45 @@ export function CheckoutModal({
       },
     ];
 
+  useEffect(() => {
+    const fetchPlaces = async () => {
+      if (!address.zipCode) return;
+
+      try {
+        const response = await fetch(
+          `${API_BASE_URL}/customer/delivery-charges/${address.zipCode}`,
+          {
+            headers: {
+              Authorization: `Bearer ${await useAuthStore.getState().token}`,
+            },
+          }
+        );
+
+        const data = await response.json();
+
+        // assuming backend returns:
+        // { places: [{ place: "Fort Kochi" }, ...] }
+
+        const availablePlaces =
+          data?.places?.map((p: any) => p.place) || [];
+
+        setPlaces(availablePlaces);
+
+        // auto select first place
+        if (availablePlaces.length > 0) {
+          setAddress((prev: any) => ({
+            ...prev,
+            place: availablePlaces[0],
+          }));
+        }
+      } catch (err) {
+        console.error("Failed to fetch places", err);
+      }
+    };
+
+    fetchPlaces();
+  }, [address.zipCode]);
+
   return (
     <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
       <View className="flex-1 bg-black/50 justify-end">
@@ -146,6 +188,7 @@ export function CheckoutModal({
                     keyboard: 'numeric',
                     readOnly: true,
                   },
+
                   {
                     label: 'Phone Number *',
                     key: 'phone',
@@ -171,6 +214,49 @@ export function CheckoutModal({
                     />
                   </View>
                 ))}
+                {/* Place Dropdown */}
+                <View className="mb-4 relative z-20">
+                  <Text className="text-gray-700 font-semibold mb-2">
+                    Select Place *
+                  </Text>
+
+                  <Pressable
+                    onPress={() =>
+                      setShowPlaceDropdown(!showPlaceDropdown)
+                    }
+                    className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 flex-row justify-between items-center"
+                  >
+                    <Text className="text-gray-800">
+                      {address.place || "Select place"}
+                    </Text>
+
+                    <Text className="text-gray-500">▼</Text>
+                  </Pressable>
+
+                  {showPlaceDropdown && (
+                    <View className="bg-white border border-gray-200 rounded-xl mt-2 overflow-hidden">
+                      {places.map((place) => (
+                        <Pressable
+                          key={place}
+                          onPress={() => {
+                            updateField("place", place);
+                            setShowPlaceDropdown(false);
+                          }}
+                          className="px-4 py-3 border-b border-gray-100"
+                        >
+                          <Text
+                            className={`${address.place === place
+                              ? "text-blue-600 font-bold"
+                              : "text-gray-800"
+                              }`}
+                          >
+                            {place}
+                          </Text>
+                        </Pressable>
+                      ))}
+                    </View>
+                  )}
+                </View>
 
                 {/* Notes */}
                 <View className="mb-4">
@@ -261,6 +347,10 @@ export function CheckoutModal({
                   onPress={() => {
                     if (!address.paymentMethod) {
                       alert('Please select a payment method');
+                      return;
+                    }
+                    if (!address.place) {
+                      alert('Please select a place');
                       return;
                     }
 

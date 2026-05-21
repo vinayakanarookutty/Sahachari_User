@@ -14,6 +14,7 @@ export function useProductActions(product: any) {
     street: "",
     city: "",
     zipCode: "",
+    place: "",
     phone: "",
     notes: "",
     paymentMethod: "",
@@ -55,7 +56,15 @@ export function useProductActions(product: any) {
       await placeSingleOrder({
         productId: product.id,
         quantity,
-        deliveryAddress: address,
+        deliveryAddress: {
+          street: address.street,
+          city: address.city,
+          zipCode: address.zipCode,
+          place: address.place,
+          phone: address.phone,
+          notes: address.notes,
+          paymentMethod: address.paymentMethod,
+        },
         paymentMethod: address.paymentMethod,
       });
       await queryClient.invalidateQueries({ queryKey: ["orders"] });

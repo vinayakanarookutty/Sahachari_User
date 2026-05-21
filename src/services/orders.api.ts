@@ -7,6 +7,7 @@ export const placeSingleOrder = (dto: {
   productId: string;
   quantity: number;
   deliveryAddress: any;
+  place: string;
 }) => api.post("/customer/single-order", dto).then((r) => r.data);
 
 export const getCart = () => api.get("/customer/cart").then((r) => r.data);

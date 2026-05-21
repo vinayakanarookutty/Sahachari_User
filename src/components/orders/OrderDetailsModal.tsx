@@ -217,6 +217,10 @@ export function OrderDetailsModal({
                   {order.deliveryAddress?.street}
                 </Text>
 
+                <Text className="text-gray-700 font-medium mb-2">
+                  {order.deliveryAddress?.place}
+                </Text>
+
                 <Text className="text-gray-700 font-medium mb-3">
                   {order.deliveryAddress?.city},{" "}
                   {order.deliveryAddress?.zipCode}
