@@ -239,7 +239,11 @@ export default function ProductDetails() {
         </View>
       </View>
 
-      <ScrollView showsVerticalScrollIndicator={false}>
+      <ScrollView showsVerticalScrollIndicator={false}
+        contentContainerStyle={{
+          paddingBottom: isBookable ? 220 : 160,
+        }}
+      >
         {/* Image Carousel */}
         <View className="bg-gray-50">
           <ScrollView
@@ -517,7 +521,7 @@ export default function ProductDetails() {
         </View>
 
         {/* Bottom Spacing for FAB */}
-        <View className="h-40" />
+        {/* <View className="h-40" /> */}
       </ScrollView>
 
       {/* Floating Action Buttons */}
