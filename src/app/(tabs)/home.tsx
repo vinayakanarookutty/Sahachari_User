@@ -30,15 +30,16 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useProducts } from "../../hooks/useProducts";
 import { useProfile } from "../../hooks/useProfile";
+import { useCarousel } from "../../hooks/useCarousel";
 
 const { width } = Dimensions.get("window");
-const CAROUSEL_IMAGES = [
-  require("../../../assets/WhatsApp Image 2026-02-11 at 10.13.48 AM.jpeg"),
-  require("../../../assets/WhatsApp Image 2026-02-11 at 5.19.25 PM.jpeg"),
-  require("../../../assets/WhatsApp Image 2026-02-11 at 11.25.36 AM.jpeg"),
-  require("../../../assets/pexels-jack-sparrow-4198972.jpg"),
-  require("../../../assets/im3.jpg"),
-];
+// const CAROUSEL_IMAGES = [
+//   require("../../../assets/WhatsApp Image 2026-02-11 at 10.13.48 AM.jpeg"),
+//   require("../../../assets/WhatsApp Image 2026-02-11 at 5.19.25 PM.jpeg"),
+//   require("../../../assets/WhatsApp Image 2026-02-11 at 11.25.36 AM.jpeg"),
+//   require("../../../assets/pexels-jack-sparrow-4198972.jpg"),
+//   require("../../../assets/im3.jpg"),
+// ];
 
 // Icon mapping for different categories
 const CATEGORY_ICONS: Record<string, any> = {
@@ -115,6 +116,9 @@ const CATEGORY_GRADIENTS: Record<
 export default function Home() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+
+  const { data: carouselData = [] } = useCarousel();
+
   const { profile, refetch: refetchProfile } = useProfile();
   const [activeSlide, setActiveSlide] = useState(0);
   const scrollViewRef = useRef<ScrollView>(null);
@@ -387,7 +391,8 @@ export default function Home() {
             onScroll={handleScroll}
             scrollEventThrottle={16}
           >
-            {CAROUSEL_IMAGES.map((image, index) => (
+            {/* {CAROUSEL_IMAGES.map((image, index) => ( */}
+            {carouselData.map((item, index) => (
               <View
                 key={index}
                 style={{ width }}
@@ -405,13 +410,32 @@ export default function Home() {
                     borderColor: '#EFF6FF',
                   }}
                 >
-                  <Image
-                    source={image}
+                  {/* <Image
+                    // source={image}
+                    source={{
+                      uri:
+                        item.imageUrl ||
+                        `${S3_BASE_URL}/${item.image}`,
+                    }}
                     // Keep your dimensions
                     style={{ width: width - 48, height: 220 }}
                     // CHANGE THIS LINE:
                     resizeMode="contain"
-                  />
+                  /> */}
+                  {(item.imageUrl || item.image) && (
+                    <Image
+                      source={{
+                        uri:
+                          item.imageUrl ||
+                          `${S3_BASE_URL}/${item.image}`,
+                      }}
+                      style={{
+                        width: width - 48,
+                        height: 220,
+                      }}
+                      resizeMode="contain"
+                    />
+                  )}
                   {/* Elegant overlay */}
                   <LinearGradient
                     colors={["transparent", "rgba(30, 58, 138, 0.2)"]}
@@ -441,7 +465,8 @@ export default function Home() {
 
           {/* Luxurious Pagination Dots */}
           <View className="flex-row justify-center items-center mt-6">
-            {CAROUSEL_IMAGES.map((_, index) => (
+            {/* {CAROUSEL_IMAGES.map((_, index) => ( */}
+            {carouselData.map((_, index) => (
               <View
                 key={index}
                 style={{
