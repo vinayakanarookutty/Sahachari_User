@@ -15,7 +15,7 @@
     },
     "android": {
       "package": "com.corestoneinnovation.sahachariuser",
-      "versionCode": 26,
+      "versionCode": 27,
       "adaptiveIcon": {
         "foregroundImage": "./assets/sahachari.jpeg",
         "backgroundColor": "#ffffff"
