@@ -2,7 +2,7 @@
   "expo": {
     "name": "Sahachari",
     "slug": "customers",
-    "version": "1.0.23",
+    "version": "1.0.27",
     "orientation": "portrait",
     "icon": "./assets/sahachari.jpeg",
     "scheme": "customers",
@@ -11,20 +11,20 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.corestoneinnovation.sahachariuser",
-      "buildNumber": "23"
+      "buildNumber": "27"
     },
     "android": {
       "package": "com.corestoneinnovation.sahachariuser",
-      "versionCode": 23,
+      "versionCode": 27,
       "adaptiveIcon": {
         "foregroundImage": "./assets/sahachari.jpeg",
-        "backgroundColor": "#0A4FD6"
+        "backgroundColor": "#ffffff"
       }
     },
     "splash": {
       "image": "./assets/sahachari.jpeg",
       "resizeMode": "contain",
-      "backgroundColor": "#0A4FD6"
+      "backgroundColor": "#ffffff"
     },
     "web": {
       "bundler": "metro",
@@ -40,7 +40,7 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "d077b4c4-210f-4a09-b6b5-c61025918d4d"
+        "projectId": "77756b3c-c127-412b-a5aa-03472f872186"
       }
     }
   }
