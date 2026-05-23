@@ -256,13 +256,56 @@ export function OrderDetailsModal({
             </View>
 
             {/* TOTAL */}
-            <View className="mx-4 mt-4 mb-6 bg-blue-600 rounded-2xl p-6">
+            {/* <View className="mx-4 mt-4 mb-6 bg-blue-600 rounded-2xl p-6">
               <View className="flex-row items-center justify-between">
 
                 <View>
                   <Text className="text-blue-100 text-sm">
                     Total Amount
                   </Text>
+                  <Text className="text-white text-3xl font-bold mt-1">
+                    ₹{order.totalAmount?.toFixed(2)}
+                  </Text>
+                </View>
+
+                <View className="bg-white/20 p-3 rounded-full">
+                  <CreditCard size={24} color="white" />
+                </View>
+              </View>
+            </View> */}
+            {/* TOTAL SUMMARY */}
+            <View className="mx-4 mt-4 mb-6 bg-blue-600 rounded-2xl p-6">
+
+              {/* Items subtotal */}
+              <View className="flex-row justify-between items-center mb-3">
+                <Text className="text-blue-100 text-base">
+                  Items Subtotal
+                </Text>
+
+                <Text className="text-white font-bold text-lg">
+                  ₹{order.itemsSubtotal?.toFixed(2)}
+                </Text>
+              </View>
+
+              {/* Delivery charge */}
+              <View className="flex-row justify-between items-center mb-4">
+                <Text className="text-blue-100 text-base">
+                  Delivery Charge
+                </Text>
+
+                <Text className="text-white font-bold text-lg">
+                  ₹{order.deliveryCharge?.toFixed(2)}
+                </Text>
+              </View>
+
+              {/* Divider */}
+              <View className="border-t border-white/20 pt-4 flex-row items-center justify-between">
+
+                <View>
+                  <Text className="text-blue-100 text-sm">
+                    Total Amount
+                  </Text>
+
                   <Text className="text-white text-3xl font-bold mt-1">
                     ₹{order.totalAmount?.toFixed(2)}
                   </Text>

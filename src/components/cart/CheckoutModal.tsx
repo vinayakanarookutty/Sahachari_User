@@ -27,6 +27,8 @@ export function CheckoutModal({
   const [showPaymentDropdown, setShowPaymentDropdown] = useState(false);
   const [places, setPlaces] = useState<string[]>([]);
   const [showPlaceDropdown, setShowPlaceDropdown] = useState(false);
+  const [deliveryCharge, setDeliveryCharge] = useState(0);
+  const [placeDetails, setPlaceDetails] = useState<any[]>([]);
 
   interface UserProfile {
     _id: string;
@@ -128,6 +130,13 @@ export function CheckoutModal({
 
         setPlaces(availablePlaces);
 
+        setPlaceDetails(data?.places || []);
+        // set delivery charge from backend
+        // set first place charge
+        if (data?.places?.length > 0) {
+          setDeliveryCharge(data.places[0].charge || 0);
+        }
+
         // auto select first place
         if (availablePlaces.length > 0) {
           setAddress((prev: any) => ({
@@ -143,11 +152,21 @@ export function CheckoutModal({
     fetchPlaces();
   }, [address.zipCode]);
 
+  const effectiveDeliveryCharge =
+    address.paymentMethod === 'SELF_PICKUP'
+      ? 0
+      : deliveryCharge;
+
+  const itemsSubtotal = total;
+
+  const finalTotal =
+    itemsSubtotal + effectiveDeliveryCharge;
+
   return (
     <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
       <View className="flex-1 bg-black/50 justify-end">
-        <View className="bg-white rounded-t-3xl max-h-[85%]">
-
+        {/* <View className="bg-white rounded-t-3xl max-h-[85%]"> */}
+        <View className="bg-white rounded-t-3xl flex-1 mt-16">
           {/* Header */}
           <View className="flex-row items-center justify-between px-6 py-4 border-b border-gray-200">
             <Text className="text-2xl font-bold text-gray-800">
@@ -175,7 +194,11 @@ export function CheckoutModal({
                 />
               )}
 
-              <ScrollView className="px-6 py-4">
+              <ScrollView
+                className="px-6 py-4"
+                // contentContainerStyle={{ paddingBottom: 10 }}
+                showsVerticalScrollIndicator={false}
+              >
 
                 {/* Address Fields */}
                 {[
@@ -240,6 +263,15 @@ export function CheckoutModal({
                           key={place}
                           onPress={() => {
                             updateField("place", place);
+
+                            const selectedPlace = placeDetails.find(
+                              (p: any) => p.place === place
+                            );
+
+                            setDeliveryCharge(
+                              selectedPlace?.charge || 0
+                            );
+
                             setShowPlaceDropdown(false);
                           }}
                           className="px-4 py-3 border-b border-gray-100"
@@ -331,7 +363,7 @@ export function CheckoutModal({
                 )}
 
                 {/* Summary */}
-                <View className="bg-blue-50 rounded-xl p-4 mb-6">
+                {/* <View className="bg-blue-50 rounded-xl p-4 mb-6">
                   <View className="flex-row justify-between items-center">
                     <Text className="text-gray-600">
                       {itemSCount} {itemSCount === 1 ? 'item' : 'items'}
@@ -340,6 +372,45 @@ export function CheckoutModal({
                       ₹{total.toFixed(2)}
                     </Text>
                   </View>
+                </View> */}
+                {/* Summary */}
+                <View className="bg-blue-50 rounded-xl p-4 mb-6">
+
+                  {/* Items subtotal */}
+                  <View className="flex-row justify-between items-center mb-2">
+                    <Text className="text-gray-600">
+                      Items ({itemSCount})
+                    </Text>
+
+                    <Text className="text-gray-800 font-semibold">
+                      ₹{itemsSubtotal.toFixed(2)}
+                    </Text>
+                  </View>
+
+                  {/* Delivery charge */}
+                  {!isBookable && (
+                    <View className="flex-row justify-between items-center mb-2">
+                      <Text className="text-gray-600">
+                        Delivery Charge
+                      </Text>
+
+                      <Text className="text-gray-800 font-semibold">
+                        ₹{effectiveDeliveryCharge.toFixed(2)}
+                      </Text>
+                    </View>
+                  )}
+
+                  {/* Final total */}
+                  <View className="border-t border-blue-200 pt-3 mt-2 flex-row justify-between items-center">
+                    <Text className="text-lg font-bold text-gray-800">
+                      Total
+                    </Text>
+
+                    <Text className="text-2xl font-bold text-blue-600">
+                      ₹{finalTotal.toFixed(2)}
+                    </Text>
+                  </View>
+
                 </View>
 
                 {/* Place Order */}
@@ -360,7 +431,8 @@ export function CheckoutModal({
                     });
                   }}
                   disabled={isPending}
-                  className="bg-blue-600 py-4 rounded-xl flex-row items-center justify-center active:bg-blue-700 mb-6"
+                  // className="bg-blue-600 py-4 rounded-xl flex-row items-center justify-center active:bg-blue-700 mb-6"
+                  className="bg-blue-600 py-4 rounded-xl flex-row items-center justify-center active:bg-blue-700 mb-10"
                 >
                   {isPending ? (
                     <ActivityIndicator color="white" />
