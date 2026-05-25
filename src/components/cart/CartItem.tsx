@@ -14,11 +14,30 @@ export function CartItem({ item, isUpdating, onQuantityChange, onRemove, parseNu
     : undefined;
 
   const itemQuantity = parseNumber(item.quantity ?? item.qty ?? 0);
-  const itemPrice = parseNumber(item.productId?.price ?? item.price ?? 0);
+  // const itemPrice = parseNumber(item.productId?.price ?? item.price ?? 0);
+
   const availableQuantity = parseNumber(item.productId?.quantity ?? 0);
   const disableMinus = isUpdating || itemQuantity <= 1;
   const disablePlus = isUpdating || itemQuantity >= availableQuantity;
+  const originalPrice = parseNumber(
+    item.productId?.price ?? item.price ?? 0
+  );
 
+  const activeOffer = item.productId?.offers?.find(
+    (offer: any) => offer.isActive
+  );
+
+  let itemPrice = originalPrice;
+
+  if (activeOffer?.type === "PERCENTAGE") {
+    itemPrice =
+      originalPrice -
+      (originalPrice * activeOffer.value) / 100;
+  }
+
+  if (activeOffer?.type === "FIXED") {
+    itemPrice = originalPrice - activeOffer.value;
+  }
   return (
     <View className="bg-white rounded-2xl mb-4 shadow-sm overflow-hidden">
       {/* MAIN CONTENT */}
@@ -34,9 +53,20 @@ export function CartItem({ item, isUpdating, onQuantityChange, onRemove, parseNu
             <Text className="font-semibold text-gray-800 text-base" numberOfLines={2}>
               {item.productId?.name}
             </Text>
-            <Text className="text-blue-600 font-bold text-lg mt-1">
+            {/* <Text className="text-blue-600 font-bold text-lg mt-1">
               ₹{itemPrice.toFixed(2)}
-            </Text>
+            </Text> */}
+            <View className="flex-row items-center mt-1">
+              {itemPrice !== originalPrice && (
+                <Text className="text-gray-400 line-through mr-2">
+                  ₹{originalPrice.toFixed(2)}
+                </Text>
+              )}
+
+              <Text className="text-blue-600 font-bold text-lg">
+                ₹{itemPrice.toFixed(2)}
+              </Text>
+            </View>
           </View>
           {/* CONTROLS */}
           <View className="flex-row items-center mt-3">
@@ -44,21 +74,21 @@ export function CartItem({ item, isUpdating, onQuantityChange, onRemove, parseNu
             <View className="flex-row items-center bg-gray-100 rounded-lg overflow-hidden">
               {/* MINUS */}
               <Pressable onPress={() =>
-                  onQuantityChange(
-                    item._id,
-                    itemQuantity,
-                    -1,
-                    availableQuantity
-                  )
-                }
+                onQuantityChange(
+                  item._id,
+                  itemQuantity,
+                  -1,
+                  availableQuantity
+                )
+              }
                 disabled={disableMinus}
                 className="p-2 active:bg-gray-200"
               >
-                <Minus size={18} color={ disableMinus ? "#9CA3AF" : "#1877F2" } strokeWidth={2.5} />
+                <Minus size={18} color={disableMinus ? "#9CA3AF" : "#1877F2"} strokeWidth={2.5} />
               </Pressable>
               {/* QUANTITY */}
               <View className="px-4 py-2 bg-white min-w-[50px] items-center justify-center">
-                {isUpdating ? ( <ActivityIndicator size="small" color="#1877F2"/> ) : (
+                {isUpdating ? (<ActivityIndicator size="small" color="#1877F2" />) : (
                   <Text className="font-semibold text-gray-800">
                     {itemQuantity}
                   </Text>
@@ -66,17 +96,17 @@ export function CartItem({ item, isUpdating, onQuantityChange, onRemove, parseNu
               </View>
               {/* PLUS */}
               <Pressable onPress={() =>
-                  onQuantityChange(
-                    item._id,
-                    itemQuantity,
-                    1,
-                    availableQuantity
-                  )
-                }
+                onQuantityChange(
+                  item._id,
+                  itemQuantity,
+                  1,
+                  availableQuantity
+                )
+              }
                 disabled={disablePlus}
                 className="p-2 active:bg-gray-200"
               >
-                <Plus size={18} color={ disablePlus ? "#9CA3AF" : "#1877F2" } strokeWidth={2.5} />
+                <Plus size={18} color={disablePlus ? "#9CA3AF" : "#1877F2"} strokeWidth={2.5} />
               </Pressable>
             </View>
             {/* REMOVE */}

@@ -78,10 +78,42 @@ export function useCart() {
     return Number.isFinite(cleaned) ? cleaned : 0;
   };
 
+  const getDiscountedPrice = (product: any) => {
+    const originalPrice = parseNumber(product?.price ?? 0);
+
+    const activeOffer = product?.offers?.find(
+      (offer: any) => offer.isActive
+    );
+
+    if (!activeOffer) return originalPrice;
+
+    if (activeOffer.type === "PERCENTAGE") {
+      return (
+        originalPrice -
+        (originalPrice * activeOffer.value) / 100
+      );
+    }
+
+    if (activeOffer.type === "FIXED") {
+      return originalPrice - activeOffer.value;
+    }
+
+    return originalPrice;
+  };
+
+  // const total =
+  //   cart?.items?.reduce((sum: number, item: any) => {
+  //     const price = parseNumber(item.productId?.price ?? item.price ?? 0);
+  //     const qty = parseNumber(item.quantity ?? item.qty ?? 0);
+  //     return sum + price * qty;
+  //   }, 0) || 0;
+
   const total =
     cart?.items?.reduce((sum: number, item: any) => {
-      const price = parseNumber(item.productId?.price ?? item.price ?? 0);
+      const price = getDiscountedPrice(item.productId);
+
       const qty = parseNumber(item.quantity ?? item.qty ?? 0);
+
       return sum + price * qty;
     }, 0) || 0;
 
