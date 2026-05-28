@@ -4,6 +4,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import {
   ArrowLeft,
+  BanIcon,
   Camera,
   ChevronRight,
   HelpCircle,
@@ -516,6 +517,20 @@ export default function Settings() {
               </View>
               <Text className="text-gray-900 font-semibold flex-1">
                 Settings
+              </Text>
+              <ChevronRight size={18} color="#9CA3AF" strokeWidth={2} />
+            </View>
+          </Pressable>
+
+          <Pressable
+            onPress={() => router.push("/settings/complaints")}
+            className="bg-white rounded-2xl shadow-sm overflow-hidden active:opacity-80">
+            <View className="flex-row items-center p-4">
+              <View className="w-10 h-10 rounded-full bg-blue-50 items-center justify-center mr-3">
+                <BanIcon size={20} color="#2563EB" strokeWidth={2} />
+              </View>
+              <Text className="text-gray-900 font-semibold flex-1">
+                Complaints
               </Text>
               <ChevronRight size={18} color="#9CA3AF" strokeWidth={2} />
             </View>

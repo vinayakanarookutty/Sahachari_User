@@ -1,0 +1,299 @@
+import { useAuthStore } from "@/store/auth.store";
+import { useRouter } from "expo-router";
+import { ArrowLeft } from "lucide-react-native";
+import { useEffect, useState } from "react";
+import {
+    ActivityIndicator,
+    Alert,
+    Pressable,
+    SafeAreaView,
+    ScrollView,
+    Text,
+    TextInput,
+    View,
+} from "react-native";
+
+const API_BASE_URL =
+  process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000";
+
+export default function ComplaintsScreen() {
+  const router = useRouter();
+
+  const [category, setCategory] = useState("OTHER");
+  const [subject, setSubject] = useState("");
+  const [description, setDescription] = useState("");
+
+  const [loading, setLoading] = useState(false);
+  const [complaints, setComplaints] = useState<any[]>([]);
+  const [loadingComplaints, setLoadingComplaints] =
+    useState(true);
+
+  const categories = [
+    "PAYMENT",
+    "DELIVERY",
+    "PRODUCT",
+    "STORE",
+    "REFUND",
+    "OTHER",
+  ];
+
+  const loadComplaints = async () => {
+    try {
+      setLoadingComplaints(true);
+
+      const token =
+        useAuthStore.getState().token;
+
+      const response = await fetch(
+        `${API_BASE_URL}/complaints/my`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data.message ||
+            "Failed to load complaints"
+        );
+      }
+
+      setComplaints(data);
+    } catch (error: any) {
+      Alert.alert(
+        "Error",
+        error.message ||
+          "Failed to load complaints"
+      );
+    } finally {
+      setLoadingComplaints(false);
+    }
+  };
+
+  useEffect(() => {
+    loadComplaints();
+  }, []);
+
+  const submitComplaint = async () => {
+    try {
+      if (!subject.trim()) {
+        Alert.alert(
+          "Validation",
+          "Please enter subject"
+        );
+        return;
+      }
+
+      if (!description.trim()) {
+        Alert.alert(
+          "Validation",
+          "Please enter description"
+        );
+        return;
+      }
+
+      setLoading(true);
+
+      const token =
+        useAuthStore.getState().token;
+
+      const response = await fetch(
+        `${API_BASE_URL}/complaints`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type":
+              "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            category,
+            subject,
+            description,
+          }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data.message ||
+            "Failed to create complaint"
+        );
+      }
+
+      Alert.alert(
+        "Success",
+        "Complaint submitted successfully"
+      );
+
+      setSubject("");
+      setDescription("");
+      setCategory("OTHER");
+
+      loadComplaints();
+    } catch (error: any) {
+      Alert.alert(
+        "Error",
+        error.message ||
+          "Failed to submit complaint"
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <SafeAreaView className="flex-1 bg-gray-50">
+      <ScrollView
+        className="flex-1"
+        contentContainerStyle={{
+          padding: 20,
+        }}
+      >
+        <View className="flex-row items-center mb-6">
+          <Pressable
+            onPress={() => router.back()}
+          >
+            <ArrowLeft size={24} />
+          </Pressable>
+
+          <Text className="text-2xl font-bold ml-4">
+            Complaints
+          </Text>
+        </View>
+
+        <View className="bg-white rounded-2xl p-4 mb-6">
+          <Text className="font-bold text-lg mb-4">
+            Submit Complaint
+          </Text>
+
+          <Text className="font-semibold mb-2">
+            Category
+          </Text>
+
+          <View className="flex-row flex-wrap mb-4">
+            {categories.map((item) => (
+              <Pressable
+                key={item}
+                onPress={() =>
+                  setCategory(item)
+                }
+                className={`px-4 py-2 rounded-full mr-2 mb-2 ${
+                  category === item
+                    ? "bg-blue-600"
+                    : "bg-gray-200"
+                }`}
+              >
+                <Text
+                  className={
+                    category === item
+                      ? "text-white"
+                      : "text-black"
+                  }
+                >
+                  {item}
+                </Text>
+              </Pressable>
+            ))}
+          </View>
+
+          <Text className="font-semibold mb-2">
+            Subject
+          </Text>
+
+          <TextInput
+            value={subject}
+            onChangeText={setSubject}
+            placeholder="Complaint subject"
+            className="border border-gray-300 rounded-xl p-4 mb-4"
+          />
+
+          <Text className="font-semibold mb-2">
+            Description
+          </Text>
+
+          <TextInput
+            value={description}
+            onChangeText={setDescription}
+            multiline
+            numberOfLines={5}
+            textAlignVertical="top"
+            placeholder="Describe your issue"
+            className="border border-gray-300 rounded-xl p-4 min-h-[140px] mb-4"
+          />
+
+          <Pressable
+            onPress={submitComplaint}
+            disabled={loading}
+            className="bg-blue-600 rounded-xl py-4"
+          >
+            {loading ? (
+              <ActivityIndicator
+                color="#fff"
+              />
+            ) : (
+              <Text className="text-center text-white font-bold">
+                Submit Complaint
+              </Text>
+            )}
+          </Pressable>
+        </View>
+
+        <View className="bg-white rounded-2xl p-4">
+          <Text className="font-bold text-lg mb-4">
+            My Complaints
+          </Text>
+
+          {loadingComplaints ? (
+            <ActivityIndicator />
+          ) : complaints.length === 0 ? (
+            <Text className="text-gray-500">
+              No complaints found
+            </Text>
+          ) : (
+            complaints.map((item) => (
+              <View
+                key={item._id}
+                className="border border-gray-200 rounded-xl p-4 mb-3"
+              >
+                <Text className="font-bold">
+                  {item.subject}
+                </Text>
+
+                <Text className="text-sm text-gray-500 mt-1">
+                  {item.category}
+                </Text>
+
+                <Text className="mt-2">
+                  {item.description}
+                </Text>
+
+                <Text className="mt-3 font-semibold text-blue-600">
+                  Status: {item.status}
+                </Text>
+
+                {item.adminReply ? (
+                  <View className="mt-3 bg-green-50 p-3 rounded-lg">
+                    <Text className="font-semibold text-green-700">
+                      Admin Reply
+                    </Text>
+
+                    <Text className="text-green-700 mt-1">
+                      {item.adminReply}
+                    </Text>
+                  </View>
+                ) : null}
+              </View>
+            ))
+          )}
+        </View>
+      </ScrollView>
+    </SafeAreaView>
+  );
+}
