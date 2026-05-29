@@ -1,93 +1,119 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
+
 import { useAuthStore } from "../store/auth.store";
 
 const API_BASE_URL =
-  process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000";
+  process.env.EXPO_PUBLIC_API_URL ||
+  "http://localhost:3000";
 
 export function usePolicyAgreement() {
   const queryClient = useQueryClient();
 
-  const token = useAuthStore.getState().token;
+  const token =
+    useAuthStore.getState().token;
 
-  // ----------------------------
-  // 1. ACTIVE POLICY
-  // ----------------------------
+  // Active policy
   const activePolicyQuery = useQuery({
     queryKey: ["policy-active"],
+    enabled: !!token,
+
     queryFn: async () => {
-      const res = await fetch(`${API_BASE_URL}/policies/active`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await fetch(
+        `${API_BASE_URL}/policies/active`
+      );
 
-      if (!res.ok) throw new Error("Failed to fetch active policy");
+      if (!response.ok) {
+        throw new Error(
+          "Failed to load active policy"
+        );
+      }
 
-      return res.json();
+      return response.json();
     },
   });
 
-  // ----------------------------
-  // 2. USER POLICY STATUS
-  // ----------------------------
+  // User acceptance status
   const statusQuery = useQuery({
     queryKey: ["policy-status"],
+    enabled: !!token,
+
     queryFn: async () => {
-      const res = await fetch(`${API_BASE_URL}/policies/status`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await fetch(
+        `${API_BASE_URL}/policies/status`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
-      if (!res.ok) throw new Error("Failed to fetch policy status");
+      if (!response.ok) {
+        throw new Error(
+          "Failed to load policy status"
+        );
+      }
 
-      return res.json();
+      return response.json();
     },
   });
 
-  // ----------------------------
-  // 3. ACCEPT POLICY
-  // ----------------------------
+  // Accept policy
   const acceptMutation = useMutation({
-    mutationFn: async (version: string) => {
-      const res = await fetch(`${API_BASE_URL}/policies/accept`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ version }),
-      });
+    mutationFn: async () => {
+      const response = await fetch(
+        `${API_BASE_URL}/policies/accept`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
-      if (!res.ok) throw new Error("Failed to accept policy");
+      if (!response.ok) {
+        throw new Error(
+          "Failed to accept policy"
+        );
+      }
 
-      return res.json();
+      return response.json();
     },
 
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["policy-status"] });
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({
+        queryKey: ["policy-status"],
+      });
     },
   });
 
-  const policy = activePolicyQuery.data;
+  const policy =
+    activePolicyQuery.data;
+
+  const accepted =
+    statusQuery.data?.accepted;
 
   const showPolicy =
-    policy &&
-    statusQuery.data &&
-    !statusQuery.data.accepted;
+    !!policy &&
+    accepted === false;
 
   return {
     policy,
+
     showPolicy,
 
-    status: statusQuery.data,
+    isInitialLoading:
+      activePolicyQuery.isLoading ||
+      statusQuery.isLoading,
 
-    isLoading:
-      activePolicyQuery.isLoading || statusQuery.isLoading,
+    isAccepting:
+      acceptMutation.isPending,
 
     acceptPolicy: () => {
-      if (!policy?.version) return;
-      acceptMutation.mutate(policy.version);
+      acceptMutation.mutate();
     },
   };
 }

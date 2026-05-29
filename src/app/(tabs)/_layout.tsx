@@ -11,6 +11,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { useAuthStore } from "../../store/auth.store";
 import { Role } from "../../types/user";
+import { PolicyGuard } from "../../components/policy/PolicyGuard";
 
 export default function TabsLayout() {
   const { token, user, hydrated } = useAuthStore();
@@ -30,48 +31,50 @@ export default function TabsLayout() {
 
   return (
     <View style={{ flex: 1 }}>
-      <Tabs
-        screenOptions={{
-          headerShown: false,
-          headerLeft: () => null,
-          tabBarShowLabel: false,
-          tabBarStyle: {
-            height: 64 + Math.min(insets.bottom, 30), // 👈 closer to nav bar
-            paddingBottom: Math.min(insets.bottom, 30),
-            paddingTop: 6,
-            borderTopWidth: 1,
-            borderTopColor: "#e5e7eb",
-            backgroundColor: "#fff",
-            elevation: 8,
-          },
-        }}
-      >
-        {TABS.map(({ name, label, Icon }) => (
-          <Tabs.Screen
-            key={name}
-            name={name}
-            options={{
-              tabBarIcon: ({ focused }) => (
-                <View className="items-center justify-center w-[64px] mt-2">
-                  <Icon
-                    size={24}
-                    strokeWidth={focused ? 2.6 : 2}
-                    color={focused ? "#2563eb" : "#6b7280"}
-                  />
-                  <Text
-                    numberOfLines={1}
-                    ellipsizeMode="tail"
-                    className={`text-[11px] mt-1 ${focused ? "text-blue-600 font-semibold" : "text-gray-500"
-                      }`}
-                  >
-                    {label}
-                  </Text>
-                </View>
-              ),
-            }}
-          />
-        ))}
-      </Tabs>
+      <PolicyGuard>
+        <Tabs
+          screenOptions={{
+            headerShown: false,
+            headerLeft: () => null,
+            tabBarShowLabel: false,
+            tabBarStyle: {
+              height: 64 + Math.min(insets.bottom, 30), // 👈 closer to nav bar
+              paddingBottom: Math.min(insets.bottom, 30),
+              paddingTop: 6,
+              borderTopWidth: 1,
+              borderTopColor: "#e5e7eb",
+              backgroundColor: "#fff",
+              elevation: 8,
+            },
+          }}
+        >
+          {TABS.map(({ name, label, Icon }) => (
+            <Tabs.Screen
+              key={name}
+              name={name}
+              options={{
+                tabBarIcon: ({ focused }) => (
+                  <View className="items-center justify-center w-[64px] mt-2">
+                    <Icon
+                      size={24}
+                      strokeWidth={focused ? 2.6 : 2}
+                      color={focused ? "#2563eb" : "#6b7280"}
+                    />
+                    <Text
+                      numberOfLines={1}
+                      ellipsizeMode="tail"
+                      className={`text-[11px] mt-1 ${focused ? "text-blue-600 font-semibold" : "text-gray-500"
+                        }`}
+                    >
+                      {label}
+                    </Text>
+                  </View>
+                ),
+              }}
+            />
+          ))}
+        </Tabs>
+      </PolicyGuard>
     </View>
   );
 }
