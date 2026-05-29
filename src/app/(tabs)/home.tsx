@@ -8,11 +8,11 @@ import {
   Leaf,
   Package,
   Phone,
+  Plug,
   ShoppingCart,
   User,
   Utensils,
   Wrench,
-  Plug,
 } from "lucide-react-native";
 import { useMemo, useRef, useState } from "react";
 import {
@@ -22,15 +22,17 @@ import {
   Image,
   Linking,
   Pressable,
+  RefreshControl,
   ScrollView,
   Text,
   View,
-  RefreshControl,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { PolicyAgreementModal } from "../../components/policy/PolicyAgreementModal";
+import { useCarousel } from "../../hooks/useCarousel";
+import { usePolicyAgreement } from "../../hooks/usePolicy";
 import { useProducts } from "../../hooks/useProducts";
 import { useProfile } from "../../hooks/useProfile";
-import { useCarousel } from "../../hooks/useCarousel";
 
 const { width } = Dimensions.get("window");
 // const CAROUSEL_IMAGES = [
@@ -128,6 +130,14 @@ export default function Home() {
     searchQuery ? { search: searchQuery } : undefined,
   );
   const [refreshing, setRefreshing] = useState(false);
+
+  const {
+    policy,
+    showPolicy,
+    acceptPolicy,
+    isLoading: policyLoading,
+  } = usePolicyAgreement();
+
 
   const onRefresh = async () => {
     try {
@@ -672,6 +682,13 @@ export default function Home() {
 
         </View>
       </ScrollView>
+      <PolicyAgreementModal
+        visible={showPolicy}
+        title={policy?.title || ""}
+        content={policy?.content || ""}
+        loading={policyLoading}
+        onAccept={acceptPolicy}
+      />
     </View>
   );
 }
