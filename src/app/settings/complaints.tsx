@@ -1,23 +1,44 @@
 import { useAuthStore } from "@/store/auth.store";
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { ArrowLeft } from "lucide-react-native";
 import { useEffect, useState } from "react";
 import {
-    ActivityIndicator,
-    Alert,
-    Pressable,
-    SafeAreaView,
-    ScrollView,
-    Text,
-    TextInput,
-    View,
+  ActivityIndicator,
+  Alert,
+  Platform,
+  Pressable,
+  RefreshControl,
+  SafeAreaView,
+  ScrollView,
+  Text,
+  TextInput,
+  View,
 } from "react-native";
 
 const API_BASE_URL =
   process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000";
 
+const showAlert = (
+  title: string,
+  message: string,
+  onOk?: () => void
+) => {
+  if (Platform.OS === "web") {
+    window.alert(`${title}\n\n${message}`);
+    onOk?.();
+  } else {
+    Alert.alert(title, message, [
+      {
+        text: "OK",
+        onPress: onOk,
+      },
+    ]);
+  }
+};
+
 export default function ComplaintsScreen() {
   const router = useRouter();
+  const params = useLocalSearchParams();
 
   const [category, setCategory] = useState("OTHER");
   const [subject, setSubject] = useState("");
@@ -25,8 +46,8 @@ export default function ComplaintsScreen() {
 
   const [loading, setLoading] = useState(false);
   const [complaints, setComplaints] = useState<any[]>([]);
-  const [loadingComplaints, setLoadingComplaints] =
-    useState(true);
+  const [loadingComplaints, setLoadingComplaints] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
 
   const categories = [
     "PAYMENT",
@@ -36,6 +57,26 @@ export default function ComplaintsScreen() {
     "REFUND",
     "OTHER",
   ];
+
+  const orderId = params.orderId as string;
+  const complaintCategory = params.category as string;
+  const isOrderCancellation =
+    complaintCategory === "ORDER_CANCELLATION" &&
+    !!orderId;
+
+  useEffect(() => {
+    if (isOrderCancellation) {
+      setCategory("ORDER_CANCELLATION");
+
+      setSubject(
+        `Cancellation Request for Order #${orderId}`
+      );
+
+      setDescription(
+        "Reason for cancellation: "
+      );
+    }
+  }, []);
 
   const loadComplaints = async () => {
     try {
@@ -58,19 +99,27 @@ export default function ComplaintsScreen() {
       if (!response.ok) {
         throw new Error(
           data.message ||
-            "Failed to load complaints"
+          "Failed to load complaints"
         );
       }
 
       setComplaints(data);
     } catch (error: any) {
-      Alert.alert(
+      showAlert(
         "Error",
-        error.message ||
-          "Failed to load complaints"
+        error.message || "Failed to load complaints"
       );
     } finally {
       setLoadingComplaints(false);
+    }
+  };
+
+  const onRefresh = async () => {
+    try {
+      setRefreshing(true);
+      await loadComplaints();
+    } finally {
+      setRefreshing(false);
     }
   };
 
@@ -81,15 +130,15 @@ export default function ComplaintsScreen() {
   const submitComplaint = async () => {
     try {
       if (!subject.trim()) {
-        Alert.alert(
+        showAlert(
           "Validation",
           "Please enter subject"
-        );
+        );;
         return;
       }
 
       if (!description.trim()) {
-        Alert.alert(
+        showAlert(
           "Validation",
           "Please enter description"
         );
@@ -114,6 +163,9 @@ export default function ComplaintsScreen() {
             category,
             subject,
             description,
+            orderId: isOrderCancellation
+              ? orderId
+              : undefined,
           }),
         }
       );
@@ -123,25 +175,32 @@ export default function ComplaintsScreen() {
       if (!response.ok) {
         throw new Error(
           data.message ||
-            "Failed to create complaint"
+          "Failed to create complaint"
         );
       }
 
-      Alert.alert(
+      showAlert(
         "Success",
-        "Complaint submitted successfully"
+        isOrderCancellation
+          ? "Cancellation request submitted successfully"
+          : "Complaint submitted successfully",
+        () => {
+          if (isOrderCancellation) {
+            router.replace("/orders");
+          } else {
+            setSubject("");
+            setDescription("");
+            setCategory("OTHER");
+            // loadComplaints();
+            onRefresh();
+          }
+        }
       );
 
-      setSubject("");
-      setDescription("");
-      setCategory("OTHER");
-
-      loadComplaints();
     } catch (error: any) {
-      Alert.alert(
+      showAlert(
         "Error",
-        error.message ||
-          "Failed to submit complaint"
+        error.message || "Failed to submit complaint"
       );
     } finally {
       setLoading(false);
@@ -152,13 +211,24 @@ export default function ComplaintsScreen() {
     <SafeAreaView className="flex-1 bg-gray-50">
       <ScrollView
         className="flex-1"
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+          />
+        }
         contentContainerStyle={{
           padding: 20,
         }}
       >
         <View className="flex-row items-center mb-6">
           <Pressable
-            onPress={() => router.back()}
+            // onPress={() => router.back()}
+            onPress={() =>
+              isOrderCancellation
+                ? router.replace("/orders")
+                : router.replace("/settings/settings")
+            }
           >
             <ArrowLeft size={24} />
           </Pressable>
@@ -167,42 +237,61 @@ export default function ComplaintsScreen() {
             Complaints
           </Text>
         </View>
+        {/* {category === "ORDER_CANCELLATION" && orderId && ( */}
+        {isOrderCancellation && (
+          <View className="bg-orange-50 border border-orange-200 rounded-2xl p-4 mb-4">
+            <Text className="text-orange-700 font-bold text-lg">
+              Order Cancellation Request
+            </Text>
 
-        <View className="bg-white rounded-2xl p-4 mb-6">
-          <Text className="font-bold text-lg mb-4">
-            Submit Complaint
-          </Text>
+            <Text className="text-orange-600 mt-1">
+              Order ID: {orderId}
+            </Text>
 
-          <Text className="font-semibold mb-2">
-            Category
-          </Text>
-
-          <View className="flex-row flex-wrap mb-4">
-            {categories.map((item) => (
-              <Pressable
-                key={item}
-                onPress={() =>
-                  setCategory(item)
-                }
-                className={`px-4 py-2 rounded-full mr-2 mb-2 ${
-                  category === item
-                    ? "bg-blue-600"
-                    : "bg-gray-200"
-                }`}
-              >
-                <Text
-                  className={
-                    category === item
-                      ? "text-white"
-                      : "text-black"
-                  }
-                >
-                  {item}
-                </Text>
-              </Pressable>
-            ))}
+            <Text className="text-orange-500 mt-2">
+              Please tell us why you want to cancel this order.
+              An admin will review your request.
+            </Text>
           </View>
+        )}
+        <View className="bg-white rounded-2xl p-4 mb-6">
+          <Text className="text-center text-white font-bold">
+            {category === "ORDER_CANCELLATION"
+              ? "Submit Cancellation Request"
+              : "Submit Complaint"}
+          </Text>
 
+          {/* {category !== "ORDER_CANCELLATION" && ( */}
+          {!isOrderCancellation && (
+            <>
+              <Text className="font-semibold mb-2">
+                Category
+              </Text>
+
+              <View className="flex-row flex-wrap mb-4">
+                {categories.map((item) => (
+                  <Pressable
+                    key={item}
+                    onPress={() => setCategory(item)}
+                    className={`px-4 py-2 rounded-full mr-2 mb-2 ${category === item
+                      ? "bg-blue-600"
+                      : "bg-gray-200"
+                      }`}
+                  >
+                    <Text
+                      className={
+                        category === item
+                          ? "text-white"
+                          : "text-black"
+                      }
+                    >
+                      {item}
+                    </Text>
+                  </Pressable>
+                ))}
+              </View>
+            </>
+          )}
           <Text className="font-semibold mb-2">
             Subject
           </Text>
@@ -224,7 +313,11 @@ export default function ComplaintsScreen() {
             multiline
             numberOfLines={5}
             textAlignVertical="top"
-            placeholder="Describe your issue"
+            placeholder={
+              isOrderCancellation
+                ? "Please tell us why you want to cancel this order"
+                : "Describe your issue"
+            }
             className="border border-gray-300 rounded-xl p-4 min-h-[140px] mb-4"
           />
 

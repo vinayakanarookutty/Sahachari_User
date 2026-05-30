@@ -18,8 +18,9 @@ import {
   View,
 } from "react-native";
 
-import { SafeAreaView } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
+import { useRouter } from "expo-router";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { getStatusColor } from "./OrderCard";
 
 const getStatusEmoji = (status: string) => {
@@ -54,6 +55,7 @@ export function OrderDetailsModal({
   onCancel,
   isCancelling,
 }: any) {
+  const router = useRouter();
   return (
     <Modal
       visible={visible}
@@ -321,7 +323,16 @@ export function OrderDetailsModal({
             {order.status?.toUpperCase() === "PLACED" && (
               <View className="px-4 pb-6">
                 <Pressable
-                  onPress={() => onCancel(order._id)}
+                  // onPress={() => onCancel(order._id)}
+                  onPress={() =>
+                    router.push({
+                      pathname: "/settings/complaints",
+                      params: {
+                        orderId: order._id,
+                        category: "ORDER_CANCELLATION",
+                      },
+                    })
+                  }
                   disabled={isCancelling}
                   className="rounded-2xl items-center justify-center"
                   style={{
@@ -343,6 +354,6 @@ export function OrderDetailsModal({
           </ScrollView>
         )}
       </SafeAreaView>
-    </Modal>
+    </Modal >
   );
 }
