@@ -1,28 +1,26 @@
 // /home/user/Desktop/Sahachari-Customer/src/app/(auth)/login.tsx
 
+import { useLogin } from "@/hooks/useAuth";
+import { useAuthStore } from "@/store/auth.store";
 import { router } from "expo-router";
-import { useState } from "react";
+import { Eye, EyeOff } from "lucide-react-native";
+import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
-  KeyboardAvoidingView,
-  Platform,
+  Image,
   Pressable,
-  ScrollView,
   Text,
   TextInput,
   TouchableOpacity,
-  View,
-  Image,
+  View
 } from "react-native";
-import { useEffect } from "react";
-import { useAuthStore } from "@/store/auth.store";
-import { useLogin } from "@/hooks/useAuth";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
-
+  const [showPassword, setShowPassword] = useState(false);
 
   const loginMutation = useLogin();
   const isLoading = loginMutation.isPending;
@@ -58,81 +56,119 @@ export default function Login() {
 
   return (
     <View className="flex-1 bg-white">
-      <KeyboardAvoidingView
+      {/* <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
-        className="flex-1"
+        className="flex-1" 
+      >      
+      <ScrollView
+        contentContainerStyle={{ flexGrow: 1 }}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+      > */}
+      <KeyboardAwareScrollView
+        enableOnAndroid
+        extraScrollHeight={40}
+        keyboardShouldPersistTaps="handled"
+        contentContainerStyle={{ flexGrow: 1 }}
+        showsVerticalScrollIndicator={false}
       >
-        <ScrollView
-          contentContainerStyle={{ flexGrow: 1 }}
-          showsVerticalScrollIndicator={false}
-          keyboardShouldPersistTaps="handled"
-        >
-          <View className="flex-1 justify-center px-6 py-8">
-            {/* Premium Header */}
-            <View className="items-center mb-12">
-              {/* logo */}
-              <Image
-                source={require("../../../assets/sahachari.jpeg")}
-                style={{ width: 100, height: 100 }}
-                resizeMode="contain"
+        <View className="flex-1 justify-center px-6 py-8">
+          {/* Premium Header */}
+          <View className="items-center mb-12">
+            {/* logo */}
+            <Image
+              source={require("../../../assets/sahachari.jpeg")}
+              style={{ width: 100, height: 100 }}
+              resizeMode="contain"
+            />
+            {/* Accent Line */}
+            <View className="w-16 h-1 bg-blue-600 mb-10 rounded-full" />
+
+            {/* Title */}
+            <Text className="text-[42px] font-bold text-gray-900 mb-3 tracking-tight">
+              Welcome Back
+            </Text>
+
+            {/* Subtitle */}
+            <Text className="text-base text-gray-500 text-center font-normal">
+              Sign in to access your account
+            </Text>
+          </View>
+
+          {/* Form Section */}
+          <View className="mb-6">
+            {/* Email Input */}
+            <View className="mb-4">
+              <Text className="text-sm font-semibold text-gray-700 mb-2 ml-1">
+                Email
+              </Text>
+              <TextInput
+                className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-4 text-base text-gray-900"
+                placeholder="Enter your email"
+                placeholderTextColor="#9CA3AF"
+                autoCapitalize="none"
+                keyboardType="email-address"
+                value={email}
+                onChangeText={(v: string) => {
+                  setEmail(v);
+                  setErrorMsg(null);
+                }}
               />
-              {/* Accent Line */}
-              <View className="w-16 h-1 bg-blue-600 mb-10 rounded-full" />
-
-              {/* Title */}
-              <Text className="text-[42px] font-bold text-gray-900 mb-3 tracking-tight">
-                Welcome Back
-              </Text>
-
-              {/* Subtitle */}
-              <Text className="text-base text-gray-500 text-center font-normal">
-                Sign in to access your account
-              </Text>
             </View>
 
-            {/* Form Section */}
-            <View className="mb-6">
-              {/* Email Input */}
-              <View className="mb-4">
-                <Text className="text-sm font-semibold text-gray-700 mb-2 ml-1">
-                  Email
+            {/* Password Input */}
+            {/* <View className="mb-2">
+              <View className="flex-row justify-between items-center mb-2">
+                <Text className="text-sm font-semibold text-gray-700 ml-1">
+                  Password
                 </Text>
-                <TextInput
-                  className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-4 text-base text-gray-900"
-                  placeholder="Enter your email"
-                  placeholderTextColor="#9CA3AF"
-                  autoCapitalize="none"
-                  keyboardType="email-address"
-                  value={email}
-                  onChangeText={(v: string) => {
-                    setEmail(v);
-                    setErrorMsg(null);
-                  }}
-                />
+
+              </View>
+              <TextInput
+                className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-4 text-base text-gray-900"
+                placeholder="Enter your password"
+                placeholderTextColor="#9CA3AF"
+                secureTextEntry
+                value={password}
+                onChangeText={(v: string) => {
+                  setPassword(v);
+                  setErrorMsg(null);
+                }}
+              />
+            </View>
+          </View> */}
+            <View className="mb-2">
+              <View className="flex-row justify-between items-center mb-2">
+                <Text className="text-sm font-semibold text-gray-700 ml-1">
+                  Password
+                </Text>
               </View>
 
-              {/* Password Input */}
-              <View className="mb-2">
-                <View className="flex-row justify-between items-center mb-2">
-                  <Text className="text-sm font-semibold text-gray-700 ml-1">
-                    Password
-                  </Text>
-
-                </View>
+              <View className="relative">
                 <TextInput
-                  className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-4 text-base text-gray-900"
+                  className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-4 pr-12 text-base text-gray-900"
                   placeholder="Enter your password"
                   placeholderTextColor="#9CA3AF"
-                  secureTextEntry
+                  secureTextEntry={!showPassword}
                   value={password}
                   onChangeText={(v: string) => {
                     setPassword(v);
                     setErrorMsg(null);
                   }}
                 />
+
+                <Pressable
+                  onPress={() => setShowPassword(!showPassword)}
+                  className="absolute right-4 top-4"
+                >
+                  {showPassword ? (
+                    <EyeOff size={22} color="#6B7280" />
+                  ) : (
+                    <Eye size={22} color="#6B7280" />
+                  )}
+                </Pressable>
               </View>
             </View>
-
             {/* Error Message */}
             {errorMsg && (
               <View className="mb-6 bg-red-50 border border-red-200 rounded-xl px-4 py-3">
@@ -190,8 +226,10 @@ export default function Login() {
             {/* Bottom Spacing */}
             <View className="h-8" />
           </View>
-        </ScrollView>
-      </KeyboardAvoidingView>
-    </View>
+          {/* </ScrollView>
+      </KeyboardAvoidingView> */}
+      </View>
+      </KeyboardAwareScrollView>
+    </View >
   );
 }

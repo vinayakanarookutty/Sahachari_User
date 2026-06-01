@@ -19,7 +19,8 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/sahachari.jpeg",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "softwareKeyboardLayoutMode": "resize"
     },
     "splash": {
       "image": "./assets/sahachari.jpeg",
