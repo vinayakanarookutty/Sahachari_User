@@ -194,10 +194,14 @@ export default function ProductDetails() {
       </View>
     );
   }
+  
+  // const originalPrice = Number(product.price);
+  const originalPrice = Number(String(product.price).replace(/[^\d.]/g, "")) || 0;
 
-  const originalPrice = Number(product.price);
   const finalPrice = product.finalPrice ?? originalPrice;
+
   const hasDiscount = finalPrice < originalPrice;
+
   const discountPercent = hasDiscount
     ? Math.round(((originalPrice - finalPrice) / originalPrice) * 100)
     : 0;

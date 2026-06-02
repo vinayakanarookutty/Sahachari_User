@@ -31,23 +31,38 @@ export function ServiceCard({ item, onPress }: any) {
   };
 
   const originalPrice = extractPrice(item.price);
+  // const originalPrice = extractPrice(item.price);
 
-  let finalPrice = originalPrice;
+  const finalPrice =
+    item.finalPrice ?? originalPrice;
+
+  const hasDiscount =
+    finalPrice < originalPrice;
+  // let finalPrice = originalPrice;
 
   // Apply active percentage offer
-  if (item.offers?.length > 0) {
-    const activeOffer = item.offers.find(
-      (offer: any) => offer.isActive
-    );
+  // if (item.offers?.length > 0) {
+  //   // const activeOffer = item.offers.find(
+  //   //   (offer: any) => offer.isActive
+  //   // );
+  //   const activeOffer = item.offers?.find((offer: any) => {
+  //     const now = new Date();
 
-    if (activeOffer?.type === "PERCENTAGE") {
-      finalPrice =
-        originalPrice -
-        (originalPrice * activeOffer.value) / 100;
-    }
-  }
+  //     return (
+  //       offer.isActive &&
+  //       new Date(offer.startDate) <= now &&
+  //       new Date(offer.endDate) >= now
+  //     );
+  //   });
 
-  const hasDiscount = finalPrice < originalPrice;
+  //   if (activeOffer?.type === "PERCENTAGE") {
+  //     finalPrice =
+  //       originalPrice -
+  //       (originalPrice * activeOffer.value) / 100;
+  //   }
+  // }
+
+  // const hasDiscount = finalPrice < originalPrice;
 
   // Extract unit from "100/Hour"
   const unit =

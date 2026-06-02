@@ -18,12 +18,44 @@ export function ProductCard({
     return match ? Number(match[0]) : 0;
   };
 
+  // const originalPrice = extractPrice(product.price);
   const originalPrice = extractPrice(product.price);
 
   const finalPrice =
     product.finalPrice ?? originalPrice;
 
-  const hasDiscount = finalPrice < originalPrice;
+  const hasDiscount =
+    finalPrice < originalPrice;
+
+  const discountPercent = hasDiscount
+    ? Math.round(
+      ((originalPrice - finalPrice) / originalPrice) * 100
+    )
+    : 0;
+
+  // const finalPrice = product.finalPrice ?? originalPrice;
+
+  // const hasDiscount = finalPrice < originalPrice;
+
+  // const activeOffer = product.offers?.find((offer: any) => {
+  //   const now = new Date();
+
+  //   return (
+  //     offer.isActive &&
+  //     new Date(offer.startDate) <= now &&
+  //     new Date(offer.endDate) >= now
+  //   );
+  // });
+
+  // let finalPrice = originalPrice;
+
+  // if (activeOffer?.type === "PERCENTAGE") {
+  //   finalPrice =
+  //     originalPrice -
+  //     (originalPrice * activeOffer.value) / 100;
+  // }
+
+  // const hasDiscount = finalPrice < originalPrice;
 
   // Extract unit from strings like "100/Kg"
   const unit =

@@ -260,15 +260,6 @@ export default function ProductsScreen() {
   };
 
   const renderProduct = ({ item }: { item: Product }) => {
-    // const isService = item.category === "Service";
-    // const hasDiscount = item.offers && item.offers.length > 0;
-    // const displayPrice = item.finalPrice || parseFloat(item.price);
-    // const originalPrice = parseFloat(item.price);
-
-    // const discountPercent =
-    //   hasDiscount && item.finalPrice
-    //     ? Math.round(((originalPrice - item.finalPrice) / originalPrice) * 100)
-    //     : 0;
     const isService = item.category === "Service";
 
     const extractPrice = (value: any) => {
@@ -281,23 +272,9 @@ export default function ProductsScreen() {
 
     const originalPrice = extractPrice(item.price);
 
-    let finalPrice = originalPrice;
+    const finalPrice = item.finalPrice ?? originalPrice;
 
-    // Find active offer
-    const activeOffer = item.offers?.find(
-      (offer: any) => offer.isActive
-    );
-
-    // Apply percentage discount
-    if (activeOffer?.type === "PERCENTAGE") {
-      finalPrice =
-        originalPrice -
-        (originalPrice * activeOffer.value) / 100;
-    }
-
-    const hasDiscount =
-      originalPrice > 0 && finalPrice < originalPrice;
-
+    const hasDiscount = finalPrice < originalPrice;
     const discountPercent = hasDiscount
       ? Math.round(
         ((originalPrice - finalPrice) / originalPrice) * 100
