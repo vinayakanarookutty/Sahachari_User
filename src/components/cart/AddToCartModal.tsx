@@ -1,12 +1,13 @@
 import { LinearGradient } from "expo-linear-gradient";
 import { Minus, Plus, ShoppingCart, X } from "lucide-react-native";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
-    ActivityIndicator,
-    Modal,
-    Pressable,
-    Text,
-    View,
+  ActivityIndicator,
+  Modal,
+  Pressable,
+  Text,
+  View,
 } from "react-native";
 
 interface AddToCartModalProps {
@@ -31,6 +32,7 @@ export function AddToCartModal({
 }: AddToCartModalProps) {
   const [quantity, setQuantity] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { t } = useTranslation();
 
   const incrementQuantity = () => {
     if (quantity < product.quantity) {
@@ -48,7 +50,7 @@ export function AddToCartModal({
     setIsSubmitting(true);
     const success = await onConfirm(quantity);
     setIsSubmitting(false);
-    
+
     if (success) {
       // Reset quantity and close modal on success
       setQuantity(1);
@@ -81,7 +83,7 @@ export function AddToCartModal({
           {/* Header */}
           <View className="flex-row items-center justify-between p-6 border-b border-gray-100">
             <Text className="text-2xl font-bold text-gray-900">
-              Add to Cart
+              {t("addToCart")}
             </Text>
             <Pressable
               onPress={handleClose}
@@ -100,23 +102,24 @@ export function AddToCartModal({
               <Text className="text-3xl font-bold text-blue-600">
                 ₹{product.finalPrice}
               </Text>
-              <Text className="text-gray-500 ml-2">per item</Text>
+              <Text className="text-gray-500 ml-2">
+                {t("per_item")}
+              </Text>
             </View>
           </View>
 
           {/* Quantity Selector */}
           <View className="px-6 py-6">
             <Text className="text-base font-semibold text-gray-700 mb-4">
-              Select Quantity
+              {t("Select_Quantity")}
             </Text>
-            
+
             <View className="flex-row items-center justify-between bg-gray-50 rounded-2xl p-4">
               <Pressable
                 onPress={decrementQuantity}
                 disabled={quantity <= 1 || isSubmitting}
-                className={`bg-white rounded-full p-3 shadow-sm ${
-                  quantity <= 1 || isSubmitting ? "opacity-50" : ""
-                }`}
+                className={`bg-white rounded-full p-3 shadow-sm ${quantity <= 1 || isSubmitting ? "opacity-50" : ""
+                  }`}
               >
                 <Minus size={24} color="#1F2937" strokeWidth={2.5} />
               </Pressable>
@@ -126,16 +129,15 @@ export function AddToCartModal({
                   {quantity}
                 </Text>
                 <Text className="text-sm text-gray-500 mt-1">
-                  {product.quantity} available
+                  {product.quantity} {t("available")}
                 </Text>
               </View>
 
               <Pressable
                 onPress={incrementQuantity}
                 disabled={quantity >= product.quantity || isSubmitting}
-                className={`bg-white rounded-full p-3 shadow-sm ${
-                  quantity >= product.quantity || isSubmitting ? "opacity-50" : ""
-                }`}
+                className={`bg-white rounded-full p-3 shadow-sm ${quantity >= product.quantity || isSubmitting ? "opacity-50" : ""
+                  }`}
               >
                 <Plus size={24} color="#1F2937" strokeWidth={2.5} />
               </Pressable>
@@ -145,7 +147,9 @@ export function AddToCartModal({
           {/* Total Price */}
           <View className="px-6 py-4 bg-blue-50 mx-6 rounded-2xl">
             <View className="flex-row items-center justify-between">
-              <Text className="text-gray-700 font-semibold">Total Price</Text>
+              <Text className="text-gray-700 font-semibold">
+                {t("Total_Price")}
+              </Text>
               <Text className="text-3xl font-bold text-blue-600">
                 ₹{totalPrice.toFixed(2)}
               </Text>
@@ -157,9 +161,8 @@ export function AddToCartModal({
             <Pressable
               onPress={handleConfirm}
               disabled={isSubmitting || isPending}
-              className={`rounded-2xl overflow-hidden ${
-                isSubmitting || isPending ? "opacity-50" : ""
-              }`}
+              className={`rounded-2xl overflow-hidden ${isSubmitting || isPending ? "opacity-50" : ""
+                }`}
             >
               <LinearGradient
                 colors={["#2563EB", "#1D4ED8"]}
@@ -178,7 +181,7 @@ export function AddToCartModal({
                   <>
                     <ShoppingCart size={22} color="#FFFFFF" strokeWidth={2.5} />
                     <Text className="text-white font-bold text-lg ml-3">
-                      Add to Cart
+                      {t("addToCart")}
                     </Text>
                   </>
                 )}
@@ -191,7 +194,7 @@ export function AddToCartModal({
               className="bg-gray-100 py-4 rounded-2xl"
             >
               <Text className="text-center text-gray-700 font-semibold text-base">
-                Cancel
+                {t("Cancel")}
               </Text>
             </Pressable>
           </View>

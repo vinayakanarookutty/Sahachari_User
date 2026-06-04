@@ -1,31 +1,33 @@
-import React from "react";
-import {
-  FlatList,
-  Text,
-  View,
-  Pressable,
-  ActivityIndicator,
-  RefreshControl
-} from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import {
-  ShoppingBag,
-  ArrowRight,
   ArrowLeft,
+  ArrowRight,
+  ShoppingBag,
 } from "lucide-react-native";
-import { LinearGradient } from "expo-linear-gradient";
+import React from "react";
+import {
+  ActivityIndicator,
+  FlatList,
+  Pressable,
+  RefreshControl,
+  Text,
+  View
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
-import { useCart } from "../../hooks/useCart";
+import { useTranslation } from "react-i18next";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { CartItem } from "../../components/cart/CartItem";
 import { CheckoutModal } from "../../components/cart/CheckoutModal";
 import { SuccessModal } from "../../components/cart/SuccessModal";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useCart } from "../../hooks/useCart";
 
 export default function Cart() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const [refreshing, setRefreshing] = React.useState(false);
+  const { t } = useTranslation();
 
   const {
     cart,
@@ -50,7 +52,9 @@ export default function Cart() {
     return (
       <View className="flex-1 items-center justify-center bg-gray-50">
         <ActivityIndicator size="large" color="#2563EB" />
-        <Text className="text-gray-600 mt-4">Loading your cart...</Text>
+        <Text className="text-gray-600 mt-4">
+          {t("Loading_your_cart")}
+        </Text>
       </View>
     );
   }
@@ -95,12 +99,12 @@ export default function Cart() {
             {/* TITLE */}
             <View className="flex-1 items-center">
               <Text className="text-2xl font-bold text-white">
-                Shopping Cart
+                {t("Shopping_Cart")}
               </Text>
 
               {!isEmpty && (
                 <Text className="text-blue-100 text-sm mt-1">
-                  {cart.items.length} items
+                  {cart.items.length} {t("items")}
                 </Text>
               )}
             </View>
@@ -117,11 +121,11 @@ export default function Cart() {
             </View>
 
             <Text className="text-2xl font-bold text-gray-800 mb-2">
-              Your cart is empty
+              {t("Your_cart_is_empty")}
             </Text>
 
             <Text className="text-gray-500 text-center mb-6">
-              Start adding items to see them here
+              {t("Start_adding_items_to_see_them_here")}
             </Text>
 
             <Pressable
@@ -129,7 +133,7 @@ export default function Cart() {
               className="bg-blue-600 px-8 py-4 rounded-xl flex-row items-center"
             >
               <Text className="text-white font-semibold mr-2">
-                Start Shopping
+                {t("Start_Shopping")}
               </Text>
               <ArrowRight size={20} color="white" />
             </Pressable>
@@ -179,7 +183,7 @@ export default function Cart() {
 
               <View className="flex-row justify-between items-center mb-4">
                 <Text className="text-xl font-bold text-gray-800">
-                  Total Amount
+                  {t("Total_Amount")}
                 </Text>
 
                 <Text className="text-2xl font-bold text-blue-600">
@@ -192,7 +196,7 @@ export default function Cart() {
                 className="bg-blue-600 py-4 rounded-xl flex-row items-center justify-center"
               >
                 <Text className="text-white font-bold text-lg mr-2">
-                  Proceed to Checkout
+                  {t("Proceed_to_Checkout")}
                 </Text>
                 <ArrowRight size={22} color="white" />
               </Pressable>

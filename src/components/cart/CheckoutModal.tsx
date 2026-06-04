@@ -2,6 +2,7 @@ import { useAuthStore } from '@/store/auth.store';
 import { useQuery } from '@tanstack/react-query';
 import { ArrowRight, X } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
+import { useTranslation } from "react-i18next";
 import {
   ActivityIndicator,
   Modal,
@@ -11,7 +12,6 @@ import {
   TextInput,
   View,
 } from 'react-native';
-import { useMemo } from 'react';
 
 export function CheckoutModal({
   visible,
@@ -29,6 +29,7 @@ export function CheckoutModal({
   const [showPlaceDropdown, setShowPlaceDropdown] = useState(false);
   const [deliveryCharge, setDeliveryCharge] = useState(0);
   const [placeDetails, setPlaceDetails] = useState<any[]>([]);
+  const { t } = useTranslation();
 
   interface UserProfile {
     _id: string;
@@ -170,7 +171,7 @@ export function CheckoutModal({
           {/* Header */}
           <View className="flex-row items-center justify-between px-6 py-4 border-b border-gray-200">
             <Text className="text-2xl font-bold text-gray-800">
-              Delivery Details
+              {t("Delivery_Details")}
             </Text>
             <Pressable onPress={onClose} className="p-2 bg-gray-100 rounded-full">
               <X size={24} color="#374151" />
@@ -181,7 +182,7 @@ export function CheckoutModal({
             <View className="py-8 items-center">
               <ActivityIndicator size="large" color="#2563eb" />
               <Text className="text-gray-500 mt-2">
-                Loading your details...
+                {t("Loading_your_details")}
               </Text>
             </View>
           ) : (
@@ -202,10 +203,10 @@ export function CheckoutModal({
 
                 {/* Address Fields */}
                 {[
-                  { label: 'Street Address *', key: 'street', placeholder: '123 Main Street' },
-                  { label: 'City *', key: 'city', placeholder: 'Mumbai' },
+                  { label: `${t("street_address")}`, key: 'street', placeholder: '123 Main Street' },
+                  { label: `${t("city")}`, key: 'city', placeholder: 'Mumbai' },
                   {
-                    label: 'Zip Code *',
+                    label: `${t("zip_code")}`,
                     key: 'zipCode',
                     placeholder: '400001',
                     keyboard: 'numeric',
@@ -213,7 +214,7 @@ export function CheckoutModal({
                   },
 
                   {
-                    label: 'Phone Number *',
+                    label: `${t("phone_number")}`,
                     key: 'phone',
                     placeholder: '+919876543210',
                     keyboard: 'phone-pad',
@@ -240,7 +241,7 @@ export function CheckoutModal({
                 {/* Place Dropdown */}
                 <View className="mb-4 relative z-20">
                   <Text className="text-gray-700 font-semibold mb-2">
-                    Select Place *
+                    {t("select_place")}
                   </Text>
 
                   <Pressable
@@ -250,7 +251,7 @@ export function CheckoutModal({
                     className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 flex-row justify-between items-center"
                   >
                     <Text className="text-gray-800">
-                      {address.place || "Select place"}
+                      {address.place || t("select_place_placeholder")}
                     </Text>
 
                     <Text className="text-gray-500">▼</Text>
@@ -293,7 +294,7 @@ export function CheckoutModal({
                 {/* Notes */}
                 <View className="mb-4">
                   <Text className="text-gray-700 font-semibold mb-2">
-                    Delivery Notes (Optional)
+                    {t("delivery_notes")}
                   </Text>
                   <TextInput
                     value={address.notes}
@@ -309,7 +310,7 @@ export function CheckoutModal({
                 {!isBookable ? (
                   <View className="mb-4 relative z-20">
                     <Text className="text-gray-700 font-semibold mb-2">
-                      Payment Method *
+                      {t("payment_method")}
                     </Text>
 
                     <Pressable
@@ -319,7 +320,7 @@ export function CheckoutModal({
                       <Text className="text-gray-800">
                         {address.paymentMethod
                           ? paymentOptions.find(p => p.value === address.paymentMethod)?.label
-                          : 'Select payment method'}
+                          : t("select_payment_method")}
                       </Text>
                       <Text className="text-gray-500">▼</Text>
                     </Pressable>
@@ -351,12 +352,12 @@ export function CheckoutModal({
                 ) : (
                   <View className="mb-4">
                     <Text className="text-gray-700 font-semibold mb-2">
-                      Pickup Method
+                      {t("pickup_method")}
                     </Text>
 
                     <View className="bg-blue-50 border border-blue-200 rounded-xl px-4 py-4">
                       <Text className="text-blue-700 font-bold">
-                        Self Pickup
+                        {t("self_pickup")}
                       </Text>
                     </View>
                   </View>
@@ -379,7 +380,7 @@ export function CheckoutModal({
                   {/* Items subtotal */}
                   <View className="flex-row justify-between items-center mb-2">
                     <Text className="text-gray-600">
-                      Items ({itemSCount})
+                      {t("Items")} ({itemSCount})
                     </Text>
 
                     <Text className="text-gray-800 font-semibold">
@@ -391,7 +392,7 @@ export function CheckoutModal({
                   {!isBookable && (
                     <View className="flex-row justify-between items-center mb-2">
                       <Text className="text-gray-600">
-                        Delivery Charge
+                        {t("Delivery_Charge")}
                       </Text>
 
                       <Text className="text-gray-800 font-semibold">
@@ -403,7 +404,7 @@ export function CheckoutModal({
                   {/* Final total */}
                   <View className="border-t border-blue-200 pt-3 mt-2 flex-row justify-between items-center">
                     <Text className="text-lg font-bold text-gray-800">
-                      Total
+                      {t("Total_Amount")}
                     </Text>
 
                     <Text className="text-2xl font-bold text-blue-600">
@@ -439,7 +440,7 @@ export function CheckoutModal({
                   ) : (
                     <>
                       <Text className="text-white font-bold text-lg mr-2">
-                        Place Order
+                        {t("Place_Order")}
                       </Text>
                       <ArrowRight size={24} color="white" />
                     </>

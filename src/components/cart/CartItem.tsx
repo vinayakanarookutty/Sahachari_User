@@ -1,11 +1,13 @@
 import { Minus, Plus, Trash2 } from "lucide-react-native";
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { ActivityIndicator, Image, Pressable, Text, View, } from "react-native";
 
 export function CartItem({ item, isUpdating, onQuantityChange, onRemove, parseNumber,
 }: any) {
   const s3Base = (process.env.EXPO_PUBLIC_S3_BASE_URL || "").replace(/\/$/, "");
   const rawImg = item.productId?.images?.[0];
+  const { t } = useTranslation();
 
   const imgUrl = rawImg
     ? /^https?:\/\//.test(rawImg)
@@ -63,7 +65,7 @@ export function CartItem({ item, isUpdating, onQuantityChange, onRemove, parseNu
   ) {
     itemPrice = originalPrice - activeOffer.value;
   }
-  
+
   return (
     <View className="bg-white rounded-2xl mb-4 shadow-sm overflow-hidden">
       {/* MAIN CONTENT */}
@@ -145,7 +147,7 @@ export function CartItem({ item, isUpdating, onQuantityChange, onRemove, parseNu
       {/* FOOTER */}
       <View className="bg-blue-50 px-4 py-2 flex-row justify-between items-center">
         <Text className="text-gray-600 text-sm">
-          Item Total
+          {t("Item_Total")}
         </Text>
         <Text className="font-bold text-blue-600">
           ₹{(itemPrice * itemQuantity).toFixed(2)}

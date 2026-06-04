@@ -1,6 +1,7 @@
-import React from "react";
-import { Modal, View, Text, Pressable } from "react-native";
 import { CheckCircle } from "lucide-react-native";
+import React from "react";
+import { useTranslation } from "react-i18next";
+import { Modal, Pressable, Text, View } from "react-native";
 
 interface SuccessModalProps {
   visible: boolean;
@@ -8,6 +9,7 @@ interface SuccessModalProps {
 }
 
 export function SuccessModal({ visible, onClose }: SuccessModalProps) {
+  const { t } = useTranslation();
   return (
     <Modal
       visible={visible}
@@ -26,13 +28,13 @@ export function SuccessModal({ visible, onClose }: SuccessModalProps) {
 
           {/* Title */}
           <Text className="text-2xl font-bold text-gray-900 text-center">
-            Order Placed!
+            {t("Order_Placed")}
           </Text>
 
           {/* Subtitle */}
           <Text className="text-gray-500 text-center mt-2 mb-8 leading-5">
-            Your order has been successfully placed.{"\n"}
-            We’ll start processing it shortly.
+            {t("Your_order_has_been_successfully_placed")} {"\n"}
+            {t("Well_start_processing_it_shortly")}
           </Text>
 
           {/* Button */}
@@ -40,7 +42,7 @@ export function SuccessModal({ visible, onClose }: SuccessModalProps) {
             className="w-full bg-blue-600 py-4 rounded-2xl items-center active:opacity-90"
           >
             <Text className="text-white font-bold text-lg">
-              Continue Shopping
+              {t("Continue_Shopping")}
             </Text>
           </Pressable>
         </View>
