@@ -321,7 +321,8 @@ export function OrderDetailsModal({
 
             {/* CANCEL BUTTON */}
             {(order.status?.toUpperCase() === "PLACED" ||
-              order.status?.toUpperCase() === "READY") && (
+              order.status?.toUpperCase() === "READY" ||
+              order.status?.toUpperCase() === "ACCEPTED") && (
                 <View className="px-4 pb-6">
                   <Pressable
                     // onPress={() => onCancel(order._id)}
