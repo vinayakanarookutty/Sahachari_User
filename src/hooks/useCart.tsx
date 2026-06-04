@@ -9,11 +9,11 @@ import {
 
 export function useCart() {
   const queryClient = useQueryClient();
+
   const [updatingItems, setUpdatingItems] = useState<Set<string>>(new Set());
   const [showCheckoutModal, setShowCheckoutModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
 
-  // Form state
   const [address, setAddress] = useState({
     street: "",
     city: "",
@@ -22,17 +22,85 @@ export function useCart() {
     notes: "",
   });
 
-  const { data: cart, isLoading, refetch, } = useQuery({
+  const {
+    data: cart,
+    isLoading,
+    refetch,
+  } = useQuery({
     queryKey: ["cart"],
     queryFn: getCart,
   });
 
+  const parseNumber = (v: any) => {
+    if (v == null) return 0;
+
+    const n = Number(v);
+
+    if (Number.isFinite(n)) return n;
+
+    const cleaned = parseFloat(
+      String(v).replace(/[^0-9.-]+/g, "")
+    );
+
+    return Number.isFinite(cleaned) ? cleaned : 0;
+  };
+
+  const getDiscountedPrice = (product: any) => {
+    const originalPrice = parseNumber(product?.price ?? 0);
+
+    const now = new Date();
+
+    const activeOffer = product?.offers?.find(
+      (offer: any) =>
+        offer.isActive &&
+        new Date(offer.startDate) <= now &&
+        new Date(offer.endDate) >= now
+    );
+
+    if (!activeOffer) {
+      return originalPrice;
+    }
+
+    if (activeOffer.type === "PERCENTAGE") {
+      return Math.max(
+        0,
+        originalPrice -
+        (originalPrice * activeOffer.value) / 100
+      );
+    }
+
+    if (activeOffer.type === "FIXED") {
+      return Math.max(
+        0,
+        originalPrice - activeOffer.value
+      );
+    }
+
+    return originalPrice;
+  };
+
   const updateQuantityMutation = useMutation({
-    mutationFn: ({ itemId, quantity }: { itemId: string; quantity: number }) =>
-      updateCartItemQuantity(itemId, quantity),
+    mutationFn: ({
+      itemId,
+      quantity,
+    }: {
+      itemId: string;
+      quantity: number;
+    }) => updateCartItemQuantity(itemId, quantity),
+
     onMutate: ({ itemId }) =>
-      setUpdatingItems((prev) => new Set(prev).add(itemId)),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["cart"] }),
+      setUpdatingItems((prev) => {
+        const next = new Set(prev);
+        next.add(itemId);
+        return next;
+      }),
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["cart"],
+      });
+    },
+
     onSettled: (_, __, { itemId }) =>
       setUpdatingItems((prev) => {
         const next = new Set(prev);
@@ -42,10 +110,22 @@ export function useCart() {
   });
 
   const removeItemMutation = useMutation({
-    mutationFn: (itemId: string) => removeCartItem(itemId),
+    mutationFn: (itemId: string) =>
+      removeCartItem(itemId),
+
     onMutate: (itemId: string) =>
-      setUpdatingItems((prev) => new Set(prev).add(itemId)),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["cart"] }),
+      setUpdatingItems((prev) => {
+        const next = new Set(prev);
+        next.add(itemId);
+        return next;
+      }),
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["cart"],
+      });
+    },
+
     onSettled: (_, __, itemId) =>
       setUpdatingItems((prev) => {
         const next = new Set(prev);
@@ -56,63 +136,42 @@ export function useCart() {
 
   const placeOrderMutation = useMutation({
     mutationFn: placeOrder,
+
     onSuccess: () => {
-      console.debug("placeOrder: success");
-      queryClient.invalidateQueries({ queryKey: ["cart"] });
-      // Close checkout modal first, then open success modal after a short delay to avoid modal overlap issues
+      queryClient.invalidateQueries({
+        queryKey: ["cart"],
+      });
+
       setShowCheckoutModal(false);
-      setTimeout(() => setShowSuccessModal(true), 250);
-      setAddress({ street: "", city: "", zipCode: "", phone: "", notes: "" });
+
+      setTimeout(() => {
+        setShowSuccessModal(true);
+      }, 250);
+
+      setAddress({
+        street: "",
+        city: "",
+        zipCode: "",
+        phone: "",
+        notes: "",
+      });
     },
+
     onError: (err: any) => {
       console.error("placeOrder failed", err);
       alert("Failed to place order. Please try again.");
     },
   });
 
-  const parseNumber = (v: any) => {
-    if (v == null) return 0;
-    const n = Number(v);
-    if (Number.isFinite(n)) return n;
-    const cleaned = parseFloat(String(v).replace(/[^0-9.-]+/g, ""));
-    return Number.isFinite(cleaned) ? cleaned : 0;
-  };
-
-  const getDiscountedPrice = (product: any) => {
-    const originalPrice = parseNumber(product?.price ?? 0);
-
-    const activeOffer = product?.offers?.find(
-      (offer: any) => offer.isActive
-    );
-
-    if (!activeOffer) return originalPrice;
-
-    if (activeOffer.type === "PERCENTAGE") {
-      return (
-        originalPrice -
-        (originalPrice * activeOffer.value) / 100
-      );
-    }
-
-    if (activeOffer.type === "FIXED") {
-      return originalPrice - activeOffer.value;
-    }
-
-    return originalPrice;
-  };
-
-  // const total =
-  //   cart?.items?.reduce((sum: number, item: any) => {
-  //     const price = parseNumber(item.productId?.price ?? item.price ?? 0);
-  //     const qty = parseNumber(item.quantity ?? item.qty ?? 0);
-  //     return sum + price * qty;
-  //   }, 0) || 0;
-
   const total =
     cart?.items?.reduce((sum: number, item: any) => {
-      const price = getDiscountedPrice(item.productId);
+      const price = getDiscountedPrice(
+        item.productId
+      );
 
-      const qty = parseNumber(item.quantity ?? item.qty ?? 0);
+      const qty = parseNumber(
+        item.quantity ?? item.qty ?? 0
+      );
 
       return sum + price * qty;
     }, 0) || 0;
@@ -122,31 +181,28 @@ export function useCart() {
     isLoading,
     refetch,
     total,
+
     updatingItems,
+
     showCheckoutModal,
     setShowCheckoutModal,
+
     showSuccessModal,
     setShowSuccessModal,
+
     address,
     setAddress,
-    // handleQuantityChange: (id: string, cur: number, d: number) => {
-    //   const next = cur + d;
-    //   if (next >= 1)
-    //     updateQuantityMutation.mutate({ itemId: id, quantity: next });
-    // },
+
     handleQuantityChange: (
       id: string,
-      cur: number,
-      d: number,
+      currentQuantity: number,
+      delta: number,
       availableQuantity: number
     ) => {
+      const next = currentQuantity + delta;
 
-      const next = cur + d;
-
-      // Prevent below 1
       if (next < 1) return;
 
-      // Prevent exceeding stock
       if (next > availableQuantity) {
         alert("Cannot add more than available stock");
         return;
@@ -157,7 +213,11 @@ export function useCart() {
         quantity: next,
       });
     },
-    handleRemoveItem: (id: string) => removeItemMutation.mutate(id),
+
+    handleRemoveItem: (id: string) => {
+      removeItemMutation.mutate(id);
+    },
+
     handleCheckout: () => {
       if (
         !address.street ||
@@ -168,9 +228,13 @@ export function useCart() {
         alert("Please fill in all required fields");
         return;
       }
+
       placeOrderMutation.mutate(address);
     },
+
     isPlacingOrder: placeOrderMutation.isPending,
+
     parseNumber,
+    getDiscountedPrice,
   };
 }

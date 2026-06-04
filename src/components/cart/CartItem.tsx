@@ -1,6 +1,6 @@
-import React from "react";
-import { View, Text, Image, Pressable, ActivityIndicator, } from "react-native";
 import { Minus, Plus, Trash2 } from "lucide-react-native";
+import React from "react";
+import { ActivityIndicator, Image, Pressable, Text, View, } from "react-native";
 
 export function CartItem({ item, isUpdating, onQuantityChange, onRemove, parseNumber,
 }: any) {
@@ -23,9 +23,31 @@ export function CartItem({ item, isUpdating, onQuantityChange, onRemove, parseNu
     item.productId?.price ?? item.price ?? 0
   );
 
-  const activeOffer = item.productId?.offers?.find(
-    (offer: any) => offer.isActive
-  );
+  // const activeOffer = item.productId?.offers?.find(
+  //   (offer: any) => offer.isActive
+  // );
+
+  // let itemPrice = originalPrice;
+
+  // if (activeOffer?.type === "PERCENTAGE") {
+  //   itemPrice =
+  //     originalPrice -
+  //     (originalPrice * activeOffer.value) / 100;
+  // }
+
+  // if (activeOffer?.type === "FIXED") {
+  //   itemPrice = originalPrice - activeOffer.value;
+  // }
+
+  const activeOffer = item.productId?.offers?.find((offer: any) => {
+    const now = new Date();
+
+    return (
+      offer.isActive &&
+      new Date(offer.startDate) <= now &&
+      new Date(offer.endDate) >= now
+    );
+  });
 
   let itemPrice = originalPrice;
 
@@ -35,9 +57,13 @@ export function CartItem({ item, isUpdating, onQuantityChange, onRemove, parseNu
       (originalPrice * activeOffer.value) / 100;
   }
 
-  if (activeOffer?.type === "FIXED") {
+  if (
+    activeOffer?.type === "FIXED" ||
+    activeOffer?.type === "FLAT"
+  ) {
     itemPrice = originalPrice - activeOffer.value;
   }
+  
   return (
     <View className="bg-white rounded-2xl mb-4 shadow-sm overflow-hidden">
       {/* MAIN CONTENT */}
