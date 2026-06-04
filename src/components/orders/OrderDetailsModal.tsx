@@ -320,37 +320,38 @@ export function OrderDetailsModal({
             </View>
 
             {/* CANCEL BUTTON */}
-            {order.status?.toUpperCase() === "PLACED" && (
-              <View className="px-4 pb-6">
-                <Pressable
-                  // onPress={() => onCancel(order._id)}
-                  onPress={() =>
-                    router.push({
-                      pathname: "/settings/complaints",
-                      params: {
-                        orderId: order._id,
-                        category: "ORDER_CANCELLATION",
-                      },
-                    })
-                  }
-                  disabled={isCancelling}
-                  className="rounded-2xl items-center justify-center"
-                  style={{
-                    backgroundColor: "#ed5e68",
-                    paddingVertical: 16,
-                  }}
-                >
-                  {isCancelling ? (<ActivityIndicator color="white" />) : (
-                    <View className="flex-row items-center justify-center">
-                      <X size={20} color="white" />
-                      <Text className="text-white text-center font-bold text-lg ml-2">
-                        Cancel Order
-                      </Text>
-                    </View>
-                  )}
-                </Pressable>
-              </View>
-            )}
+            {(order.status?.toUpperCase() === "PLACED" ||
+              order.status?.toUpperCase() === "READY") && (
+                <View className="px-4 pb-6">
+                  <Pressable
+                    // onPress={() => onCancel(order._id)}
+                    onPress={() =>
+                      router.push({
+                        pathname: "/settings/complaints",
+                        params: {
+                          orderId: order._id,
+                          category: "ORDER_CANCELLATION",
+                        },
+                      })
+                    }
+                    disabled={isCancelling}
+                    className="rounded-2xl items-center justify-center"
+                    style={{
+                      backgroundColor: "#ed5e68",
+                      paddingVertical: 16,
+                    }}
+                  >
+                    {isCancelling ? (<ActivityIndicator color="white" />) : (
+                      <View className="flex-row items-center justify-center">
+                        <X size={20} color="white" />
+                        <Text className="text-white text-center font-bold text-lg ml-2">
+                          Cancel Order
+                        </Text>
+                      </View>
+                    )}
+                  </Pressable>
+                </View>
+              )}
           </ScrollView>
         )}
       </SafeAreaView>
