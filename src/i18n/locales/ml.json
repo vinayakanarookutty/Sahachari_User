@@ -17,7 +17,7 @@
     "Loading_services": "സേവനങ്ങൾ ലോഡ് ചെയ്യുന്നു...",
     "categories": {
         "food": "ഭക്ഷണം",
-        "vegetables_and_fruits": "പഴങ്ങളും പച്ചക്കറികളും",
+        "vegetables_and_fruits": "പഴം-പച്ചക്കറി",
         "groceries": "പലചരക്ക് സാധനങ്ങൾ",
         "home_made": "വീട്ടിൽ തയ്യാറാക്കിയത്",
         "service": "സേവനം",
@@ -27,5 +27,21 @@
         "fast_food": "ഫാസ്റ്റ് ഫുഡ്",
         "snacks": "സ്നാക്കുകൾ",
         "beverages": "പാനീയങ്ങൾ"
-    }
+    },
+    "Verified": "✓ സ്ഥിരീകരിച്ചു",
+    "View_Products": "ഉൽപ്പന്നം കാണുക →",
+    "Service": "സേവനം",
+    "In_Stock": "✓ സ്റ്റോക്കിൽ ലഭ്യമാണ്",
+    "Out_of_Stock": "✗ നിലവിൽ ലഭ്യമല്ല",
+    "Available": "✓ ലഭ്യമാണ്",
+    "Search_products": "ഉൽപ്പന്നങ്ങൾ തിരയൂ...",
+    "items": "ഉൽപ്പന്നങ്ങൾ",
+    "item": "ഉൽപ്പന്നം",
+    "stores": "സ്റ്റോറുകൾ",
+    "store": "സ്റ്റോർ",
+    "Loading_stores": "സ്റ്റോറുകൾ ലോഡുചെയ്യുന്നു...",
+    "No_stores_found": "സ്റ്റോറുകൾ ലഭ്യമല്ല",
+    "noStoresInCategory": "\"{{category}}\" വിഭാഗത്തിൽ സ്റ്റോറുകളൊന്നും ലഭ്യമല്ല",
+    "Stores": "സ്റ്റോറുകൾ",
+    "All_Services": "സമ്പൂർണ്ണ സേവനങ്ങൾ"
 }

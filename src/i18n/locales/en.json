@@ -27,5 +27,22 @@
         "fast_food": "Fast Food",
         "snacks": "Snacks",
         "beverages": "Beverages"
-    }
+    },
+    "Verified": "✓ Verified",
+    "View_Products": "View Products →",
+    "Service": "Service",
+    "In_Stock": "✓ In Stock",
+    "Out_of_Stock": "✗ Out of Stock",
+    "Available": "✓ Available",
+    "Search_products": "Search products...",
+    "items": "items",
+    "item": "item",
+    "stores": "stores",
+    "store": "store",
+    "Loading_stores": "Loading stores...",
+    "No_stores_found": "No stores found",
+    "noStoresInCategory": "No stores available in \"{{category}}\" category",
+    "Stores": "Stores",
+    "All_Services": "All Services"
+
 }

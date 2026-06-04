@@ -3,6 +3,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { ArrowLeft, Search, ShoppingBag, Store, X } from "lucide-react-native";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   ActivityIndicator,
   FlatList,
@@ -47,6 +48,7 @@ export default function ProductsScreen() {
   const insets = useSafeAreaInsets();
   const params = useLocalSearchParams();
   const [refreshing, setRefreshing] = useState(false);
+  const { t } = useTranslation();
 
   // const categoryFilter = params.category as string | undefined;
   const categoryFilter = params.category as string | undefined;
@@ -159,6 +161,15 @@ export default function ProductsScreen() {
   const clearStoreFilter = () => {
     router.setParams({ storeId: undefined });
   };
+  // translate category name
+  const categoryKey = categoryFilter
+    ?.toLowerCase()
+    .replace(/&/g, "")
+    .replace(/\s+/g, "_");
+
+  const translatedCategory = categoryKey
+    ? t(`categories.${categoryKey}`)
+    : "";
 
   const renderStore = ({ item }: { item: Store }) => {
     return (
@@ -214,7 +225,7 @@ export default function ProductsScreen() {
                   }}
                 >
                   <Text className="text-white text-xs font-bold">
-                    ✓ Verified
+                    {t("Verified")}
                   </Text>
                 </LinearGradient>
               </View>
@@ -249,7 +260,7 @@ export default function ProductsScreen() {
             <View className="mt-3">
               <View className="bg-blue-50 self-start px-4 py-2 rounded-full">
                 <Text className="text-xs text-blue-700 font-semibold">
-                  View Products →
+                  {t("View_Products")}
                 </Text>
               </View>
             </View>
@@ -354,7 +365,9 @@ export default function ProductsScreen() {
                     borderRadius: 12,
                   }}
                 >
-                  <Text className="text-white text-xs font-bold">Service</Text>
+                  <Text className="text-white text-xs font-bold">
+                    {t("Service")}
+                  </Text>
                 </LinearGradient>
               </View>
             )}
@@ -422,13 +435,13 @@ export default function ProductsScreen() {
                   {item.quantity > 0 ? (
                     <View className="bg-green-50 self-start px-3 py-1 rounded-full">
                       <Text className="text-xs text-green-700 font-semibold">
-                        ✓ In Stock ({item.quantity})
+                        {t("In_Stock")} ({item.quantity})
                       </Text>
                     </View>
                   ) : (
                     <View className="bg-red-50 self-start px-3 py-1 rounded-full">
                       <Text className="text-xs text-red-700 font-semibold">
-                        ✗ Out of Stock
+                        {t("Out_of_Stock")}
                       </Text>
                     </View>
                   )}
@@ -439,7 +452,7 @@ export default function ProductsScreen() {
                 <View className="mt-2">
                   <View className="bg-blue-50 self-start px-3 py-1 rounded-full">
                     <Text className="text-xs text-blue-700 font-semibold">
-                      ✓ Available
+                      {t("Available")}
                     </Text>
                   </View>
                 </View>
@@ -475,19 +488,21 @@ export default function ProductsScreen() {
             <View className="flex-1 items-center">
               <Text className="text-2xl font-bold text-white">
                 {showingStores
-                  ? `${categoryFilter} Stores`
+                  ? `${translatedCategory} ${t("Stores")}`
                   : storeId
-                    ? "Service"
-                    : "All Services"}
+                    ? `${t("Service")}`
+                    : `${t("All_Services")}`}
               </Text>
               {showingStores && stores.length > 0 && (
                 <Text className="text-blue-100 text-sm mt-0.5">
-                  {stores.length} stores
+                  {stores.length}{" "}
+                  {stores.length === 1 ? t("store") : t("stores")}
                 </Text>
               )}
               {showingProducts && displayProducts && displayProducts.length > 0 && (
                 <Text className="text-blue-100 text-sm mt-0.5">
-                  {displayProducts.length} items
+                  {displayProducts.length}{" "}
+                  {displayProducts.length === 1 ? t("item") : t("items")}
                 </Text>
               )}
             </View>
@@ -507,7 +522,7 @@ export default function ProductsScreen() {
             >
               <Search size={20} color="#9CA3AF" strokeWidth={2} />
               <TextInput
-                placeholder="Search products..."
+                placeholder={t('Search_products')}
                 value={searchQuery}
                 onChangeText={setSearchQuery}
                 className="flex-1 ml-3 text-gray-900 text-base"
@@ -542,7 +557,8 @@ export default function ProductsScreen() {
               }}
             >
               <Text className="text-blue-700 font-semibold mr-2">
-                {categoryFilter}
+                {/* {categoryFilter} */}
+                {translatedCategory}
               </Text>
               <X size={16} color="#1D4ED8" strokeWidth={3} />
             </Pressable>
@@ -576,7 +592,7 @@ export default function ProductsScreen() {
             <View className="flex-1 items-center justify-center">
               <ActivityIndicator size="large" color="#2563EB" />
               <Text className="text-gray-500 mt-4 font-medium">
-                Loading stores...
+                {t("Loading_stores")}
               </Text>
             </View>
           ) : stores.length > 0 ? (
@@ -599,10 +615,15 @@ export default function ProductsScreen() {
               <View className="bg-white rounded-3xl p-8 items-center shadow-lg">
                 <Text className="text-7xl mb-4">🏪</Text>
                 <Text className="text-xl font-bold text-gray-900 mb-2">
-                  No stores found
+                  {t("No_stores_found")}
                 </Text>
-                <Text className="text-gray-500 text-center text-base leading-6">
+                {/* <Text className="text-gray-500 text-center text-base leading-6">
                   No stores available in "{categoryFilter}" category
+                </Text> */}
+                <Text className="text-gray-500 text-center text-base leading-6">
+                  {t("noStoresInCategory", {
+                    category: translatedCategory,
+                  })}
                 </Text>
               </View>
             </View>
