@@ -20,6 +20,7 @@ import {
 
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
+import { useTranslation } from "react-i18next";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { getStatusColor } from "./OrderCard";
 
@@ -56,6 +57,8 @@ export function OrderDetailsModal({
   isCancelling,
 }: any) {
   const router = useRouter();
+  const {t} = useTranslation();
+
   return (
     <Modal
       visible={visible}
@@ -81,11 +84,11 @@ export function OrderDetailsModal({
             {/* TITLE */}
             <View className="flex-1 items-center">
               <Text className="text-2xl font-bold text-white">
-                Order Details
+                {t("order_details")}
               </Text>
 
               <Text className="text-blue-100 text-sm mt-1">
-                Track your order
+                {t("track_order")}
               </Text>
             </View>
 
@@ -102,7 +105,7 @@ export function OrderDetailsModal({
               />
 
               <Text className="text-gray-500 mt-4 font-medium">
-                Loading details...
+                {t("loading_details")}
               </Text>
             </View>
           </View>
@@ -118,7 +121,7 @@ export function OrderDetailsModal({
               {/* ORDER ID */}
               <View className="mb-4">
                 <Text className="text-gray-500 text-sm mb-1">
-                  Order ID
+                  {t("order_id")}
                 </Text>
                 <Text className="text-gray-800 font-bold text-lg" numberOfLines={1} >
                   #{order.checkoutId}
@@ -128,7 +131,7 @@ export function OrderDetailsModal({
               {/* STATUS */}
               <View>
                 <Text className="text-gray-500 text-sm mb-2">
-                  Order Status
+                  {t("order_status")}
                 </Text>
                 <View className={`px-4 py-2 rounded-full self-start ${getStatusColor(order.status)}`} >
                   <Text className={`font-bold text-sm ${getStatusTextColor(order.status)}`} >
@@ -146,7 +149,7 @@ export function OrderDetailsModal({
                 </View>
 
                 <Text className="font-bold text-xl text-gray-800">
-                  Order Items
+                  {t("order_items")}
                 </Text>
               </View>
 
@@ -189,7 +192,7 @@ export function OrderDetailsModal({
                       </Text>
 
                       <Text className="text-gray-500 mt-1">
-                        Qty: {item.quantity}
+                        {t("qty")}: {item.quantity}
                       </Text>
 
                       <Text className="text-blue-600 font-bold text-lg mt-2">
@@ -209,7 +212,7 @@ export function OrderDetailsModal({
                 </View>
 
                 <Text className="font-bold text-xl text-gray-800">
-                  Delivery Address
+                  {t("delivery_address")}
                 </Text>
               </View>
 
@@ -245,7 +248,7 @@ export function OrderDetailsModal({
 
                       <View className="flex-1 ml-2">
                         <Text className="text-gray-500 text-xs font-semibold mb-1 uppercase tracking-wide">
-                          Delivery Notes
+                          {t("delivery_note")}
                         </Text>
                         <Text className="text-gray-700 italic">
                           {order.deliveryAddress.notes}
@@ -281,7 +284,7 @@ export function OrderDetailsModal({
               {/* Items subtotal */}
               <View className="flex-row justify-between items-center mb-3">
                 <Text className="text-blue-100 text-base">
-                  Items Subtotal
+                  {t("items_subtotal")}
                 </Text>
 
                 <Text className="text-white font-bold text-lg">
@@ -292,7 +295,7 @@ export function OrderDetailsModal({
               {/* Delivery charge */}
               <View className="flex-row justify-between items-center mb-4">
                 <Text className="text-blue-100 text-base">
-                  Delivery Charge
+                  {t("Delivery_Charge")}
                 </Text>
 
                 <Text className="text-white font-bold text-lg">
@@ -305,7 +308,7 @@ export function OrderDetailsModal({
 
                 <View>
                   <Text className="text-blue-100 text-sm">
-                    Total Amount
+                    {t("Total_Amount")}
                   </Text>
 
                   <Text className="text-white text-3xl font-bold mt-1">
@@ -346,7 +349,7 @@ export function OrderDetailsModal({
                       <View className="flex-row items-center justify-center">
                         <X size={20} color="white" />
                         <Text className="text-white text-center font-bold text-lg ml-2">
-                          Cancel Order
+                          {t("cancel_order")}
                         </Text>
                       </View>
                     )}

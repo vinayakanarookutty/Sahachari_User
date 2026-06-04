@@ -1,14 +1,13 @@
 // app/(tabs)/orders/index.tsx
+import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
-import { AlertCircle, RefreshCw, ShoppingBag } from "lucide-react-native";
-import { ActivityIndicator, FlatList, Pressable, Text, View, RefreshControl } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { AlertCircle, ArrowLeft, RefreshCw, ShoppingBag } from "lucide-react-native";
+import { useTranslation } from "react-i18next";
+import { ActivityIndicator, FlatList, Pressable, RefreshControl, Text, View } from "react-native";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { OrderCard } from "../../components/orders/OrderCard";
 import { OrderDetailsModal } from "../../components/orders/OrderDetailsModal";
 import { useOrders } from "../../hooks/useOrders";
-import { ArrowLeft } from "lucide-react-native";
-import { LinearGradient } from "expo-linear-gradient";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function Orders() {
   const router = useRouter();
@@ -18,13 +17,16 @@ export default function Orders() {
     showDetailsModal, isCancelling, handleOrderPress, handleCancelOrder,
     handleCloseModal, refetch
   } = useOrders();
+  const {t} = useTranslation();
 
   if (isLoading) {
     return (
       <SafeAreaView className="flex-1 items-center justify-center bg-gray-50">
         <View className="bg-white p-8 rounded-3xl shadow-xl items-center">
           <ActivityIndicator size="large" color="#2563eb" />
-          <Text className="mt-4 text-gray-600 font-semibold">Loading your orders...</Text>
+          <Text className="mt-4 text-gray-600 font-semibold">
+            {t("loading_orders")}
+          </Text>
         </View>
       </SafeAreaView>
     );
@@ -43,13 +45,13 @@ export default function Orders() {
           </View>
 
           <Text className="text-2xl font-bold text-gray-800 mb-3 text-center">
-            {error ? "Oops! Something went wrong" : "No orders yet"}
+            {error ? t("oops_something_went_wrong") : t("no_orders_yet")}
           </Text>
 
           <Text className="text-gray-500 text-center mb-6 leading-6">
             {error
-              ? "We couldn't load your orders. Please try again."
-              : "Start shopping and your orders will appear here"}
+              ? t("orders_load_failed")
+              : t("start_shopping_orders")}
           </Text>
 
           <Pressable
@@ -58,7 +60,7 @@ export default function Orders() {
           >
             {error && <RefreshCw size={20} color="white" className="mr-2" />}
             <Text className="text-white font-bold text-lg ml-2">
-              {error ? "Try Again" : "Start Shopping"}
+              {error ? t("try_again") : t("start_shopping")}
             </Text>
           </Pressable>
         </View>
@@ -94,11 +96,11 @@ export default function Orders() {
             {/* TITLE */}
             <View className="flex-1 items-center">
               <Text className="text-2xl font-bold text-white">
-                My Orders
+                {t("my_orders")}
               </Text>
               <Text className="text-blue-100 text-sm mt-1">
                 {orders.length}{" "}
-                {orders.length === 1 ? "order" : "orders"}
+                {orders.length === 1 ? t("order") : t("orders")}
               </Text>
             </View>
             <View className="w-10" />

@@ -1,10 +1,12 @@
 import { Wrench } from "lucide-react-native";
 import React, { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Image, Pressable, Text, View } from "react-native";
 
 export function ServiceCard({ item, onPress }: any) {
   const imgUrl = item.images?.[0] || null;
   const [imgSrc, setImgSrc] = useState<any>(null);
+  const {t} = useTranslation();
 
   useEffect(() => {
     if (!imgUrl) {
@@ -95,7 +97,7 @@ export function ServiceCard({ item, onPress }: any) {
               {Math.round(
                 ((originalPrice - finalPrice) / originalPrice) * 100
               )}
-              % OFF
+              % {t("off")}
             </Text>
           </View>
         )}
@@ -115,7 +117,7 @@ export function ServiceCard({ item, onPress }: any) {
           className="text-gray-500 text-xs mt-1"
           numberOfLines={2}
         >
-          {item.description || "Professional Service"}
+          {item.description || t("professional_service")}
         </Text>
 
         {/* Price */}

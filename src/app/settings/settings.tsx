@@ -26,10 +26,10 @@ import {
   Platform,
   Pressable,
   ScrollView,
+  Switch,
   Text,
   ToastAndroid,
   View,
-  Switch,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { EditProfileModal } from "../../components/settings/EditProfileModal";
@@ -76,35 +76,7 @@ export default function Settings() {
     }
   };
 
-  // const handleLanguageChange = () => {
-  //   if (Platform.OS === "web") {
-  //     const isMalayalam = window.confirm(
-  //       "Press OK for Malayalam\nPress Cancel for English"
-  //     );
-
-  //     changeLanguage(isMalayalam ? "ml" : "en");
-  //     return;
-  //   }
-
-  //   Alert.alert(
-  //     "Select Language",
-  //     "Choose your preferred language",
-  //     [
-  //       {
-  //         text: "English",
-  //         onPress: () => changeLanguage("en"),
-  //       },
-  //       {
-  //         text: "Malayalam",
-  //         onPress: () => changeLanguage("ml"),
-  //       },
-  //       {
-  //         text: "Cancel",
-  //         style: "cancel",
-  //       },
-  //     ]
-  //   );
-  // };
+  // translate language
   const toggleLanguage = async () => {
     const nextLanguage =
       i18n.resolvedLanguage === "ml" ? "en" : "ml";
@@ -387,7 +359,7 @@ export default function Settings() {
       <View className="flex-1 items-center justify-center bg-gray-50">
         <ActivityIndicator size="large" color="#2563EB" />
         <Text className="text-gray-500 mt-4 font-medium">
-          Loading profile...
+          {t("loading_profile")}
         </Text>
       </View>
     );
@@ -451,7 +423,7 @@ export default function Settings() {
               <ArrowLeft size={24} color="#FFFFFF" strokeWidth={2.5} />
             </Pressable>
             <Text className="text-2xl font-bold text-white flex-1 text-center">
-              Settings
+              {t("settings")}
             </Text>
             <View className="w-12" />
           </View>
@@ -513,18 +485,18 @@ export default function Settings() {
           {/* Profile Details */}
           <View className="p-4">
             <Text className="text-base font-bold text-gray-900 mb-3 px-2">
-              Personal Information
+              {t("personal_information")}
             </Text>
             <SettingItem
               icon={User}
-              label="Full Name"
+              label={t("full_name")}
               value={profile?.name}
               field="name"
             />
-            <SettingItem icon={Mail} label="Email" value={profile?.email} />
+            <SettingItem icon={Mail} label={t("email")} value={profile?.email} />
             <SettingItem
               icon={Phone}
-              label="Mobile Number"
+              label={t("mobile_number")}
               value={profile?.mobileNumber}
               field="mobileNumber"
             />
@@ -535,24 +507,24 @@ export default function Settings() {
         <View className="bg-white mx-4 mt-4 rounded-3xl shadow-lg overflow-hidden">
           <View className="p-4">
             <Text className="text-base font-bold text-gray-900 mb-3 px-2">
-              Address Details
+              {t("address_details")}
             </Text>
             <SettingItem
               icon={MapPin}
-              label="Primary Address"
+              label={t("primary_address")}
               value={profile?.address}
               field="address"
             />
             <SettingItem
               icon={MapPin}
-              label="Secondary Address"
+              label={t("secondary_address")}
               value={profile?.address2}
               field="address2"
             />
             {profile?.serviceablePincodes && (
               <SettingItem
                 icon={MapPin}
-                label="Serviceable Pincodes"
+                label={t("serviceable_pincodes")}
                 value={profile.serviceablePincodes.join(", ")}
                 field="serviceablePincodes"
               />
@@ -568,7 +540,7 @@ export default function Settings() {
                 <SettingsIcon size={20} color="#2563EB" strokeWidth={2} />
               </View>
               <Text className="text-gray-900 font-semibold flex-1">
-                Settings
+                {t("settings")}
               </Text>
               <ChevronRight size={18} color="#9CA3AF" strokeWidth={2} />
             </View>
@@ -633,7 +605,7 @@ export default function Settings() {
                 <BanIcon size={20} color="#2563EB" strokeWidth={2} />
               </View>
               <Text className="text-gray-900 font-semibold flex-1">
-                Complaints
+                {t("complaints")}
               </Text>
               <ChevronRight size={18} color="#9CA3AF" strokeWidth={2} />
             </View>
@@ -645,7 +617,7 @@ export default function Settings() {
                 <HelpCircle size={20} color="#2563EB" strokeWidth={2} />
               </View>
               <Text className="text-gray-900 font-semibold flex-1">
-                Help & Support
+                {t("help_support")}
               </Text>
               <ChevronRight size={18} color="#9CA3AF" strokeWidth={2} />
             </View>
@@ -675,7 +647,7 @@ export default function Settings() {
             >
               <LogOut size={20} color="#FFFFFF" strokeWidth={2.5} />
               <Text className="text-white font-bold text-base ml-2">
-                Logout
+                {t("logout")}
               </Text>
             </LinearGradient>
           </Pressable>

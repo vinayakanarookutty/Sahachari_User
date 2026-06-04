@@ -1,5 +1,6 @@
 // components/orders/OrderCard.tsx
 import { Calendar, CreditCard, Package } from "lucide-react-native";
+import { useTranslation } from "react-i18next";
 import { Image, Pressable, Text, View } from "react-native";
 
 export const getStatusColor = (status: string) => {
@@ -44,6 +45,7 @@ export function OrderCard({ item, onPress }: any) {
       year: 'numeric',
     });
   };
+  const {t} = useTranslation();
 
   return (
     <Pressable
@@ -55,7 +57,7 @@ export function OrderCard({ item, onPress }: any) {
         <View className="flex-row justify-between items-start mb-3">
           <View className="flex-1">
             <Text className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
-              Order ID
+              {t("order_id")}
             </Text>
             <Text className="text-lg font-bold text-gray-800" numberOfLines={1}>
               #{item.checkoutId}
@@ -98,7 +100,7 @@ export function OrderCard({ item, onPress }: any) {
                   {orderItem.productId?.name}
                 </Text>
                 <Text className="text-xs text-gray-500">
-                  Qty: {orderItem.quantity}
+                  {t("qty")}: {orderItem.quantity}
                 </Text>
               </View>
               <Text className="text-sm font-bold text-blue-600">
@@ -109,7 +111,7 @@ export function OrderCard({ item, onPress }: any) {
 
           {item.items?.length > 2 && (
             <Text className="text-xs text-blue-600 font-semibold text-center mt-1">
-              +{item.items.length - 2} more items
+              +{item.items.length - 2} {t("more_items")}
             </Text>
           )}
         </View>
@@ -121,7 +123,9 @@ export function OrderCard({ item, onPress }: any) {
               <View className="bg-blue-100 p-2 rounded-lg mr-2">
                 <CreditCard size={14} color="#3B82F6" />
               </View>
-              <Text className="text-sm text-gray-600">Total Amount</Text>
+              <Text className="text-sm text-gray-600">
+                {t("Total_Amount")}
+              </Text>
             </View>
             <Text className="text-xl font-bold text-blue-600">
               ₹{item.totalAmount?.toFixed(2)}
@@ -133,7 +137,9 @@ export function OrderCard({ item, onPress }: any) {
               <View className="bg-purple-100 p-2 rounded-lg mr-2">
                 <Calendar size={14} color="#8B5CF6" />
               </View>
-              <Text className="text-sm text-gray-600">Order Date</Text>
+              <Text className="text-sm text-gray-600">
+                {t("order_date")}
+              </Text>
             </View>
             <Text className="text-sm font-semibold text-gray-700">
               {formatDate(item.createdAt)}

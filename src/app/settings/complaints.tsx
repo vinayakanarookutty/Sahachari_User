@@ -2,6 +2,7 @@ import { useAuthStore } from "@/store/auth.store";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { ArrowLeft } from "lucide-react-native";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   ActivityIndicator,
   Alert,
@@ -39,6 +40,7 @@ const showAlert = (
 export default function ComplaintsScreen() {
   const router = useRouter();
   const params = useLocalSearchParams();
+  const {t} = useTranslation();
 
   const [category, setCategory] = useState("OTHER");
   const [subject, setSubject] = useState("");
@@ -234,31 +236,31 @@ export default function ComplaintsScreen() {
           </Pressable>
 
           <Text className="text-2xl font-bold ml-4">
-            Complaints
+            {t("complaints")}
           </Text>
         </View>
         {/* {category === "ORDER_CANCELLATION" && orderId && ( */}
         {isOrderCancellation && (
           <View className="bg-orange-50 border border-orange-200 rounded-2xl p-4 mb-4">
             <Text className="text-orange-700 font-bold text-lg">
-              Order Cancellation Request
+              {t("order_cancellation_request")}
             </Text>
 
             <Text className="text-orange-600 mt-1">
-              Order ID: {orderId}
+              {t("order_id")}: {orderId}
             </Text>
 
             <Text className="text-orange-500 mt-2">
-              Please tell us why you want to cancel this order.
-              An admin will review your request.
+              {t("why_cancel_order1")}
+              {t("why_cancel_order2")}
             </Text>
           </View>
         )}
         <View className="bg-white rounded-2xl p-4 mb-6">
           <Text className="text-center text-white font-bold">
             {category === "ORDER_CANCELLATION"
-              ? "Submit Cancellation Request"
-              : "Submit Complaint"}
+              ? t("cancel_request")
+              : t("submit_complaint")}
           </Text>
 
           {/* {category !== "ORDER_CANCELLATION" && ( */}
@@ -293,7 +295,7 @@ export default function ComplaintsScreen() {
             </>
           )}
           <Text className="font-semibold mb-2">
-            Subject
+            {t("subject")}
           </Text>
 
           <TextInput
@@ -304,7 +306,7 @@ export default function ComplaintsScreen() {
           />
 
           <Text className="font-semibold mb-2">
-            Description
+            {t("description")}
           </Text>
 
           <TextInput
@@ -315,8 +317,8 @@ export default function ComplaintsScreen() {
             textAlignVertical="top"
             placeholder={
               isOrderCancellation
-                ? "Please tell us why you want to cancel this order"
-                : "Describe your issue"
+                ? t("cancel_reason")
+                : t("issue")
             }
             className="border border-gray-300 rounded-xl p-4 min-h-[140px] mb-4"
           />
@@ -332,7 +334,7 @@ export default function ComplaintsScreen() {
               />
             ) : (
               <Text className="text-center text-white font-bold">
-                Submit Complaint
+                {t("submit_complaint")}
               </Text>
             )}
           </Pressable>
@@ -340,14 +342,14 @@ export default function ComplaintsScreen() {
 
         <View className="bg-white rounded-2xl p-4">
           <Text className="font-bold text-lg mb-4">
-            My Complaints
+            {t("my_complaints")}
           </Text>
 
           {loadingComplaints ? (
             <ActivityIndicator />
           ) : complaints.length === 0 ? (
             <Text className="text-gray-500">
-              No complaints found
+              {t("no_complaints_found")}
             </Text>
           ) : (
             complaints.map((item) => (
@@ -368,13 +370,13 @@ export default function ComplaintsScreen() {
                 </Text>
 
                 <Text className="mt-3 font-semibold text-blue-600">
-                  Status: {item.status}
+                  {t("status")}: {item.status}
                 </Text>
 
                 {item.adminReply ? (
                   <View className="mt-3 bg-green-50 p-3 rounded-lg">
                     <Text className="font-semibold text-green-700">
-                      Admin Reply
+                      {t("admin_reply")}
                     </Text>
 
                     <Text className="text-green-700 mt-1">

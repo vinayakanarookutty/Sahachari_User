@@ -14,6 +14,7 @@ import {
   XCircle
 } from "lucide-react-native";
 import { useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   ActivityIndicator,
   Animated,
@@ -43,6 +44,7 @@ export default function ProductDetails() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const { t } = useTranslation();
 
   const { data: product, isLoading, error, refetch } = useProduct(id);
   const {
@@ -159,7 +161,7 @@ export default function ProductDetails() {
         <ActivityIndicator size="large" color="#2563EB" />
         {/* <Text className="text-gray-500 mt-4 font-medium">Loading {isService ? 'service' : 'product'}...</Text> */}
         <Text className="text-gray-500 mt-4 font-medium">
-          Loading {isBookable ? 'booking item' : 'product'}...
+          {t("Loading")} {isBookable ? 'booking item' : 'product'}...
         </Text>
       </View>
     );
@@ -172,10 +174,10 @@ export default function ProductDetails() {
           <Text className="text-6xl mb-4">😔</Text>
           <Text className="text-xl font-bold text-gray-900 mb-2">
             {/* Unable to load {isService ? 'service' : 'product'} */}
-            Unable to load {isBookable ? 'booking item' : 'product'}
+            {t("unable_to_load")} {isBookable ? 'booking item' : 'product'}
           </Text>
           <Text className="text-gray-500 text-center mb-6">
-            Something went wrong. Please try again.
+            {t("something_went_wrong")}
           </Text>
           <Pressable
             onPress={() => refetch()}
@@ -271,7 +273,9 @@ export default function ProductDetails() {
             ) : (
               <View style={{ width, height: 400 }} className="bg-gray-200 items-center justify-center">
                 <Package size={64} color="#9CA3AF" strokeWidth={1.5} />
-                <Text className="text-gray-400 mt-4">No image available</Text>
+                <Text className="text-gray-400 mt-4">
+                  {t("No_image_available")}
+                </Text>
               </View>
             )}
           </ScrollView>
@@ -295,7 +299,7 @@ export default function ProductDetails() {
                 }}
               >
                 <Text className="text-white text-lg font-bold">
-                  {discountPercent}% OFF
+                  {discountPercent}% {t("off")}
                 </Text>
               </LinearGradient>
             </View>
@@ -321,7 +325,7 @@ export default function ProductDetails() {
                 }}
               >
                 <Text className="text-white text-lg font-bold">
-                  Service
+                  {t("Service")}
                 </Text>
               </LinearGradient>
             </View>
@@ -388,7 +392,7 @@ export default function ProductDetails() {
                   {/* {isService && ( */}
                   {isBookable && (
                     <Text className="text-lg text-gray-600 ml-2">
-                      per hour
+                      {t("per_hour")}
                     </Text>
                   )}
                   {/* {!isService && hasDiscount && ( */}
@@ -402,7 +406,7 @@ export default function ProductDetails() {
                 {/* {!isService && hasDiscount && ( */}
                 {!isBookable && hasDiscount && (
                   <Text className="text-green-600 font-semibold mt-1">
-                    You save ₹{(originalPrice - finalPrice).toFixed(2)}
+                    {t("you_save")} ₹{(originalPrice - finalPrice).toFixed(2)}
                   </Text>
                 )}
               </View>
@@ -415,14 +419,14 @@ export default function ProductDetails() {
                     <View className="bg-green-100 px-4 py-2 rounded-full flex-row items-center">
                       <CheckCircle size={18} color="#16A34A" strokeWidth={2.5} />
                       <Text className="text-green-700 font-bold ml-2">
-                        In Stock
+                        {t("in_stock")}
                       </Text>
                     </View>
                   ) : (
                     <View className="bg-red-100 px-4 py-2 rounded-full flex-row items-center">
                       <XCircle size={18} color="#DC2626" strokeWidth={2.5} />
                       <Text className="text-red-700 font-bold ml-2">
-                        Out of Stock
+                        {t("outOfStock")}
                       </Text>
                     </View>
                   )}
@@ -433,7 +437,7 @@ export default function ProductDetails() {
                   )} */}
                   {product.quantity > 0 && (
                     <Text className="text-gray-500 text-sm mt-2 text-right">
-                      {product.quantity} units available
+                      {product.quantity} {t("units_available")}
                     </Text>
                   )}
                 </View>
@@ -445,7 +449,7 @@ export default function ProductDetails() {
                 <View className="bg-green-100 px-4 py-2 rounded-full flex-row items-center">
                   <CheckCircle size={18} color="#16A34A" strokeWidth={2.5} />
                   <Text className="text-green-700 font-bold ml-2">
-                    Available
+                    {t("available")}
                   </Text>
                 </View>
               )}
@@ -456,13 +460,13 @@ export default function ProductDetails() {
                   <View className="bg-green-100 px-4 py-2 rounded-full flex-row items-center">
                     <CheckCircle size={18} color="#16A34A" strokeWidth={2.5} />
                     <Text className="text-green-700 font-bold ml-2">
-                      Available
+                      {t("available")}
                     </Text>
                   </View>
 
                   {product.quantity && (
                     <Text className="text-gray-500 text-sm mt-2 text-right">
-                      {product.quantity} units available
+                      {product.quantity} {t("units_available")}
                     </Text>
                   )}
                 </View>
@@ -476,7 +480,7 @@ export default function ProductDetails() {
           {isPurchasable && product.quantity > 0 && (
             <View className="mt-6 bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
               <Text className="text-lg font-bold text-gray-900 mb-4">
-                Quantity (for Buy Now)
+                {t("quantity_buy_now")}
               </Text>
 
               <View className="flex-row items-center justify-between">
@@ -510,7 +514,9 @@ export default function ProductDetails() {
 
               {/* Total */}
               <View className="mt-4 pt-4 border-t border-gray-100 flex-row justify-between items-center">
-                <Text className="text-gray-600">Total Amount</Text>
+                <Text className="text-gray-600">
+                  {t("Total_Amount")}
+                </Text>
                 <Text className="text-lg font-bold text-blue-600">
                   ₹{totalPrice.toFixed(2)}
                 </Text>
@@ -521,7 +527,7 @@ export default function ProductDetails() {
           {/* Description */}
           <View className="mt-6 bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
             <Text className="text-lg font-bold text-gray-900 mb-3">
-              Description
+              {t("description")}
             </Text>
 
             <Text className="text-gray-600 leading-7 text-base">
@@ -620,7 +626,7 @@ export default function ProductDetails() {
                 <View className="bg-gray-100 py-4 flex-row items-center justify-center">
                   <ShoppingCart size={20} color="#1F2937" strokeWidth={2.5} />
                   <Text className="text-gray-900 font-bold text-base ml-2">
-                    Add to Cart
+                    {t("addToCart")}
                   </Text>
                 </View>
               </Pressable>
@@ -644,7 +650,7 @@ export default function ProductDetails() {
                 >
                   <Package size={20} color="#FFFFFF" strokeWidth={2.5} />
                   <Text className="text-white font-bold text-base ml-2">
-                    Buy Now
+                    {t("buy_now")}
                   </Text>
                 </LinearGradient>
               </Pressable>
@@ -674,7 +680,7 @@ export default function ProductDetails() {
                   <>
                     <Package size={20} color="#FFFFFF" strokeWidth={2.5} />
                     <Text className="text-white font-bold text-base ml-2">
-                      Book Now
+                      {t("book_now")}
                     </Text>
                   </>
                 )}
@@ -686,7 +692,7 @@ export default function ProductDetails() {
           {isBookable && (
             <View className="mt-3 bg-blue-50 rounded-2xl p-3">
               <Text className="text-blue-700 text-center font-semibold text-sm">
-                Self Pickup Only
+                {t("self_pickup_only")}
               </Text>
             </View>
           )}
