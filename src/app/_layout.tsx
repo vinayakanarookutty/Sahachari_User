@@ -6,6 +6,8 @@ import { useAuthStore } from '../store/auth.store';
 import '../../global.css';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { ActivityIndicator, View } from 'react-native';
+import "../i18n";
+import { initializeLanguage } from "../i18n";
 
 export default function RootLayout() {
   const hydrate = useAuthStore((s) => s.hydrate);
@@ -14,6 +16,7 @@ export default function RootLayout() {
 
   useEffect(() => {
     hydrate();
+    initializeLanguage();
   }, []);
 
   if (!hydrated) {

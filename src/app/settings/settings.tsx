@@ -1,3 +1,4 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import * as ImagePicker from "expo-image-picker";
 import { LinearGradient } from "expo-linear-gradient";
@@ -8,6 +9,7 @@ import {
   Camera,
   ChevronRight,
   HelpCircle,
+  Languages,
   LogOut,
   Mail,
   MapPin,
@@ -16,6 +18,7 @@ import {
   User,
 } from "lucide-react-native";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   ActivityIndicator,
   Alert,
@@ -26,9 +29,11 @@ import {
   Text,
   ToastAndroid,
   View,
+  Switch,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { EditProfileModal } from "../../components/settings/EditProfileModal";
+import i18n from "../../i18n";
 import { useAuthStore } from "../../store/auth.store";
 
 const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000";
@@ -53,12 +58,59 @@ export default function Settings() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const queryClient = useQueryClient();
+  const { t } = useTranslation();
 
   const [showEditModal, setShowEditModal] = useState(false);
   const [editField, setEditField] = useState<
     "name" | "mobileNumber" | "address" | "address2" | "serviceablePincodes" | null
   >(null);
   const [editValue, setEditValue] = useState("");
+
+  // change app language
+  const changeLanguage = async (lang: "en" | "ml") => {
+    try {
+      await AsyncStorage.setItem("language", lang);
+      await i18n.changeLanguage(lang);
+    } catch (err) {
+      console.error("Language change failed", err);
+    }
+  };
+
+  // const handleLanguageChange = () => {
+  //   if (Platform.OS === "web") {
+  //     const isMalayalam = window.confirm(
+  //       "Press OK for Malayalam\nPress Cancel for English"
+  //     );
+
+  //     changeLanguage(isMalayalam ? "ml" : "en");
+  //     return;
+  //   }
+
+  //   Alert.alert(
+  //     "Select Language",
+  //     "Choose your preferred language",
+  //     [
+  //       {
+  //         text: "English",
+  //         onPress: () => changeLanguage("en"),
+  //       },
+  //       {
+  //         text: "Malayalam",
+  //         onPress: () => changeLanguage("ml"),
+  //       },
+  //       {
+  //         text: "Cancel",
+  //         style: "cancel",
+  //       },
+  //     ]
+  //   );
+  // };
+  const toggleLanguage = async () => {
+    const nextLanguage =
+      i18n.resolvedLanguage === "ml" ? "en" : "ml";
+
+    await changeLanguage(nextLanguage);
+  };
 
   // Fetch user profile
   const { data: profile, isLoading } = useQuery<UserProfile, Error>({
@@ -519,6 +571,57 @@ export default function Settings() {
                 Settings
               </Text>
               <ChevronRight size={18} color="#9CA3AF" strokeWidth={2} />
+            </View>
+          </Pressable>
+          {/* <Pressable
+            onPress={handleLanguageChange}
+            className="bg-white rounded-2xl shadow-sm overflow-hidden active:opacity-80"
+          >
+            <View className="flex-row items-center p-4">
+              <View className="w-10 h-10 rounded-full bg-blue-50 items-center justify-center mr-3">
+                <Languages size={20} color="#2563EB" strokeWidth={2} />
+              </View>
+
+              <View className="flex-1">
+                <Text className="text-gray-900 font-semibold">
+                  Language
+                </Text>
+
+                <Text className="text-xs text-gray-500">
+                  {i18n.resolvedLanguage === "ml"
+                    ? t("malayalam")
+                    : t("english")}
+                </Text>
+              </View>
+
+              <ChevronRight size={18} color="#9CA3AF" strokeWidth={2} />
+            </View>
+          </Pressable> */}
+          <Pressable
+            onPress={toggleLanguage}
+            className="bg-white rounded-2xl shadow-sm overflow-hidden"
+          >
+            <View className="flex-row items-center p-4">
+              <View className="w-10 h-10 rounded-full bg-blue-50 items-center justify-center mr-3">
+                <Languages size={20} color="#2563EB" />
+              </View>
+
+              <View className="flex-1">
+                <Text className="text-gray-900 font-semibold">
+                  {t("language")}
+                </Text>
+
+                <Text className="text-xs text-gray-500">
+                  {i18n.resolvedLanguage === "ml"
+                    ? "മലയാളം"
+                    : "English"}
+                </Text>
+              </View>
+
+              <Switch
+                value={i18n.resolvedLanguage === "ml"}
+                onValueChange={toggleLanguage}
+              />
             </View>
           </Pressable>
 

@@ -29,9 +29,10 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useCarousel } from "../../hooks/useCarousel";
-import { usePolicyAgreement } from "../../hooks/usePolicy";
 import { useProducts } from "../../hooks/useProducts";
 import { useProfile } from "../../hooks/useProfile";
+
+import { useTranslation } from "react-i18next";
 
 const { width } = Dimensions.get("window");
 // const CAROUSEL_IMAGES = [
@@ -117,6 +118,7 @@ const CATEGORY_GRADIENTS: Record<
 export default function Home() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const { t } = useTranslation();
 
   const { data: carouselData = [] } = useCarousel();
 
@@ -191,9 +193,14 @@ export default function Home() {
         gradientMap[normalizedCategory] ||
         CATEGORY_GRADIENTS["default"];
 
+      const translationKey = normalizedCategory
+        .replace(/\s*&\s*/g, "_")
+        .replace(/\s+/g, "_");
+
       return {
         id: `category-${index}`,
         name: category,
+        translationKey,
         icon: icon,
         gradient: colors.gradient,
         iconColor: colors.iconColor,
@@ -300,13 +307,15 @@ export default function Home() {
                     textShadowRadius: 4,
                   }}
                 >
-                  Sahachari
+                  {/* Sahachari */}
+                  {t("sahachari")}
                 </Text>
               </View>
               <View className="flex-row items-center mt-1">
                 <View className="w-12 h-0.5 bg-blue-200 mr-3 rounded-full" />
                 <Text className="text-blue-50 text-sm font-semibold tracking-wide">
-                  Premium Local Services
+                  {t("Premium_Local_Services")}
+
                 </Text>
               </View>
             </View>
@@ -519,10 +528,10 @@ export default function Home() {
 
                   </View>
                   <Text className="text-3xl font-black text-blue-900 mb-2" style={{ letterSpacing: 0.5 }}>
-                    Happy 60
+                    {t("Happy_60")}
                   </Text>
                   <Text className="text-blue-600 text-sm font-semibold leading-5">
-                    Exclusive for senior citizens
+                    {t("Exclusive_for_senior_citizens")}
                   </Text>
                 </View>
 
@@ -565,12 +574,12 @@ export default function Home() {
           <View className="flex-row items-center justify-between mb-7">
             <View className="flex-1">
               <Text className="text-3xl font-black text-gray-900 tracking-tight" style={{ letterSpacing: 0.3 }}>
-                Our Services
+                {t("Our_Services")}
               </Text>
               <View className="flex-row items-center mt-2">
                 <View className="w-8 h-0.5 bg-blue-500 rounded-full mr-2" />
                 <Text className="text-blue-600 text-sm font-bold tracking-wide">
-                  Discover Excellence
+                  {t("Discover_Excellence")}
                 </Text>
               </View>
             </View>
@@ -591,7 +600,9 @@ export default function Home() {
           {isLoading && (
             <View className="py-20 items-center">
               <ActivityIndicator size="large" color="#2563EB" />
-              <Text className="text-blue-400 mt-6 font-semibold text-base">Loading services...</Text>
+              <Text className="text-blue-400 mt-6 font-semibold text-base">
+                {t("Loading_services")}
+              </Text>
             </View>
           )}
 
@@ -657,7 +668,8 @@ export default function Home() {
                               numberOfLines={1}
                               style={{ letterSpacing: 0.5 }}
                             >
-                              {category.name}
+                              {/* {category.name} */}
+                              {t(`categories.${category.translationKey}`)}
                             </Text>
                           </View>
                         </LinearGradient>

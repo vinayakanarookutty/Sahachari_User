@@ -9,9 +9,11 @@ import {
 import { ActivityIndicator, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { PolicyGuard } from "../../components/policy/PolicyGuard";
 import { useAuthStore } from "../../store/auth.store";
 import { Role } from "../../types/user";
-import { PolicyGuard } from "../../components/policy/PolicyGuard";
+
+import i18n from "../../i18n";
 
 export default function TabsLayout() {
   const { token, user, hydrated } = useAuthStore();

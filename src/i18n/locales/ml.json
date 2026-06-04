@@ -1,0 +1,31 @@
+{
+    "sahachari": "സഹചാരി",
+    "home": "ഹോം",
+    "cart": "കാർട്ട്",
+    "addToCart": "കാർട്ടിലേക്ക് ചേർക്കുക",
+    "outOfStock": "സ്റ്റോക്കില്ല",
+    "price": "വില",
+    "description": "വിവരണം",
+    "language": "ഭാഷ",
+    "english": "ഇംഗ്ലീഷ്",
+    "malayalam": "മലയാളം",
+    "Premium_Local_Services": "മികച്ച പ്രാദേശിക സേവനങ്ങൾ",
+    "Happy_60": "ഹാപ്പി 60",
+    "Exclusive_for_senior_citizens": "മുതിർന്ന പൗരന്മാർക്കായി മാത്രം",
+    "Discover_Excellence": "മികവ് കണ്ടെത്തൂ",
+    "Our_Services": "ഞങ്ങളുടെ സേവനങ്ങൾ",
+    "Loading_services": "സേവനങ്ങൾ ലോഡ് ചെയ്യുന്നു...",
+    "categories": {
+        "food": "ഭക്ഷണം",
+        "vegetables_and_fruits": "പഴങ്ങളും പച്ചക്കറികളും",
+        "groceries": "പലചരക്ക് സാധനങ്ങൾ",
+        "home_made": "വീട്ടിൽ തയ്യാറാക്കിയത്",
+        "service": "സേവനം",
+        "fish_meat": "മത്സ്യവും മാംസവും",
+        "rent": "വാടക",
+        "electronics": "ഇലക്ട്രോണിക്സ്",
+        "fast_food": "ഫാസ്റ്റ് ഫുഡ്",
+        "snacks": "സ്നാക്കുകൾ",
+        "beverages": "പാനീയങ്ങൾ"
+    }
+}

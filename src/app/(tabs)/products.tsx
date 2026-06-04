@@ -8,10 +8,10 @@ import {
   FlatList,
   Image,
   Pressable,
+  RefreshControl,
   Text,
   TextInput,
   View,
-  RefreshControl,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useCategoryStores } from "../../hooks/Usecategorystores";
@@ -639,12 +639,14 @@ export default function ProductsScreen() {
               <View className="bg-white rounded-3xl p-8 items-center shadow-lg">
                 <Text className="text-7xl mb-4">📦</Text>
                 <Text className="text-xl font-bold text-gray-900 mb-2">
-                  No products found
+                  {/* No products found */}
+                  No services found
                 </Text>
                 <Text className="text-gray-500 text-center text-base leading-6">
                   {searchQuery
                     ? "Try searching with different keywords"
-                    : "No products available at the moment"}
+                    // : "No products available at the moment"}
+                    : "No services available at the moment"}
                 </Text>
               </View>
             </View>

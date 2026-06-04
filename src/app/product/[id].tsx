@@ -194,7 +194,7 @@ export default function ProductDetails() {
       </View>
     );
   }
-  
+
   // const originalPrice = Number(product.price);
   const originalPrice = Number(String(product.price).replace(/[^\d.]/g, "")) || 0;
 
@@ -426,7 +426,12 @@ export default function ProductDetails() {
                       </Text>
                     </View>
                   )}
-                  {product.quantity && product.quantity > 0 && (
+                  {/* {product.quantity && product.quantity > 0 && (
+                    <Text className="text-gray-500 text-sm mt-2 text-right">
+                      {product.quantity} units available
+                    </Text>
+                  )} */}
+                  {product.quantity > 0 && (
                     <Text className="text-gray-500 text-sm mt-2 text-right">
                       {product.quantity} units available
                     </Text>
@@ -467,7 +472,8 @@ export default function ProductDetails() {
 
           {/* Quantity Selector - Only for Products with Buy Now */}
           {/* {!isService && product.quantity && product.quantity > 0 && ( */}
-          {isPurchasable && product.quantity && product.quantity > 0 && (
+          {/* {isPurchasable && product.quantity && product.quantity > 0 && ( */}
+          {isPurchasable && product.quantity > 0 && (
             <View className="mt-6 bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
               <Text className="text-lg font-bold text-gray-900 mb-4">
                 Quantity (for Buy Now)
