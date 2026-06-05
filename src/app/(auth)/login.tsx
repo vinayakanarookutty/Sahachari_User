@@ -106,7 +106,7 @@ export default function Login() {
               </Text>
               <TextInput
                 className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-4 text-base text-gray-900"
-                placeholder="Enter your email"
+                placeholder={t("enter_your_email")}
                 placeholderTextColor="#9CA3AF"
                 autoCapitalize="none"
                 keyboardType="email-address"
@@ -149,7 +149,7 @@ export default function Login() {
               <View className="relative">
                 <TextInput
                   className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-4 pr-12 text-base text-gray-900"
-                  placeholder="Enter your password"
+                  placeholder={t("enter_your_password")}
                   placeholderTextColor="#9CA3AF"
                   secureTextEntry={!showPassword}
                   value={password}
@@ -193,7 +193,7 @@ export default function Login() {
                   <ActivityIndicator color="#ffffff" />
                 ) : (
                   <Text className="text-white text-base font-semibold">
-                    Sign In
+                    {t("sign_in")}
                   </Text>
                 )}
               </TouchableOpacity>
@@ -203,7 +203,7 @@ export default function Login() {
             <View className="flex-row items-center mb-8">
               <View className="flex-1 h-px bg-gray-200" />
               <Text className="px-4 text-sm text-gray-400 font-medium">
-                or
+                {t("or")}
               </Text>
               <View className="flex-1 h-px bg-gray-200" />
             </View>
@@ -212,14 +212,14 @@ export default function Login() {
             <View className="items-center">
               <View className="flex-row items-center">
                 <Text className="text-gray-600 text-base">
-                  Do not have an account?{" "}
+                  {t("do_not_have_account")}{" "}
                 </Text>
                 <Pressable
                   onPress={() => router.push("/(auth)/register")}
                   className="active:opacity-70"
                 >
                   <Text className="text-blue-600 font-semibold text-base">
-                    Sign Up
+                    {t("sign_up")}
                   </Text>
                 </Pressable>
               </View>

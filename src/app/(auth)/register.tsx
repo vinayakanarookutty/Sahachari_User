@@ -17,10 +17,12 @@ import { useRegister } from "../../hooks/useAuth";
 import { Role } from "../../types/user";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { Eye, EyeOff } from "lucide-react-native";
+import { useTranslation } from "react-i18next";
 
 export default function Register() {
   const register = useRegister();
   const [showPassword, setShowPassword] = useState(false);
+  const {t} = useTranslation();
 
   const [form, setForm] = useState({
     name: "",
@@ -107,10 +109,10 @@ export default function Register() {
             />
             <View className="w-12 h-1 bg-blue-600 mb-6 rounded-full" />
             <Text className="text-3xl font-bold text-gray-900 mb-2 tracking-tight">
-              Create Account
+              {t("create_account")}
             </Text>
             <Text className="text-sm text-gray-500 text-center">
-              Sign up to get started
+              {t("sign_up_to_get_started")}
             </Text>
           </View>
 
@@ -119,11 +121,11 @@ export default function Register() {
             {/* Full Name */}
             <View>
               <Text className="text-xs font-semibold text-gray-700 mb-1.5 ml-1">
-                Full Name
+                {t("full_name")}
               </Text>
               <TextInput
                 className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-3.5 text-base text-gray-900"
-                placeholder="Enter your full name"
+                placeholder={t("enter_your_full_name")}
                 placeholderTextColor="#9CA3AF"
                 value={form.name}
                 onChangeText={(v) => {
@@ -136,11 +138,11 @@ export default function Register() {
             {/* Email */}
             <View>
               <Text className="text-xs font-semibold text-gray-700 mb-1.5 ml-1">
-                Email
+                {t("email")}
               </Text>
               <TextInput
                 className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-3.5 text-base text-gray-900"
-                placeholder="Enter your email"
+                placeholder={t("enter_your_email")}
                 placeholderTextColor="#9CA3AF"
                 autoCapitalize="none"
                 keyboardType="email-address"
@@ -155,11 +157,11 @@ export default function Register() {
             {/* Address */}
             <View>
               <Text className="text-xs font-semibold text-gray-700 mb-1.5 ml-1">
-                Delivery Address
+                {t("delivery_address")}
               </Text>
               <TextInput
                 className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-3.5 text-base text-gray-900"
-                placeholder="Enter your delivery address"
+                placeholder={t("enter_your_delivery_address")}
                 placeholderTextColor="#9CA3AF"
                 value={form.address}
                 onChangeText={(v) => {
@@ -172,11 +174,11 @@ export default function Register() {
             {/* Pincodes */}
             <View>
               <Text className="text-xs font-semibold text-gray-700 mb-1.5 ml-1">
-                Serviceable Pincodes
+                {t("serviceable_pincodes")}
               </Text>
               <TextInput
                 className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-3.5 text-base text-gray-900"
-                placeholder="e.g., 110001, 110002"
+                placeholder={t("e_g_110001_110002")}
                 placeholderTextColor="#9CA3AF"
                 keyboardType="numeric"
                 value={form.pincodesInput}
@@ -186,7 +188,7 @@ export default function Register() {
                 }}
               />
               <Text className="text-[10px] text-gray-400 mt-1 ml-1">
-                Comma separated 6-digit codes
+                {t("comma_separated_6_digit_codes")}
               </Text>
             </View>
 
@@ -210,13 +212,13 @@ export default function Register() {
           </View> */}
             <View>
               <Text className="text-xs font-semibold text-gray-700 mb-1.5 ml-1">
-                Password
+                {t("password")}
               </Text>
 
               <View className="relative">
                 <TextInput
                   className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-3.5 pr-12 text-base text-gray-900"
-                  placeholder="Create a password"
+                  placeholder={t("create_a_password")}
                   placeholderTextColor="#9CA3AF"
                   secureTextEntry={!showPassword}
                   value={form.password}
@@ -259,7 +261,7 @@ export default function Register() {
                 <ActivityIndicator color="#ffffff" />
               ) : (
                 <Text className="text-white text-base font-semibold">
-                  Create Account
+                  {t("create_account")}
                 </Text>
               )}
             </TouchableOpacity>
@@ -267,7 +269,9 @@ export default function Register() {
             {/* Divider */}
             <View className="flex-row items-center my-6">
               <View className="flex-1 h-px bg-gray-200" />
-              <Text className="px-4 text-xs text-gray-400 font-medium">or</Text>
+              <Text className="px-4 text-xs text-gray-400 font-medium">
+                {t("or")}
+              </Text>
               <View className="flex-1 h-px bg-gray-200" />
             </View>
 
@@ -278,8 +282,10 @@ export default function Register() {
                 className="active:opacity-70"
               >
                 <Text className="text-gray-600 text-sm">
-                  Already have an account?{" "}
-                  <Text className="text-blue-600 font-semibold">Log In</Text>
+                  {t("already_have_account")}{" "}
+                  <Text className="text-blue-600 font-semibold">
+                    {t("log_in")}
+                  </Text>
                 </Text>
               </Pressable>
             </View>

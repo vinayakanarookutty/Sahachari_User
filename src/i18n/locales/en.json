@@ -178,5 +178,20 @@
     "terms_and_conditions": "Terms & Conditions",
     "welcome_back": "Welcome Back",
     "sign_in_to_access_account": "Sign in to access your account",
-     "password": "Password"
+    "password": "Password",
+    "enter_your_email": "Enter your email",
+    "enter_your_password": "Enter your password",
+    "sign_in": "Sign In",
+    "or": "or",
+    "do_not_have_account": " Do not have an account?",
+    "sign_up": "Sign Up",
+    "create_account": "Create Account",
+    "sign_up_to_get_started": "Sign up to get started",
+    "enter_your_full_name": "Enter your full name",
+    "enter_your_delivery_address": "Enter your delivery address",
+    "e_g_110001_110002": "Eg., 110001, 110002",
+    "comma_separated_6_digit_codes": "Comma separated 6-digit codes",
+    "create_a_password": "Create a password",
+    "log_in": "Log In",
+    "already_have_account": "Already have an account?"
 }
