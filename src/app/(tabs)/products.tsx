@@ -578,7 +578,7 @@ export default function ProductsScreen() {
               }}
             >
               <Text className="text-amber-700 font-semibold mr-2">
-                Store Products
+                {t("store_products")}
               </Text>
               <X size={16} color="#D97706" strokeWidth={3} />
             </Pressable>
