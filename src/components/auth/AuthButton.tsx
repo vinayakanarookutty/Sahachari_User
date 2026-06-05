@@ -1,4 +1,5 @@
 // components/AuthButton.tsx
+import { useTranslation } from "react-i18next";
 import { Pressable, Text } from "react-native";
 
 export function AuthButton({
@@ -10,6 +11,7 @@ export function AuthButton({
   loading: boolean;
   onPress: () => void;
 }) {
+  const {t} = useTranslation();
   return (
     <Pressable
       className={`bg-blue-600 py-3 rounded-md ${
@@ -19,7 +21,7 @@ export function AuthButton({
       disabled={loading}
     >
       <Text className="text-white text-center font-semibold text-lg">
-        {loading ? "Please wait..." : title}
+        {loading ? t("please_wait") : title}
       </Text>
     </Pressable>
   );

@@ -417,12 +417,12 @@ export function CheckoutModal({
                 {/* Place Order */}
                 <Pressable
                   onPress={() => {
-                    if (!address.paymentMethod) {
-                      alert('Please select a payment method');
+                    if (!address.city) {
+                      alert(t("please_select_place"));
                       return;
                     }
-                    if (!address.place) {
-                      alert('Please select a place');
+                    if (!address.paymentMethod) {
+                      alert(t("please_select_payment_method"));
                       return;
                     }
 

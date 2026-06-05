@@ -101,15 +101,15 @@ export default function ComplaintsScreen() {
       if (!response.ok) {
         throw new Error(
           data.message ||
-          "Failed to load complaints"
+          t("failed_to_load_complaints")
         );
       }
 
       setComplaints(data);
     } catch (error: any) {
       showAlert(
-        "Error",
-        error.message || "Failed to load complaints"
+        t("error"),
+        error.message ||  t("failed_to_load_complaints")
       );
     } finally {
       setLoadingComplaints(false);
@@ -133,16 +133,16 @@ export default function ComplaintsScreen() {
     try {
       if (!subject.trim()) {
         showAlert(
-          "Validation",
-          "Please enter subject"
+          t("validation"),
+          t("enter_subject")
         );;
         return;
       }
 
       if (!description.trim()) {
         showAlert(
-          "Validation",
-          "Please enter description"
+          t("validation"),
+          t("enter_description")
         );
         return;
       }
@@ -177,15 +177,15 @@ export default function ComplaintsScreen() {
       if (!response.ok) {
         throw new Error(
           data.message ||
-          "Failed to create complaint"
+          t("failed_to_create_complaint")
         );
       }
 
       showAlert(
-        "Success",
+        t("success"),
         isOrderCancellation
-          ? "Cancellation request submitted successfully"
-          : "Complaint submitted successfully",
+          ? t("cancellation_request_success")
+          : t("complaint_submitted_success"),
         () => {
           if (isOrderCancellation) {
             router.replace("/orders");
@@ -201,8 +201,8 @@ export default function ComplaintsScreen() {
 
     } catch (error: any) {
       showAlert(
-        "Error",
-        error.message || "Failed to submit complaint"
+        t("error"),
+        error.message || t("failed_to_load_complaints")
       );
     } finally {
       setLoading(false);

@@ -3,8 +3,7 @@ import {
   Home,
   Receipt,
   ShoppingBag,
-  ShoppingCart,
-  Wrench,
+  ShoppingCart
 } from "lucide-react-native";
 import { ActivityIndicator, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -87,5 +86,5 @@ const TABS = [
   { name: "products", label: "services", Icon: ShoppingBag },
   { name: "cart", label: "cart", Icon: ShoppingCart },
   { name: "orders", label: "orders", Icon: Receipt },
-  { name: "services", label: "services", Icon: Wrench },
+  // { name: "services", label: "services", Icon: Wrench },
 ] as const;

@@ -5,6 +5,7 @@ import { useAuthStore } from "@/store/auth.store";
 import { router } from "expo-router";
 import { Eye, EyeOff } from "lucide-react-native";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   ActivityIndicator,
   Image,
@@ -21,6 +22,7 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
+  const {t}= useTranslation();
 
   const loginMutation = useLogin();
   const isLoading = loginMutation.isPending;
@@ -86,12 +88,12 @@ export default function Login() {
 
             {/* Title */}
             <Text className="text-[42px] font-bold text-gray-900 mb-3 tracking-tight">
-              Welcome Back
+              {t("welcome_back")}
             </Text>
 
             {/* Subtitle */}
             <Text className="text-base text-gray-500 text-center font-normal">
-              Sign in to access your account
+              {t("sign_in_to_access_account")}
             </Text>
           </View>
 
@@ -100,7 +102,7 @@ export default function Login() {
             {/* Email Input */}
             <View className="mb-4">
               <Text className="text-sm font-semibold text-gray-700 mb-2 ml-1">
-                Email
+                {t("email")}
               </Text>
               <TextInput
                 className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-4 text-base text-gray-900"
@@ -140,7 +142,7 @@ export default function Login() {
             <View className="mb-2">
               <View className="flex-row justify-between items-center mb-2">
                 <Text className="text-sm font-semibold text-gray-700 ml-1">
-                  Password
+                  {t("password")}
                 </Text>
               </View>
 

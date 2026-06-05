@@ -134,7 +134,7 @@ export default function Settings() {
 
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.message || "Failed to update profile");
+        throw new Error(error.message || t("failed_to_update_profile"));
       }
 
       return response.json();
@@ -144,13 +144,13 @@ export default function Settings() {
       setShowEditModal(false);
 
       if (Platform.OS === "android") {
-        ToastAndroid.show("Profile updated successfully!", ToastAndroid.SHORT);
+        ToastAndroid.show(t("profile_updated_successfully"), ToastAndroid.SHORT);
       } else {
-        Alert.alert("Success", "Profile updated successfully!");
+        Alert.alert(t("success"), t("profile_updated_successfully"));
       }
     },
     onError: (error: any) => {
-      Alert.alert("Error", error.message || "Failed to update profile");
+      Alert.alert(t("error"), error.message || t("failed_to_update_profile"));
     },
   });
 
@@ -238,14 +238,14 @@ export default function Settings() {
       queryClient.invalidateQueries({ queryKey: ["currentUser"] });
 
       if (Platform.OS === "android") {
-        ToastAndroid.show("Profile picture updated!", ToastAndroid.SHORT);
+        ToastAndroid.show(t("profile_picture_updated"), ToastAndroid.SHORT);
       } else {
-        Alert.alert("Success", "Profile picture updated!");
+        Alert.alert(t("success"), t("profile_picture_updated"));
       }
     },
     onError: (error: any) => {
       console.error("Avatar upload error:", error);
-      Alert.alert("Error", error.message || "Failed to upload avatar");
+      Alert.alert("Error", error.message || t("failed_to_upload_avatar"));
     },
   });
 
@@ -285,8 +285,8 @@ export default function Settings() {
 
       if (status !== "granted") {
         Alert.alert(
-          "Permission needed",
-          "Please grant permission to access photos"
+          t("permission_needed"),
+          t("please_grant_permission_to_access_photos")
         );
         return;
       }
@@ -303,7 +303,7 @@ export default function Settings() {
       }
     } catch (error) {
       console.error("Error picking image:", error);
-      Alert.alert("Error", "Failed to pick image");
+      Alert.alert(t("error"), t("failed_to_pick_image"));
     }
   };
 
@@ -340,14 +340,14 @@ export default function Settings() {
       };
 
       if (Platform.OS === "web") {
-        const confirm = window.confirm("Are you sure you want to logout?");
+        const confirm = window.confirm(t("are_you_sure_you_want_to_logout"));
         if (confirm) await doLogout();
         return;
       }
 
-      Alert.alert("Logout", "Are you sure you want to logout?", [
-        { text: "Cancel", style: "cancel" },
-        { text: "Logout", style: "destructive", onPress: doLogout },
+      Alert.alert(t("logout"), t("are_you_sure_you_want_to_logout"), [
+        { text: t("cancel"), style: "cancel" },
+        { text: t("logout"), style: "destructive", onPress: doLogout },
       ]);
     } catch (err) {
       console.error("Logout failed:", err);

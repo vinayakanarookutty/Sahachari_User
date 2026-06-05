@@ -4,8 +4,9 @@ import {
   View,
 } from "react-native";
 
-import { PolicyAgreementModal } from "./PolicyAgreementModal";
+import { useTranslation } from "react-i18next";
 import { usePolicyAgreement } from "../../hooks/usePolicy";
+import { PolicyAgreementModal } from "./PolicyAgreementModal";
 
 interface Props {
   children: ReactNode;
@@ -21,6 +22,7 @@ export function PolicyGuard({
     isInitialLoading,
     isAccepting,
   } = usePolicyAgreement();
+  const {t}= useTranslation();
 
   // Prevent app flashing before policy status is known
   if (isInitialLoading) {
@@ -46,7 +48,7 @@ export function PolicyGuard({
         visible={showPolicy}
         title={
           policy?.title ||
-          "Terms & Conditions"
+          t("terms_and_conditions")
         }
         content={policy?.content || ""}
         loading={isAccepting}

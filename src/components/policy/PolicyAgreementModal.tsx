@@ -1,5 +1,6 @@
 import { LinearGradient } from "expo-linear-gradient";
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
     ActivityIndicator,
     Dimensions,
@@ -28,6 +29,7 @@ export function PolicyAgreementModal({
     onAccept,
 }: PolicyAgreementModalProps) {
     const [hasReachedBottom, setHasReachedBottom] = useState(false);
+    const {t} = useTranslation();
 
     const handleScroll = (event: any) => {
         const {
@@ -99,7 +101,7 @@ export function PolicyAgreementModal({
                                 fontSize: 14,
                             }}
                         >
-                            Please read the policy carefully before continuing.
+                            {t("please_read_policy_carefully")}
                         </Text>
                     </LinearGradient>
 
@@ -149,7 +151,7 @@ export function PolicyAgreementModal({
                                         fontWeight: "600",
                                     }}
                                 >
-                                    Scroll to the bottom to enable agreement
+                                   {t("scroll_to_bottom_to_enable_agreement")}
                                 </Text>
                             </View>
                         )}
@@ -193,7 +195,7 @@ export function PolicyAgreementModal({
                                             fontWeight: "700",
                                         }}
                                     >
-                                        I Agree & Continue
+                                        {t("i_agree_and_continue")}
                                     </Text>
                                 )}
                             </LinearGradient>
