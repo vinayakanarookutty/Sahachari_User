@@ -16,20 +16,32 @@ i18n.use(initReactI18next).init({
     },
   },
 
-
-  lng: Localization.getLocales()[0]?.languageCode || "en",
+  lng: "en",
   fallbackLng: "en",
 
   interpolation: {
     escapeValue: false,
   },
-}); 
+});
 
 export const initializeLanguage = async () => {
-  const savedLanguage = await AsyncStorage.getItem("language");
+  try {
+    const savedLanguage =
+      await AsyncStorage.getItem("language");
 
-  if (savedLanguage) {
-    await i18n.changeLanguage(savedLanguage);
+    if (savedLanguage) {
+      await i18n.changeLanguage(savedLanguage);
+      return;
+    }
+
+    const deviceLanguage =
+      Localization.getLocales()?.[0]?.languageCode;
+
+    await i18n.changeLanguage(
+      deviceLanguage === "ml" ? "ml" : "en"
+    );
+  } catch (error) {
+    console.log("Language init error:", error);
   }
 };
 

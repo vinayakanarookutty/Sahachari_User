@@ -15,8 +15,12 @@ export default function RootLayout() {
   const hydrated = useAuthStore((s) => s.hydrated);
 
   useEffect(() => {
-    hydrate();
-    initializeLanguage();
+    const init = async () => {
+      await hydrate();
+      await initializeLanguage();
+    };
+
+    init();
   }, []);
 
   if (!hydrated) {
