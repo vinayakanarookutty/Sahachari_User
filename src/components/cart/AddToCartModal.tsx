@@ -194,7 +194,7 @@ export function AddToCartModal({
               className="bg-gray-100 py-4 rounded-2xl"
             >
               <Text className="text-center text-gray-700 font-semibold text-base">
-                {t("Cancel")}
+                {t("cancel")}
               </Text>
             </Pressable>
           </View>

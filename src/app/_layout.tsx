@@ -1,13 +1,12 @@
 import { QueryClientProvider } from '@tanstack/react-query';
-import { queryClient } from '../lib/queryClient';
 import { Slot } from 'expo-router';
 import { useEffect } from 'react';
-import { useAuthStore } from '../store/auth.store';
-import '../../global.css';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { ActivityIndicator, View } from 'react-native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import '../../global.css';
 import "../i18n";
-import { initializeLanguage } from "../i18n";
+import { queryClient } from '../lib/queryClient';
+import { useAuthStore } from '../store/auth.store';
 
 export default function RootLayout() {
   const hydrate = useAuthStore((s) => s.hydrate);
@@ -17,7 +16,7 @@ export default function RootLayout() {
   useEffect(() => {
     const init = async () => {
       await hydrate();
-      await initializeLanguage();
+      // await initializeLanguage();
     };
 
     init();
