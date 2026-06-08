@@ -33,6 +33,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { EditProfileModal } from "../../components/settings/EditProfileModal";
+import { changeLanguage } from "../../i18n";
 import i18n from "../../i18n";
 import { useAuthStore } from "../../store/auth.store";
 
@@ -67,15 +68,6 @@ export default function Settings() {
   const [editValue, setEditValue] = useState("");
 
   // change app language
-  const changeLanguage = async (lang: "en" | "ml") => {
-    try {
-      await AsyncStorage.setItem("language", lang);
-      await i18n.changeLanguage(lang);
-    } catch (err) {
-      console.error("Language change failed", err);
-    }
-  };
-
   // translate language
   const toggleLanguage = async () => {
     const nextLanguage =
