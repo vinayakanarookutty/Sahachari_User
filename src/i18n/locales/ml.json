@@ -194,5 +194,14 @@
     "create_a_password": "പാസ്‌വേഡ് സൃഷ്ടിക്കുക",
     "log_in": "ലോഗ് ഇൻ",
     "already_have_account": "അക്കൗണ്ട് ഉണ്ടോ?",
-    "store_products": "സ്റ്റോർ ഉൽപ്പന്നം"
+    "store_products": "സ്റ്റോർ ഉൽപ്പന്നം",
+    "Category": "വിഭാഗം",
+    "categories2": {
+        "PAYMENT": "പേയ്മെന്റ്",
+        "DELIVERY": "ഡെലിവറി",
+        "PRODUCT": "ഉൽപ്പന്നം",
+        "STORE": "സ്റ്റോർ",
+        "REFUND": "റീഫണ്ട്",
+        "OTHER": "മറ്റുള്ളവ"
+    }
 }

@@ -40,7 +40,7 @@ const showAlert = (
 export default function ComplaintsScreen() {
   const router = useRouter();
   const params = useLocalSearchParams();
-  const {t} = useTranslation();
+  const { t } = useTranslation();
 
   const [category, setCategory] = useState("OTHER");
   const [subject, setSubject] = useState("");
@@ -51,7 +51,7 @@ export default function ComplaintsScreen() {
   const [loadingComplaints, setLoadingComplaints] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
-  const categories = [
+  const categories2 = [
     "PAYMENT",
     "DELIVERY",
     "PRODUCT",
@@ -109,7 +109,7 @@ export default function ComplaintsScreen() {
     } catch (error: any) {
       showAlert(
         t("error"),
-        error.message ||  t("failed_to_load_complaints")
+        error.message || t("failed_to_load_complaints")
       );
     } finally {
       setLoadingComplaints(false);
@@ -267,11 +267,11 @@ export default function ComplaintsScreen() {
           {!isOrderCancellation && (
             <>
               <Text className="font-semibold mb-2">
-                Category
+                {t("Category")}
               </Text>
 
               <View className="flex-row flex-wrap mb-4">
-                {categories.map((item) => (
+                {categories2.map((item) => (
                   <Pressable
                     key={item}
                     onPress={() => setCategory(item)}
@@ -287,7 +287,7 @@ export default function ComplaintsScreen() {
                           : "text-black"
                       }
                     >
-                      {item}
+                      {t(`categories2.${item}`)}
                     </Text>
                   </Pressable>
                 ))}

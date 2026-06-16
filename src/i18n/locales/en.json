@@ -193,5 +193,14 @@
     "create_a_password": "Create a password",
     "log_in": "Log In",
     "already_have_account": "Already have an account?",
-    "store_products": "Store Products"
+    "store_products": "Store Products",
+    "Category": "Category",
+    "categories2": {
+        "PAYMENT": "Payment",
+        "DELIVERY": "Delivery",
+        "PRODUCT": "Product",
+        "STORE": "Store",
+        "REFUND": "Refund",
+        "OTHER": "Other"
+    }
 }
