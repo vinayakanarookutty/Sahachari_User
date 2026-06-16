@@ -40,8 +40,10 @@ export default function TabsLayout() {
             headerLeft: () => null,
             tabBarShowLabel: false,
             tabBarStyle: {
-              height: 64 + Math.min(insets.bottom, 30), // 👈 closer to nav bar
-              paddingBottom: Math.min(insets.bottom, 30),
+              // height: 64 + Math.min(insets.bottom, 30), // 👈 closer to nav bar
+              height: 60 + insets.bottom, //
+              paddingBottom: insets.bottom,
+              // paddingBottom: Math.min(insets.bottom, 30),
               paddingTop: 6,
               borderTopWidth: 1,
               borderTopColor: "#e5e7eb",
