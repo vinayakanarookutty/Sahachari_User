@@ -45,7 +45,7 @@
     "No_stores_found": "സ്റ്റോറുകൾ ലഭ്യമല്ല",
     "noStoresInCategory": "\"{{category}}\" വിഭാഗത്തിൽ സ്റ്റോറുകളൊന്നും ലഭ്യമല്ല",
     "Stores": "സ്റ്റോറുകൾ",
-    "All_Services": "സമ്പൂർണ്ണ സേവനങ്ങൾ",
+    "All_Services": "സേവനങ്ങൾ",
     "Loading_your_cart": "കാർട്ട് ലോഡ് ചെയ്യുന്നു...",
     "Shopping_Cart": "ഷോപ്പിംഗ് കാർട്ട്",
     "Your_cart_is_empty": "കാർട്ട് ശൂന്യമാണ്",
@@ -203,5 +203,6 @@
         "STORE": "സ്റ്റോർ",
         "REFUND": "റീഫണ്ട്",
         "OTHER": "മറ്റുള്ളവ"
-    }
+    },
+    "All_Products":"ഉൽപ്പന്നങ്ങൾ"
 }

@@ -469,6 +469,14 @@ export default function ProductsScreen() {
   const showingProducts =
     !!storeId || (!categoryFilter && !isLoadingStores);
 
+  const isService = effectiveCategory?.toLowerCase() === "service";
+
+  const pageTitle = showingStores
+    ? `${translatedCategory} ${t("Stores")}`
+    : isService
+      ? t("All_Services")
+      : t("All_Products");
+
   return (
     <View className="flex-1 bg-gray-50">
       <LinearGradient
@@ -489,9 +497,9 @@ export default function ProductsScreen() {
               <Text className="text-2xl font-bold text-white">
                 {showingStores
                   ? `${translatedCategory} ${t("Stores")}`
-                  : storeId
-                    ? `${t("Service")}`
-                    : `${t("All_Services")}`}
+                  : isService
+                    ? t("All_Services")
+                    : t("All_Products")}
               </Text>
               {showingStores && stores.length > 0 && (
                 <Text className="text-blue-100 text-sm mt-0.5">
