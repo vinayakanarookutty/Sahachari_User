@@ -13,6 +13,9 @@ import {
   User,
   Utensils,
   Wrench,
+  Coffee,
+  Sandwich,
+  Cookie,
 } from "lucide-react-native";
 import { useMemo, useRef, useState } from "react";
 import {
@@ -35,13 +38,6 @@ import { useProfile } from "../../hooks/useProfile";
 import { useTranslation } from "react-i18next";
 
 const { width } = Dimensions.get("window");
-// const CAROUSEL_IMAGES = [
-//   require("../../../assets/WhatsApp Image 2026-02-11 at 10.13.48 AM.jpeg"),
-//   require("../../../assets/WhatsApp Image 2026-02-11 at 5.19.25 PM.jpeg"),
-//   require("../../../assets/WhatsApp Image 2026-02-11 at 11.25.36 AM.jpeg"),
-//   require("../../../assets/pexels-jack-sparrow-4198972.jpg"),
-//   require("../../../assets/im3.jpg"),
-// ];
 
 // Icon mapping for different categories
 const CATEGORY_ICONS: Record<string, any> = {
@@ -53,6 +49,9 @@ const CATEGORY_ICONS: Record<string, any> = {
   "Fish meat": Fish,
   "rent": Wrench,
   "electronics": Plug,
+  "Snacks": Cookie,
+  "Fast Food": Sandwich,
+  "Beverages": Coffee,
   "default": Package,
 };
 // Premium white and blue color gradients
@@ -105,6 +104,23 @@ const CATEGORY_GRADIENTS: Record<
     gradient: ["#FFFFFF", "#F5F3FF"],
     iconColor: "#7C3AED",
     shadowColor: "#C4B5FD",
+  },
+  "Snacks": {
+    gradient: ["#FFFFFF", "#FFF7ED"],
+    iconColor: "#C2410C",
+    shadowColor: "#FDBA74",
+  },
+
+  "Fast Food": {
+    gradient: ["#FFFFFF", "#FEF2F2"],
+    iconColor: "#DC2626",
+    shadowColor: "#FCA5A5",
+  },
+
+  "Beverages": {
+    gradient: ["#FFFFFF", "#EFF6FF"],
+    iconColor: "#2563EB",
+    shadowColor: "#93C5FD",
   },
 
   "default": {
@@ -173,6 +189,9 @@ export default function Home() {
         "fish & meat": Fish,
         "rent": Wrench,
         "electronics": Plug,
+        "snacks": Cookie,
+        "fast food": Sandwich,
+        "beverages": Coffee,
       };
 
       const gradientMap: Record<string, any> = {
@@ -185,6 +204,9 @@ export default function Home() {
         "fish & meat": CATEGORY_GRADIENTS["Fish meat"],
         "rent": CATEGORY_GRADIENTS["rent"],
         "electronics": CATEGORY_GRADIENTS["electronics"],
+        "snacks": CATEGORY_GRADIENTS["Snacks"],
+        "fast food": CATEGORY_GRADIENTS["Fast Food"],
+        "beverages": CATEGORY_GRADIENTS["Beverages"],
       };
 
       const icon = iconMap[normalizedCategory] || Package;
