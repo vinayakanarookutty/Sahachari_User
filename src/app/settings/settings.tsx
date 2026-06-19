@@ -299,26 +299,6 @@ export default function Settings() {
     }
   };
 
-  // const handleLogout = () => {
-  //   window.alert("TEST ALERT");
-  //   Alert.alert("Logout", "Are you sure you want to logout?", [
-  //     { text: "Cancel", style: "cancel" },
-  //     {
-  //       text: "Logout",
-  //       style: "destructive",
-  //       onPress: async () => {
-  //         // testing
-  //         console.log("BEFORE LOGOUT:", useAuthStore.getState());
-  //         await logout();
-  //         console.log("AFTER LOGOUT:", useAuthStore.getState());
-  //         // testing
-  //         router.replace("/(auth)/login");
-  //         console.log("FINAL STATE:", useAuthStore.getState());
-  //       },
-  //     },
-  //   ]);
-  // };
-
   const handleLogout = async () => {
     try {
       const doLogout = async () => {
@@ -603,7 +583,9 @@ export default function Settings() {
             </View>
           </Pressable>
 
-          <Pressable className="bg-white rounded-2xl shadow-sm overflow-hidden active:opacity-80">
+          <Pressable className="bg-white rounded-2xl shadow-sm overflow-hidden active:opacity-80"
+            onPress={() => router.push("/settings/faq")}
+          >
             <View className="flex-row items-center p-4">
               <View className="w-10 h-10 rounded-full bg-blue-50 items-center justify-center mr-3">
                 <HelpCircle size={20} color="#2563EB" strokeWidth={2} />

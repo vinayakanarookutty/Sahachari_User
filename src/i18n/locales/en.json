@@ -203,5 +203,42 @@
         "REFUND": "Refund",
         "OTHER": "Other"
     },
-    "All_Products":"All Products"
+    "All_Products": "All Products",
+    "frequently_asked_questions": "Frequently Asked Questions",
+    "need_more_help": "Need more help?",
+    "contact_support_message": "If your question is not listed here, please contact support through the Help & Support section.",
+    "faq": {
+        "place_order": {
+            "question": "How do I place an order?",
+            "answer": "Browse products or services, add them to your cart, and proceed to checkout."
+        },
+        "track_order": {
+            "question": "How do I track my order?",
+            "answer": "Go to the Orders section from the bottom navigation and select the order you want to track."
+        },
+        "cancel_order": {
+            "question": "How do I cancel an order?",
+            "answer": "Orders can be cancelled before they are accepted or processed by the store."
+        },
+        "contact_support": {
+            "question": "How do I contact support?",
+            "answer": "Use the Help & Support section or contact details provided in the application."
+        },
+        "service_booking": {
+            "question": "How do service bookings work?",
+            "answer": "Choose a service, review the details, place your booking, and wait for confirmation from the provider."
+        },
+        "rental_booking": {
+            "question": "How do rental bookings work?",
+            "answer": "Select the rental item, choose the required duration, and complete the booking process."
+        },
+        "payment_methods": {
+            "question": "What payment methods are available?",
+            "answer": "Available payment methods depend on your application configuration and store settings."
+        },
+        "update_profile": {
+            "question": "How can I update my profile?",
+            "answer": "Open Profile Settings and edit your personal information."
+        }
+    }
 }
