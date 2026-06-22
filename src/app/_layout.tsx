@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react';
 import { ActivityIndicator, View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import '../../global.css';
-// import "../i18n";
 import { queryClient } from '../lib/queryClient';
 import { useAuthStore } from '../store/auth.store';
 import { initializeLanguage } from "../i18n";

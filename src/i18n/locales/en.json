@@ -240,5 +240,7 @@
             "question": "How can I update my profile?",
             "answer": "Open Profile Settings and edit your personal information."
         }
-    }
+    },
+    "Open": "Open",
+    "Closed": "Closed"
 }

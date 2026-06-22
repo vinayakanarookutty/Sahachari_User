@@ -41,6 +41,7 @@ interface Product {
   quantity: number;
   offers: any[];
   storeId?: string;
+  status: string; // ACTIVE | CLOSED
 }
 
 export default function ProductsScreen() {
@@ -172,11 +173,15 @@ export default function ProductsScreen() {
     : "";
 
   const renderStore = ({ item }: { item: Store }) => {
+    const isStoreActive = item.status === "ACTIVE";
     return (
       <Pressable
+        // disabled={!isStoreActive}
         onPress={() => handleStorePress(item._id)}
         className="mb-4 mx-4 rounded-3xl overflow-hidden bg-white active:scale-[0.98]"
         style={{
+          opacity: isStoreActive ? 1 : 0.65,
+          backgroundColor: isStoreActive ? "#FFFFFF" : "#F3F4F6",
           shadowColor: "#000",
           shadowOffset: { width: 0, height: 4 },
           shadowOpacity: 0.1,
@@ -193,7 +198,14 @@ export default function ProductsScreen() {
                   source={{ uri: `${S3_BASE_URL}/${item.image}` }}
                   className="w-full h-full"
                   resizeMode="cover"
-                />
+                />{!isStoreActive && (
+                  <View
+                    className="absolute inset-0"
+                    style={{
+                      backgroundColor: "rgba(128,128,128,0.65)",
+                    }}
+                  />
+                )}
                 <LinearGradient
                   colors={["transparent", "rgba(0,0,0,0.3)"]}
                   style={{
@@ -215,7 +227,8 @@ export default function ProductsScreen() {
             {item.isVerified && (
               <View className="absolute top-2 left-2">
                 <LinearGradient
-                  colors={["#10B981", "#059669"]}
+                  colors={isStoreActive
+                    ? ["#10B981", "#059669"] : ["#9CA3AF", "#6B7280"]}
                   start={{ x: 0, y: 0 }}
                   end={{ x: 1, y: 1 }}
                   style={{
@@ -232,13 +245,23 @@ export default function ProductsScreen() {
             )}
 
             {/* Status Badge */}
-            <View className="absolute bottom-2 right-2">
+            {/* <View className="absolute bottom-2 right-2">
               <View
                 className={`px-2 py-1 rounded-full ${item.status === "ACTIVE" ? "bg-green-500" : "bg-gray-500"
                   }`}
               >
                 <Text className="text-white text-xs font-semibold">
                   {item.status}
+                </Text>
+              </View>
+            </View> */}
+            <View className="absolute bottom-2 right-2">
+              <View
+                className={`px-3 py-1 rounded-full ${isStoreActive ? "bg-green-500" : "bg-black"
+                  }`}
+              >
+                <Text className="text-white text-xs font-semibold">
+                  {isStoreActive ? t("Open") : t("Closed")}
                 </Text>
               </View>
             </View>
@@ -250,7 +273,10 @@ export default function ProductsScreen() {
               <Text className="text-lg font-bold text-gray-900" numberOfLines={1}>
                 {item.name}
               </Text>
-              <Text className="text-sm text-gray-500 mt-1" numberOfLines={1}>
+              <Text
+                className={`text-sm ${isStoreActive ? "text-gray-500" : "text-gray-400"
+                  }`}
+              >
                 📍 {item.address}
               </Text>
               <Text className="text-sm text-gray-400 mt-1" numberOfLines={1}>
@@ -258,8 +284,19 @@ export default function ProductsScreen() {
               </Text>
             </View>
             <View className="mt-3">
-              <View className="bg-blue-50 self-start px-4 py-2 rounded-full">
+              {/* <View className="bg-blue-50 self-start px-4 py-2 rounded-full">
                 <Text className="text-xs text-blue-700 font-semibold">
+                  {t("View_Products")}
+                </Text>
+              </View> */}
+              <View
+                className={`self-start px-4 py-2 rounded-full ${isStoreActive ? "bg-blue-50" : "bg-gray-200"
+                  }`}
+              >
+                <Text
+                  className={`text-xs font-semibold ${isStoreActive ? "text-blue-700" : "text-gray-500"
+                    }`}
+                >
                   {t("View_Products")}
                 </Text>
               </View>
@@ -272,6 +309,7 @@ export default function ProductsScreen() {
 
   const renderProduct = ({ item }: { item: Product }) => {
     const isService = item.category === "Service";
+    const isStoreActive = item.status === "ACTIVE";
 
     const extractPrice = (value: any) => {
       if (!value) return 0;
@@ -306,10 +344,13 @@ export default function ProductsScreen() {
 
     return (
       <Pressable
+        disabled={!isStoreActive}
         onPress={() => handleProductPress(item)}
         className="mb-4 mx-4 rounded-3xl overflow-hidden bg-white active:scale-[0.98]"
         style={{
           shadowColor: "#000",
+          opacity: isStoreActive ? 1 : 0.65,
+          backgroundColor: isStoreActive ? "#FFFFFF" : "#F3F4F6",
           shadowOffset: { width: 0, height: 4 },
           shadowOpacity: 0.1,
           shadowRadius: 12,
@@ -321,14 +362,20 @@ export default function ProductsScreen() {
           <View className="w-32 h-32 relative">
             {item.images && item.images.length > 0 ? (
               <>
-
                 <Image
-
-                  // source={{ uri: item.images[0] }}
                   source={{ uri: imageUrl }}
                   className="w-full h-full"
                   resizeMode="cover"
                 />
+
+                {!isStoreActive && (
+                  <View
+                    className="absolute inset-0"
+                    style={{
+                      backgroundColor: "rgba(128,128,128,0.65)",
+                    }}
+                  />
+                )}
                 <LinearGradient
                   colors={["transparent", "rgba(0,0,0,0.3)"]}
                   style={{
@@ -356,7 +403,9 @@ export default function ProductsScreen() {
             {isService && (
               <View className="absolute top-2 left-2">
                 <LinearGradient
-                  colors={["#3B82F6", "#2563EB"]}
+                  colors={isStoreActive
+                    ? ["#3B82F6", "#2563EB"]
+                    : ["#9CA3AF", "#6B7280"]}
                   start={{ x: 0, y: 0 }}
                   end={{ x: 1, y: 1 }}
                   style={{
@@ -376,7 +425,7 @@ export default function ProductsScreen() {
             {hasDiscount && discountPercent > 0 && (
               <View className="absolute top-2 right-2">
                 <LinearGradient
-                  colors={["#EF4444", "#DC2626"]}
+                  colors={isStoreActive ? ["#EF4444", "#DC2626"] : ["#9CA3AF", "#6B7280"]}
                   start={{ x: 0, y: 0 }}
                   end={{ x: 1, y: 1 }}
                   style={{
@@ -396,10 +445,16 @@ export default function ProductsScreen() {
           {/* Product Details */}
           <View className="flex-1 p-4 justify-between">
             <View>
-              <Text className="text-lg font-bold text-gray-900" numberOfLines={1}>
+              <Text
+                className={`text-lg font-bold ${isStoreActive ? "text-gray-900" : "text-gray-500"
+                  }`}
+              >
                 {item.name}
               </Text>
-              <Text className="text-sm text-gray-500 mt-1" numberOfLines={2}>
+              <Text
+                className={`text-sm ${isStoreActive ? "text-gray-500" : "text-gray-400"
+                  }`}
+              >
                 {item.description}
               </Text>
             </View>
@@ -407,7 +462,10 @@ export default function ProductsScreen() {
             <View className="mt-3">
               <View className="flex-row items-baseline">
                 <View className="flex-row items-end">
-                  <Text className="text-2xl font-bold text-blue-600">
+                  <Text
+                    className={`text-2xl font-bold ${isStoreActive ? "text-blue-600" : "text-gray-500"
+                      }`}
+                  >
                     ₹{displayPrice}
                   </Text>
 
@@ -433,14 +491,26 @@ export default function ProductsScreen() {
               {!isService && (
                 <View className="mt-2">
                   {item.quantity > 0 ? (
-                    <View className="bg-green-50 self-start px-3 py-1 rounded-full">
-                      <Text className="text-xs text-green-700 font-semibold">
+                    <View
+                      className={`self-start px-3 py-1 rounded-full ${isStoreActive ? "bg-green-50" : "bg-gray-200"
+                        }`}
+                    >
+                      <Text
+                        className={`text-xs font-semibold ${isStoreActive ? "text-green-700" : "text-gray-600"
+                          }`}
+                      >
                         {t("In_Stock")} ({item.quantity})
                       </Text>
                     </View>
                   ) : (
-                    <View className="bg-red-50 self-start px-3 py-1 rounded-full">
-                      <Text className="text-xs text-red-700 font-semibold">
+                    <View
+                      className={`self-start px-3 py-1 rounded-full ${isStoreActive ? "bg-red-50" : "bg-gray-200"
+                        }`}
+                    >
+                      <Text
+                        className={`text-xs font-semibold ${isStoreActive ? "text-red-700" : "text-gray-600"
+                          }`}
+                      >
                         {t("Out_of_Stock")}
                       </Text>
                     </View>
@@ -450,8 +520,14 @@ export default function ProductsScreen() {
 
               {isService && (
                 <View className="mt-2">
-                  <View className="bg-blue-50 self-start px-3 py-1 rounded-full">
-                    <Text className="text-xs text-blue-700 font-semibold">
+                  <View
+                    className={`self-start px-3 py-1 rounded-full ${isStoreActive ? "bg-blue-50" : "bg-gray-200"
+                      }`}
+                  >
+                    <Text
+                      className={`text-xs font-semibold ${isStoreActive ? "text-blue-700" : "text-gray-600"
+                        }`}
+                    >
                       {t("Available")}
                     </Text>
                   </View>
