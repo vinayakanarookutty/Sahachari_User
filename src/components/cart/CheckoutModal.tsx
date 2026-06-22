@@ -188,12 +188,12 @@ export function CheckoutModal({
           ) : (
             <>
               {/* Overlay for closing dropdown */}
-              {showPaymentDropdown && (
+              {/* {showPaymentDropdown && (
                 <Pressable
                   className="absolute inset-0 z-10"
                   onPress={() => setShowPaymentDropdown(false)}
                 />
-              )}
+              )} */}
 
               <ScrollView
                 className="px-6 py-4"

@@ -1,3 +1,4 @@
+import { useStoreStatus } from "@/hooks/useStore";
 import { useAuthStore } from "@/store/auth.store";
 import { LinearGradient } from "expo-linear-gradient";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -90,8 +91,16 @@ export default function ProductsScreen() {
     });
 
 
-  const { data: storeProducts, isLoading: isLoadingStoreProducts, refetch: refetchStoreProducts, } =
-    useStoreProducts(storeId);
+  const { data: storeProducts, isLoading: isLoadingStoreProducts, refetch: refetchStoreProducts, } = useStoreProducts(storeId);
+  const {
+    data: storeStatuses = [],
+    isLoading: isLoadingStoreStatus,
+    error: storeStatusError,
+  } = useStoreStatus(token);
+
+  console.log("storeStatuses", storeStatuses);
+  console.log("storeStatusError", storeStatusError);
+
 
   //filter products based on category
   const filteredProducts = (storeProducts ?? allProducts ?? []).filter(
@@ -174,6 +183,7 @@ export default function ProductsScreen() {
 
   const renderStore = ({ item }: { item: Store }) => {
     const isStoreActive = item.status === "ACTIVE";
+
     return (
       <Pressable
         // disabled={!isStoreActive}
@@ -309,7 +319,17 @@ export default function ProductsScreen() {
 
   const renderProduct = ({ item }: { item: Product }) => {
     const isService = item.category === "Service";
-    const isStoreActive = item.status === "ACTIVE";
+
+    const currentStore = Array.isArray(storeStatuses)
+      ? storeStatuses.find(
+        (s) => String(s.storeId) === String(item.storeId)
+      )
+      : null;
+
+    const isStoreActive = currentStore?.status === 'ACTIVE';
+    console.log("Product Store ID:", item.storeId);
+    console.log("stores", stores);
+    console.log("Store Statuses:", storeStatuses);
 
     const extractPrice = (value: any) => {
       if (!value) return 0;
