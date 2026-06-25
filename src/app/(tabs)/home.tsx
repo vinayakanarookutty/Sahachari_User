@@ -3,19 +3,19 @@ import { useRouter } from "expo-router";
 import {
   Briefcase,
   ChevronRight,
+  Coffee,
+  Cookie,
   Fish,
   HomeIcon,
   Leaf,
   Package,
   Phone,
   Plug,
+  Sandwich,
   ShoppingCart,
   User,
   Utensils,
   Wrench,
-  Coffee,
-  Sandwich,
-  Cookie,
 } from "lucide-react-native";
 import { useMemo, useRef, useState } from "react";
 import {
@@ -34,8 +34,12 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useCarousel } from "../../hooks/useCarousel";
 import { useProducts } from "../../hooks/useProducts";
 import { useProfile } from "../../hooks/useProfile";
+import { useRentals } from "../../hooks/useRentals";
+import { useServices } from "../../hooks/useServices";
 
 import { useTranslation } from "react-i18next";
+
+import { resolveCategoryRoute } from "../market/utils/marketplaceRouter";
 
 const { width } = Dimensions.get("window");
 
@@ -143,9 +147,19 @@ export default function Home() {
   const scrollViewRef = useRef<ScrollView>(null);
 
   const [searchQuery, setSearchQuery] = useState("");
-  const { data, isLoading, refetch: refetchProducts, } = useProducts(
+  // const { data, isLoading, refetch: refetchProducts, } = useProducts(
+  //   searchQuery ? { search: searchQuery } : undefined,
+  // );
+  const { data: products = [], isLoading: productsLoading, refetch: refetchProducts, } = useProducts(
     searchQuery ? { search: searchQuery } : undefined,
   );
+
+  const { data: services = [], isLoading: servicesLoading, } = useServices();
+
+  const { data: rentals = [], isLoading: rentalsLoading, } = useRentals();
+
+  const isLoading = productsLoading || servicesLoading || rentalsLoading;
+
   const [refreshing, setRefreshing] = useState(false);
 
   const onRefresh = async () => {
@@ -155,6 +169,7 @@ export default function Home() {
       await Promise.all([
         refetchProducts?.(),
         refetchProfile?.(),
+        // need to add services and rentals
       ]);
     } catch (error) {
       console.log("Refresh error:", error);
@@ -164,72 +179,159 @@ export default function Home() {
   };
 
   // Extract unique categories from products data
-  const categories = useMemo(() => {
-    if (!data || data.length === 0) return [];
+  // const categories = useMemo(() => {
+  //   if (!data || data.length === 0) return [];
 
+  //   const uniqueCategories = new Set<string>();
+  //   data.forEach((product: any) => {
+  //     if (product.category) {
+  //       const cleanCategory = product.category.trim();
+  //       uniqueCategories.add(cleanCategory);
+  //     }
+  //   });
+
+  //   return Array.from(uniqueCategories).map((category, index) => {
+  //     // const colors = CATEGORY_GRADIENTS[category] || CATEGORY_GRADIENTS["default"];
+  //     // const icon = CATEGORY_ICONS[category] || CATEGORY_ICONS["default"];
+  //     const normalizedCategory = category.trim().toLowerCase();
+
+  //     const iconMap: Record<string, any> = {
+  //       "food": Utensils,
+  //       "vegetables and fruits": Leaf,
+  //       "groceries": ShoppingCart,
+  //       "home made": HomeIcon,
+  //       "service": Briefcase,
+  //       "fish & meat": Fish,
+  //       "rent": Wrench,
+  //       "electronics": Plug,
+  //       "snacks": Cookie,
+  //       "fast food": Sandwich,
+  //       "beverages": Coffee,
+  //     };
+
+  //     const gradientMap: Record<string, any> = {
+  //       "food": CATEGORY_GRADIENTS["Food"],
+  //       "vegetables and fruits":
+  //         CATEGORY_GRADIENTS["Vegetables and fruits"],
+  //       "groceries": CATEGORY_GRADIENTS["Groceries"],
+  //       "home made": CATEGORY_GRADIENTS["Home made"],
+  //       "service": CATEGORY_GRADIENTS["Service"],
+  //       "fish & meat": CATEGORY_GRADIENTS["Fish meat"],
+  //       "rent": CATEGORY_GRADIENTS["rent"],
+  //       "electronics": CATEGORY_GRADIENTS["electronics"],
+  //       "snacks": CATEGORY_GRADIENTS["Snacks"],
+  //       "fast food": CATEGORY_GRADIENTS["Fast Food"],
+  //       "beverages": CATEGORY_GRADIENTS["Beverages"],
+  //     };
+
+  //     const icon = iconMap[normalizedCategory] || Package;
+
+  //     const colors =
+  //       gradientMap[normalizedCategory] ||
+  //       CATEGORY_GRADIENTS["default"];
+
+  //     const translationKey = normalizedCategory
+  //       .replace(/\s*&\s*/g, "_")
+  //       .replace(/\s+/g, "_");
+
+  //     return {
+  //       id: `category-${index}`,
+  //       name: category,
+  //       translationKey,
+  //       icon: icon,
+  //       gradient: colors.gradient,
+  //       iconColor: colors.iconColor,
+  //       shadowColor: colors.shadowColor,
+  //     };
+  //   });
+  // }, [data]);
+
+  const categories = useMemo(() => {
     const uniqueCategories = new Set<string>();
-    data.forEach((product: any) => {
-      if (product.category) {
-        const cleanCategory = product.category.trim();
-        uniqueCategories.add(cleanCategory);
+
+    products.forEach((item: any) => {
+      if (item.category) {
+        uniqueCategories.add(item.category.trim());
       }
     });
 
-    return Array.from(uniqueCategories).map((category, index) => {
-      // const colors = CATEGORY_GRADIENTS[category] || CATEGORY_GRADIENTS["default"];
-      // const icon = CATEGORY_ICONS[category] || CATEGORY_ICONS["default"];
-      const normalizedCategory = category.trim().toLowerCase();
+    if (services.length > 0) {
+      uniqueCategories.add("Service");
+    }
 
-      const iconMap: Record<string, any> = {
-        "food": Utensils,
-        "vegetables and fruits": Leaf,
-        "groceries": ShoppingCart,
-        "home made": HomeIcon,
-        "service": Briefcase,
-        "fish & meat": Fish,
-        "rent": Wrench,
-        "electronics": Plug,
-        "snacks": Cookie,
-        "fast food": Sandwich,
-        "beverages": Coffee,
-      };
+    if (rentals.length > 0) {
+      uniqueCategories.add("Rent");
+    }
 
-      const gradientMap: Record<string, any> = {
-        "food": CATEGORY_GRADIENTS["Food"],
-        "vegetables and fruits":
-          CATEGORY_GRADIENTS["Vegetables and fruits"],
-        "groceries": CATEGORY_GRADIENTS["Groceries"],
-        "home made": CATEGORY_GRADIENTS["Home made"],
-        "service": CATEGORY_GRADIENTS["Service"],
-        "fish & meat": CATEGORY_GRADIENTS["Fish meat"],
-        "rent": CATEGORY_GRADIENTS["rent"],
-        "electronics": CATEGORY_GRADIENTS["electronics"],
-        "snacks": CATEGORY_GRADIENTS["Snacks"],
-        "fast food": CATEGORY_GRADIENTS["Fast Food"],
-        "beverages": CATEGORY_GRADIENTS["Beverages"],
-      };
+    return Array.from(uniqueCategories).map(
+      (category, index) => {
+        const normalizedCategory =
+          category.trim().toLowerCase();
 
-      const icon = iconMap[normalizedCategory] || Package;
+        const iconMap: Record<string, any> = {
+          food: Utensils,
+          "vegetables and fruits": Leaf,
+          groceries: ShoppingCart,
+          "home made": HomeIcon,
+          service: Briefcase,
+          rent: Wrench,
+          electronics: Plug,
+          snacks: Cookie,
+          "fast food": Sandwich,
+          beverages: Coffee,
+          "fish & meat": Fish,
+        };
 
-      const colors =
-        gradientMap[normalizedCategory] ||
-        CATEGORY_GRADIENTS["default"];
+        const gradientMap: Record<string, any> = {
+          food: CATEGORY_GRADIENTS["Food"],
+          "vegetables and fruits":
+            CATEGORY_GRADIENTS[
+            "Vegetables and fruits"
+            ],
+          groceries:
+            CATEGORY_GRADIENTS["Groceries"],
+          "home made":
+            CATEGORY_GRADIENTS["Home made"],
+          service:
+            CATEGORY_GRADIENTS["Service"],
+          rent:
+            CATEGORY_GRADIENTS["rent"],
+          electronics:
+            CATEGORY_GRADIENTS["electronics"],
+          snacks:
+            CATEGORY_GRADIENTS["Snacks"],
+          "fast food":
+            CATEGORY_GRADIENTS["Fast Food"],
+          beverages:
+            CATEGORY_GRADIENTS["Beverages"],
+          "fish & meat":
+            CATEGORY_GRADIENTS["Fish meat"],
+        };
 
-      const translationKey = normalizedCategory
-        .replace(/\s*&\s*/g, "_")
-        .replace(/\s+/g, "_");
+        const icon =
+          iconMap[normalizedCategory] ||
+          Package;
 
-      return {
-        id: `category-${index}`,
-        name: category,
-        translationKey,
-        icon: icon,
-        gradient: colors.gradient,
-        iconColor: colors.iconColor,
-        shadowColor: colors.shadowColor,
-      };
-    });
-  }, [data]);
+        const colors =
+          gradientMap[normalizedCategory] ||
+          CATEGORY_GRADIENTS["default"];
+
+        return {
+          id: `category-${index}`,
+          name: category,
+          translationKey:
+            normalizedCategory.replace(
+              /\s*&\s*/g,
+              "_",
+            ).replace(/\s+/g, "_"),
+          icon,
+          gradient: colors.gradient,
+          iconColor: colors.iconColor,
+          shadowColor: colors.shadowColor,
+        };
+      }
+    );
+  }, [products, services, rentals]);
 
   const scaleAnims = useRef(
     Array(10).fill(0).map(() => new Animated.Value(1))
@@ -266,9 +368,27 @@ export default function Home() {
     }
   };
 
+  // const handleCategoryPress = (categoryName: string) => {
+  //   router.push({
+  //     pathname: "/products",
+  //     params: { category: categoryName },
+  //   });
+  // };
   const handleCategoryPress = (categoryName: string) => {
+    const route = resolveCategoryRoute(categoryName);
+
+    if (route === "services") {
+      router.push("/services");
+      return;
+    }
+
+    if (route === "rentals") {
+      router.push("/rentals");
+      return;
+    }
+
     router.push({
-      pathname: "/products",
+      pathname: "/product",
       params: { category: categoryName },
     });
   };

@@ -242,5 +242,6 @@
         }
     },
     "Open": "Open",
-    "Closed": "Closed"
+    "Closed": "Closed",
+    "my_bookings":"My Bookings"
 }

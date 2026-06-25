@@ -19,6 +19,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useCategoryStores } from "../../hooks/Usecategorystores";
 import { useProducts } from "../../hooks/useProducts";
 import { useStoreProducts } from "../../hooks/useStoreProducts";
+import { getImageUrl } from "@/utils/image";
 
 interface Store {
   _id: string;
@@ -120,9 +121,6 @@ export default function ProductsScreen() {
       allowedStoreIds.includes(p.storeId || "")
     );
 
-  // const isLoadingProducts = storeId
-  //   ? isLoadingStoreProducts
-  //   : isLoadingAllProducts;
   const isLoadingProducts = storeId
     ? !!isLoadingStoreProducts
     : !!isLoadingAllProducts;
@@ -147,7 +145,7 @@ export default function ProductsScreen() {
 
   const handleStorePress = (selectedStoreId: string) => {
     router.push({
-      pathname: "/products",
+      pathname: "/product",
       params: {
         category: categoryFilter,
         storeId: selectedStoreId,
@@ -205,7 +203,10 @@ export default function ProductsScreen() {
             {item.image ? (
               <>
                 <Image
-                  source={{ uri: `${S3_BASE_URL}/${item.image}` }}
+                  // source={{ uri: `${S3_BASE_URL}/${item.image}` }}
+                  source={{
+                    uri: getImageUrl(item.image),
+                  }}
                   className="w-full h-full"
                   resizeMode="cover"
                 />{!isStoreActive && (
@@ -254,17 +255,6 @@ export default function ProductsScreen() {
               </View>
             )}
 
-            {/* Status Badge */}
-            {/* <View className="absolute bottom-2 right-2">
-              <View
-                className={`px-2 py-1 rounded-full ${item.status === "ACTIVE" ? "bg-green-500" : "bg-gray-500"
-                  }`}
-              >
-                <Text className="text-white text-xs font-semibold">
-                  {item.status}
-                </Text>
-              </View>
-            </View> */}
             <View className="absolute bottom-2 right-2">
               <View
                 className={`px-3 py-1 rounded-full ${isStoreActive ? "bg-green-500" : "bg-black"
@@ -291,6 +281,11 @@ export default function ProductsScreen() {
               </Text>
               <Text className="text-sm text-gray-400 mt-1" numberOfLines={1}>
                 ✉️ {item.email}
+              </Text>
+              <Text>
+                <Text className="text-sm text-gray-400 mt-1" numberOfLines={1}>
+                  {item.address}
+                </Text>
               </Text>
             </View>
             <View className="mt-3">
@@ -327,9 +322,6 @@ export default function ProductsScreen() {
       : null;
 
     const isStoreActive = currentStore?.status === 'ACTIVE';
-    console.log("Product Store ID:", item.storeId);
-    console.log("stores", stores);
-    console.log("Store Statuses:", storeStatuses);
 
     const extractPrice = (value: any) => {
       if (!value) return 0;
@@ -358,9 +350,11 @@ export default function ProductsScreen() {
         ? item.price.split("/")[1].trim()
         : "";
 
-    const imageUrl = item.images?.[0]?.startsWith("http")
-      ? item.images[0]
-      : `${S3_BASE_URL?.replace(/\/$/, "")}/${item.images?.[0]}`;
+    // const imageUrl = item.images?.[0]?.startsWith("http")
+    //   ? item.images[0]
+    //   : `${S3_BASE_URL?.replace(/\/$/, "")}/${item.images?.[0]}`;
+
+    const imageUrl = getImageUrl(item.images?.[0]);
 
     return (
       <Pressable
@@ -582,66 +576,48 @@ export default function ProductsScreen() {
         style={{ paddingTop: insets.top + 16, paddingBottom: 20 }}
       >
         <View className="px-6">
-          <View className="flex-row items-center justify-between mb-4">
+          <View className="flex-row items-center mb-4">
+            {/* Left */}
             <Pressable
-              onPress={() => router.back()}
-              className="bg-white/20 rounded-full p-2.5 backdrop-blur-sm"
+              onPress={() => router.back() || router.push('/home')}
+              className="bg-white/20 rounded-full p-2.5"
             >
               <ArrowLeft size={24} color="#FFFFFF" strokeWidth={2.5} />
             </Pressable>
-            <View className="flex-1 items-center">
-              <Text className="text-2xl font-bold text-white">
+
+            {/* Center */}
+            <View className="flex-1 items-center px-3">
+              <Text
+                className="text-2xl font-bold text-white text-center"
+                numberOfLines={2}
+              >
                 {showingStores
                   ? `${translatedCategory} ${t("Stores")}`
                   : isService
                     ? t("All_Services")
                     : t("All_Products")}
               </Text>
+
               {showingStores && stores.length > 0 && (
                 <Text className="text-blue-100 text-sm mt-0.5">
                   {stores.length}{" "}
                   {stores.length === 1 ? t("store") : t("stores")}
                 </Text>
               )}
-              {showingProducts && displayProducts && displayProducts.length > 0 && (
-                <Text className="text-blue-100 text-sm mt-0.5">
-                  {displayProducts.length}{" "}
-                  {displayProducts.length === 1 ? t("item") : t("items")}
-                </Text>
-              )}
-            </View>
-            <View className="w-12" />
-          </View>
 
-          {showingProducts && (
-            <View
-              className="bg-white rounded-2xl flex-row items-center px-4 py-3.5"
-              style={{
-                shadowColor: "#000",
-                shadowOffset: { width: 0, height: 2 },
-                shadowOpacity: 0.1,
-                shadowRadius: 8,
-                elevation: 3,
-              }}
-            >
-              <Search size={20} color="#9CA3AF" strokeWidth={2} />
-              <TextInput
-                placeholder={t('Search_products')}
-                value={searchQuery}
-                onChangeText={setSearchQuery}
-                className="flex-1 ml-3 text-gray-900 text-base"
-                placeholderTextColor="#9CA3AF"
-              />
-              {searchQuery.length > 0 && (
-                <Pressable
-                  onPress={clearSearch}
-                  className="bg-gray-100 rounded-full p-1"
-                >
-                  <X size={16} color="#6B7280" strokeWidth={2.5} />
-                </Pressable>
-              )}
+              {showingProducts &&
+                displayProducts &&
+                displayProducts.length > 0 && (
+                  <Text className="text-blue-100 text-sm mt-0.5">
+                    {displayProducts.length}{" "}
+                    {displayProducts.length === 1 ? t("item") : t("items")}
+                  </Text>
+                )}
             </View>
-          )}
+
+            {/* Right spacer = same width as button */}
+            <View className="w-[44px]" />
+          </View>
         </View>
       </LinearGradient>
 

@@ -1,29 +1,11 @@
 import { Wrench } from "lucide-react-native";
-import React, { useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
 import { Image, Pressable, Text, View } from "react-native";
+import { useTranslation } from "react-i18next";
+import { getImageUrl } from "@/utils/image";
 
 export function ServiceCard({ item, onPress }: any) {
-  const imgUrl = item.images?.[0] || null;
-  const [imgSrc, setImgSrc] = useState<any>(null);
-  const {t} = useTranslation();
+  const { t } = useTranslation();
 
-  useEffect(() => {
-    if (!imgUrl) {
-      setImgSrc(null);
-      return;
-    }
-
-    setImgSrc(null);
-
-    const t = setTimeout(() => {
-      setImgSrc({ uri: imgUrl });
-    }, 30);
-
-    return () => clearTimeout(t);
-  }, [imgUrl]);
-
-  // Extract numeric price from strings like "100/Hour"
   const extractPrice = (value: any) => {
     if (!value) return 0;
 
@@ -33,112 +15,118 @@ export function ServiceCard({ item, onPress }: any) {
   };
 
   const originalPrice = extractPrice(item.price);
-  // const originalPrice = extractPrice(item.price);
+  const finalPrice = item.finalPrice ?? originalPrice;
 
-  const finalPrice =
-    item.finalPrice ?? originalPrice;
+  const hasDiscount = finalPrice < originalPrice;
 
-  const hasDiscount =
-    finalPrice < originalPrice;
-  // let finalPrice = originalPrice;
+  const discountPercent = hasDiscount
+    ? Math.round(
+      ((originalPrice - finalPrice) / originalPrice) * 100
+    )
+    : 0;
 
-  // Apply active percentage offer
-  // if (item.offers?.length > 0) {
-  //   // const activeOffer = item.offers.find(
-  //   //   (offer: any) => offer.isActive
-  //   // );
-  //   const activeOffer = item.offers?.find((offer: any) => {
-  //     const now = new Date();
+  const imageUrl = getImageUrl(item.images?.[0]);
 
-  //     return (
-  //       offer.isActive &&
-  //       new Date(offer.startDate) <= now &&
-  //       new Date(offer.endDate) >= now
-  //     );
-  //   });
-
-  //   if (activeOffer?.type === "PERCENTAGE") {
-  //     finalPrice =
-  //       originalPrice -
-  //       (originalPrice * activeOffer.value) / 100;
-  //   }
-  // }
-
-  // const hasDiscount = finalPrice < originalPrice;
-
-  // Extract unit from "100/Hour"
   const unit =
-    typeof item.price === "string" && item.price.includes("/")
-      ? item.price.split("/")[1]
-      : "";
+    typeof item.price === "string" &&
+      item.price.includes("/")
+      ? item.price.split("/")[1].trim()
+      : "hr";
 
   return (
     <Pressable
-      onPress={() => onPress(item.id)}
-      className="flex-1 bg-white rounded-2xl overflow-hidden shadow-sm active:opacity-70"
+      onPress={() => onPress?.(item)}
+      className="mb-4 mx-4 rounded-3xl overflow-hidden bg-white max-h-40 active:scale-[0.98]"
+      style={{
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.1,
+        shadowRadius: 12,
+        elevation: 5,
+      }}
     >
-      <View className="relative">
-        {imgSrc ? (
-          <Image
-            source={imgSrc}
-            style={{ width: "100%", height: 160 }}
-            resizeMode="cover"
-          />
-        ) : (
-          <View className="w-full h-40 bg-blue-50 items-center justify-center">
-            <Wrench size={48} color="#1877F2" strokeWidth={1.5} />
-          </View>
-        )}
+      <View className="flex-row">
+        {/* IMAGE */}
+        <View className="w-32 h-32 relative">
+          {imageUrl ? (
+            <Image
+              source={{ uri: imageUrl }}
+              className="w-full h-full"
+              resizeMode="cover"
+            />
+          ) : (
+            <View className="w-full h-full bg-gray-100 items-center justify-center">
+              <Wrench size={32} color="#9CA3AF" />
+            </View>
+          )}
 
-        {/* Discount Badge */}
-        {hasDiscount && (
-          <View className="absolute top-2 right-2 bg-red-500 px-2 py-1 rounded-lg">
+          {/* Service Badge */}
+          <View className="absolute top-2 left-2 bg-blue-600 px-2 py-1 rounded-full">
             <Text className="text-white text-xs font-bold">
-              {Math.round(
-                ((originalPrice - finalPrice) / originalPrice) * 100
-              )}
-              % {t("off")}
+              {t("Service")}
             </Text>
           </View>
-        )}
-      </View>
 
-      <View className="p-3">
-        {/* Service Name */}
-        <Text
-          className="text-gray-800 font-semibold text-base"
-          numberOfLines={2}
-        >
-          {item.name}
-        </Text>
+          {/* Discount Badge */}
+          {hasDiscount && (
+            <View className="absolute top-2 right-2 bg-red-500 px-2 py-1 rounded-full">
+              <Text className="text-white text-xs font-bold">
+                -{discountPercent}%
+              </Text>
+            </View>
+          )}
+        </View>
 
-        {/* Description */}
-        <Text
-          className="text-gray-500 text-xs mt-1"
-          numberOfLines={2}
-        >
-          {item.description || t("professional_service")}
-        </Text>
-
-        {/* Price */}
-        <View className="mt-2">
-          <View className="flex-row items-end">
-            <Text className="text-blue-600 font-bold text-lg">
-              ₹{finalPrice.toFixed(0)}
+        {/* DETAILS */}
+        <View className="flex-1 p-4 justify-between">
+          <View>
+            <Text
+              className="text-lg font-bold text-gray-900"
+              numberOfLines={1}
+            >
+              {item.name}
             </Text>
 
-            {unit ? (
-              <Text className="text-gray-500 text-sm ml-1 mb-0.5">
+            <Text
+              className="text-sm text-gray-500"
+              numberOfLines={1}
+            >
+              {item.description || t("professional_service")}
+            </Text>
+          </View>
+
+          <View className="mt-3">
+            <View className="flex-row items-end h-7">
+              <Text className="text-2xl font-bold text-blue-600">
+                ₹{finalPrice}
+              </Text>
+
+              <Text className="text-xs text-gray-600 ml-1 mb-1">
                 /{unit}
               </Text>
-            ) : null}
-          </View>
 
-          {hasDiscount && (
-            <Text className="text-gray-400 text-sm line-through">
-              ₹{originalPrice.toFixed(0)}
-            </Text>
-          )}
+              <View className="ml-2 min-w-[60px]">
+                {hasDiscount ? (
+                  <Text className="text-sm text-gray-400 line-through">
+                    ₹{originalPrice}
+                  </Text>
+                ) : (
+                  <Text className="opacity-0 text-sm">
+                    {/* ₹0000 */}
+                  </Text>
+                )}
+              </View>
+            </View>
+
+
+            <View className="mt-2">
+              <View className="self-start px-3 py-1 rounded-full bg-blue-50">
+                <Text className="text-xs font-semibold text-blue-700">
+                  {t("Available")}
+                </Text>
+              </View>
+            </View>
+          </View>
         </View>
       </View>
     </Pressable>

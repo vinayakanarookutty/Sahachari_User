@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Image, Pressable, Text, View } from "react-native";
 import { Product } from "../../types/product";
+import { getImageUrl } from "@/utils/image";
 
 export function ProductCard({
   product,
@@ -9,6 +10,8 @@ export function ProductCard({
   product: Product;
   onPress?: (id: string) => void;
 }) {
+  if (!product) return null;
+
   // Extract numeric price
   const extractPrice = (value: any) => {
     if (!value) return 0;
@@ -66,23 +69,33 @@ export function ProductCard({
 
   const S3_BASE_URL = process.env.EXPO_PUBLIC_S3_BASE_URL;
 
+  // const imageUri = product.images?.[0]
+  //   ? `${S3_BASE_URL}/${product.images[0]}`
+  //   : null;
+
+  // const [imgSrc, setImgSrc] = useState<any>(null);
+
+  // useEffect(() => {
+  //   if (!imageUri) return;
+
+  //   setImgSrc(null);
+
+  //   const t = setTimeout(() => {
+  //     setImgSrc({ uri: imageUri });
+  //   }, 30);
+
+  //   return () => clearTimeout(t);
+  // }, [imageUri]);
+
   const imageUri = product.images?.[0]
-    ? `${S3_BASE_URL}/${product.images[0]}`
+    ? getImageUrl(product.images[0])
     : null;
 
-  const [imgSrc, setImgSrc] = useState<any>(null);
-
-  useEffect(() => {
-    if (!imageUri) return;
-
-    setImgSrc(null);
-
-    const t = setTimeout(() => {
-      setImgSrc({ uri: imageUri });
-    }, 30);
-
-    return () => clearTimeout(t);
-  }, [imageUri]);
+  // console.log("ProductCard image", product.images?.[0]);
+  // console.log(
+  //   "ProductCard final image",
+  //   getImageUrl(product.images?.[0])
+  // );
 
   return (
     <Pressable
@@ -92,9 +105,11 @@ export function ProductCard({
       }}
     >
       <View className="bg-white rounded-lg p-3 shadow">
-        {imgSrc ? (
+        {/* {imgSrc ? ( */}
+        {imageUri ? (
           <Image
-            source={imgSrc}
+            // source={imgSrc}
+            source={{ uri: imageUri }}
             style={{ width: "100%", height: 128, borderRadius: 8 }}
             resizeMode="cover"
           />

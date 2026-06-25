@@ -1,9 +1,11 @@
 import { Redirect, Tabs } from "expo-router";
 import {
+  CalendarDays,
   Home,
   Receipt,
   ShoppingBag,
-  ShoppingCart
+  ShoppingCart,
+  Briefcase
 } from "lucide-react-native";
 import { ActivityIndicator, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -70,7 +72,7 @@ export default function TabsLayout() {
                       className={`text-[11px] mt-1 ${focused ? "text-blue-600 font-semibold" : "text-gray-500"
                         }`}
                     >
-                       {t(label)}
+                      {t(label)}
                     </Text>
                   </View>
                 ),
@@ -85,8 +87,10 @@ export default function TabsLayout() {
 
 const TABS = [
   { name: "home", label: "home", Icon: Home },
-  { name: "products", label: "services", Icon: ShoppingBag },
+  // { name: "products", label: "Products", Icon: ShoppingBag },
+  { name: "market", label: "Market", Icon: ShoppingBag},
   { name: "cart", label: "cart", Icon: ShoppingCart },
   { name: "orders", label: "orders", Icon: Receipt },
-  // { name: "services", label: "services", Icon: Wrench },
+  { name: "booking", label: "Bookings", Icon: CalendarDays },
+  // { name: "services", label: "services", Icon: Briefcase,},
 ] as const;
