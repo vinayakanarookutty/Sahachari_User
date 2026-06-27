@@ -1,37 +1,51 @@
+import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
+import { ArrowLeft } from "lucide-react-native";
+import { useState } from "react";
 import {
+    ActivityIndicator,
     FlatList,
+    Pressable,
+    RefreshControl,
     Text,
     View,
-    ActivityIndicator,
-    RefreshControl,
-    Pressable,
 } from "react-native";
-import { useState } from "react";
-import { ArrowLeft } from "lucide-react-native";
-import { LinearGradient } from "expo-linear-gradient";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { ServiceCard } from "../../components/products/ServiceCard";
-import { useServices } from "../../hooks/useServices";
+import { StoreCard } from "../../components/stores/StoreCard";
+
+import { useServiceStores } from "../../hooks/useServiceStores";
+import { useStoreServices } from "../../hooks/useStoreServices";
 
 export default function ServicesScreen() {
     const router = useRouter();
     const insets = useSafeAreaInsets();
 
+    const [selectedStore, setSelectedStore] = useState<any>(null);
+    const [refreshing, setRefreshing] = useState(false);
+
+    const {
+        data: stores = [],
+        isLoading: storesLoading,
+        refetch: refetchStores,
+    } = useServiceStores();
+
     const {
         data: services = [],
-        isLoading,
-        refetch,
-    } = useServices();
-
-    const [refreshing, setRefreshing] = useState(false);
+        isLoading: servicesLoading,
+        refetch: refetchServices,
+    } = useStoreServices(selectedStore?._id);
 
     const onRefresh = async () => {
         setRefreshing(true);
 
         try {
-            await refetch?.();
+            if (selectedStore) {
+                await refetchServices();
+            } else {
+                await refetchStores();
+            }
         } finally {
             setRefreshing(false);
         }
@@ -47,9 +61,14 @@ export default function ServicesScreen() {
             }}
         >
             <View className="flex-row items-center">
-                {/* Back Button */}
                 <Pressable
-                    onPress={() => router.back()}
+                    onPress={() => {
+                        if (selectedStore) {
+                            setSelectedStore(null);
+                        } else {
+                            router.back();
+                        }
+                    }}
                     className="bg-white/20 rounded-full p-2.5"
                 >
                     <ArrowLeft
@@ -58,30 +77,29 @@ export default function ServicesScreen() {
                     />
                 </Pressable>
 
-                {/* Center Title */}
                 <View className="flex-1 items-center px-3">
                     <Text
                         className="text-white text-2xl font-bold"
                         numberOfLines={1}
                     >
-                        Services
+                        {selectedStore
+                            ? selectedStore.name
+                            : "Services Store"}
                     </Text>
 
                     <Text className="text-blue-100 text-sm mt-0.5">
-                        {services.length}{" "}
-                        {services.length === 1
-                            ? "service"
-                            : "services"}
+                        {selectedStore
+                            ? `${services.length} services`
+                            : `${stores.length} stores`}
                     </Text>
                 </View>
 
-                {/* Spacer */}
                 <View className="w-[46px]" />
             </View>
         </LinearGradient>
     );
 
-    if (isLoading) {
+    if (storesLoading) {
         return (
             <View className="flex-1 bg-gray-50">
                 <Header />
@@ -91,34 +109,10 @@ export default function ServicesScreen() {
                         size="large"
                         color="#2563EB"
                     />
+
                     <Text className="text-gray-500 mt-3">
-                        Loading services...
+                        Loading service stores...
                     </Text>
-                </View>
-            </View>
-        );
-    }
-
-    if (!services.length) {
-        return (
-            <View className="flex-1 bg-gray-50">
-                <Header />
-
-                <View className="flex-1 items-center justify-center px-6">
-                    <View className="bg-white p-8 rounded-3xl items-center shadow-sm">
-                        <Text className="text-6xl mb-3">
-                            🛠️
-                        </Text>
-
-                        <Text className="text-xl font-bold text-gray-900 mb-2">
-                            No services available
-                        </Text>
-
-                        <Text className="text-gray-500 text-center leading-6">
-                            Services will appear here once
-                            they are added.
-                        </Text>
-                    </View>
                 </View>
             </View>
         );
@@ -128,33 +122,103 @@ export default function ServicesScreen() {
         <View className="flex-1 bg-gray-50">
             <Header />
 
-            <FlatList
-                data={services}
-                keyExtractor={(item: any) => item._id}
-                contentContainerStyle={{
-                    paddingTop: 16,
-                    paddingBottom: 24,
-                    paddingHorizontal: 12,
-                }}
-                renderItem={({ item }) => (
-                    <ServiceCard
-                        item={item}
-                        onPress={(service: any) =>
-                            router.push(
-                                `/services/${service._id}`
-                            )
-                        }
+            {!selectedStore ? (
+                <FlatList
+                    data={stores}
+                    keyExtractor={(item: any) => item._id}
+                    contentContainerStyle={{
+                        padding: 12,
+                        paddingBottom: 24,
+                    }}
+                    renderItem={({ item }) => (
+                        <StoreCard
+                            store={item}
+                            onPress={() =>
+                                setSelectedStore(item)
+                            }
+                        />
+                    )}
+                    ListEmptyComponent={
+                        <View className="items-center justify-center mt-24">
+                            <Text className="text-6xl mb-3">
+                                🏪
+                            </Text>
+
+                            <Text className="text-lg font-semibold text-gray-800">
+                                No service stores found
+                            </Text>
+
+                            <Text className="text-gray-500 mt-2 text-center">
+                                Service stores will appear
+                                here when available.
+                            </Text>
+                        </View>
+                    }
+                    refreshControl={
+                        <RefreshControl
+                            refreshing={refreshing}
+                            onRefresh={onRefresh}
+                            colors={["#2563EB"]}
+                        />
+                    }
+                    showsVerticalScrollIndicator={false}
+                />
+            ) : servicesLoading ? (
+                <View className="flex-1 items-center justify-center">
+                    <ActivityIndicator
+                        size="large"
+                        color="#2563EB"
                     />
-                )}
-                showsVerticalScrollIndicator={false}
-                refreshControl={
-                    <RefreshControl
-                        refreshing={refreshing}
-                        onRefresh={onRefresh}
-                        colors={["#2563EB"]}
-                    />
-                }
-            />
+
+                    <Text className="text-gray-500 mt-3">
+                        Loading services...
+                    </Text>
+                </View>
+            ) : (
+                <FlatList
+                    data={services}
+                    keyExtractor={(item: any) => item._id}
+                    contentContainerStyle={{
+                        paddingTop: 16,
+                        paddingBottom: 24,
+                        paddingHorizontal: 12,
+                    }}
+                    renderItem={({ item }) => (
+                        <ServiceCard
+                            item={item}
+                            onPress={(service: any) =>
+                                router.push(
+                                    `/services/${service._id}`
+                                )
+                            }
+                        />
+                    )}
+                    ListEmptyComponent={
+                        <View className="items-center justify-center mt-24">
+                            <Text className="text-6xl mb-3">
+                                🛠️
+                            </Text>
+
+                            <Text className="text-lg font-semibold text-gray-800">
+                                No services available
+                            </Text>
+
+                            <Text className="text-gray-500 mt-2 text-center">
+                                This store has no services
+                                yet.
+                            </Text>
+                        </View>
+                    }
+                    refreshControl={
+                        <RefreshControl
+                            refreshing={refreshing}
+                            onRefresh={onRefresh}
+                            colors={["#2563EB"]}
+                        />
+                    }
+                    showsVerticalScrollIndicator={false}
+                />
+            )}
         </View>
     );
 }
