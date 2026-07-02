@@ -39,6 +39,16 @@ export default function RentalDetailsScreen() {
     const [showCheckout, setShowCheckout] = useState(false);
     const [showSuccess, setShowSuccess] = useState(false);
 
+    const [address, setAddress] = useState({
+        street: "",
+        city: "",
+        zipCode: "",
+        phone: "",
+        place: "",
+        notes: "",
+        paymentMethod: "",
+    });
+
     const heartAnim = useRef(new Animated.Value(1)).current;
 
     if (isLoading) {
@@ -98,7 +108,14 @@ export default function RentalDetailsScreen() {
         await createBooking("RENTAL", {
             rentalId: rental._id,
             quantity: 1,
-            bookingAddress: addressData,
+            bookingAddress: {
+                street: addressData.street,
+                city: addressData.city,
+                zipCode: addressData.zipCode,
+                place: addressData.place,
+                phone: addressData.phone,
+                notes: addressData.notes,
+            },
         });
 
         setShowCheckout(false);
@@ -113,8 +130,8 @@ export default function RentalDetailsScreen() {
                 className="absolute top-0 left-0 right-0 z-10 flex-row justify-between px-6"
                 style={{ paddingTop: insets.top + 10 }}
             >
-                <Pressable onPress={() => router.back()} className="bg-white p-3 rounded-full">
-                    <ArrowLeft size={20} color="#111827" />
+                <Pressable onPress={() => router.back() || router.push('/rentals')} className="bg-blue-600 p-3 rounded-full">
+                    <ArrowLeft size={20} color="#ffffff" />
                 </Pressable>
 
                 <View className="flex-row gap-3">
@@ -173,7 +190,7 @@ export default function RentalDetailsScreen() {
                         <View className="flex-row items-center justify-between">
 
                             {/* PRICE */}
-                            <View>
+                            {/* <View>
                                 <Text className="text-gray-600 text-sm">
                                     Rate
                                 </Text>
@@ -184,16 +201,62 @@ export default function RentalDetailsScreen() {
                                         /{unit}
                                     </Text>
                                 </Text>
+                            </View> */}
+                            <View>
+                                <Text className="text-gray-600 text-sm">
+                                    Rate
+                                </Text>
+
+                                <View className="flex-row items-end mt-1">
+                                    <Text className="text-4xl font-bold text-blue-600">
+                                        ₹{finalPrice}
+                                    </Text>
+
+                                    <Text className="text-lg text-gray-600 mb-1">
+                                        /{unit}
+                                    </Text>
+
+                                    {hasDiscount && (
+                                        <Text className="ml-3 text-lg text-gray-400 line-through mb-1">
+                                            ₹{originalPrice}
+                                        </Text>
+                                    )}
+                                </View>
                             </View>
 
                             {/* AVAILABILITY (RIGHT SIDE like product UI) */}
-                            <View className="bg-green-100 px-4 py-2 rounded-full flex-row items-center">
+                            {/* <View className="bg-green-100 px-4 py-2 rounded-full flex-row items-center">
                                 <CheckCircle size={18} color="#16A34A" />
                                 <Text className="ml-2 text-green-700 font-semibold">
                                     Available
                                 </Text>
-                            </View>
+                            </View> */}
+                            <View
+                                className={`px-4 py-2 rounded-full flex-row items-center ${rental.isAvailable
+                                    ? "bg-green-100"
+                                    : "bg-red-100"
+                                    }`}
+                            >
+                                <CheckCircle
+                                    size={18}
+                                    color={
+                                        rental.isAvailable
+                                            ? "#16A34A"
+                                            : "#DC2626"
+                                    }
+                                />
 
+                                <Text
+                                    className={`ml-2 font-semibold ${rental.isAvailable
+                                        ? "text-green-700"
+                                        : "text-red-700"
+                                        }`}
+                                >
+                                    {rental.isAvailable
+                                        ? "Available"
+                                        : "Not Available"}
+                                </Text>
+                            </View>
                         </View>
                     </View>
 
@@ -203,7 +266,7 @@ export default function RentalDetailsScreen() {
                             Description
                         </Text>
                         <Text className="text-gray-600 leading-6">
-                            {rental.description}
+                            {rental.description || "No description available."}
                         </Text>
                     </View>
 
@@ -218,7 +281,10 @@ export default function RentalDetailsScreen() {
                     paddingTop: 12,
                 }}
             >
-                <Pressable onPress={() => setShowCheckout(true)}>
+                <Pressable
+                    disabled={!rental.isAvailable}
+                    onPress={() => setShowCheckout(true)}
+                >
                     <LinearGradient
                         colors={["#2563EB", "#1D4ED8"]}
                         style={{
@@ -244,8 +310,8 @@ export default function RentalDetailsScreen() {
             <CheckoutModal
                 visible={showCheckout}
                 onClose={() => setShowCheckout(false)}
-                address={{}}
-                setAddress={() => { }}
+                address={address}
+                setAddress={setAddress}
                 onConfirm={handleConfirm}
                 isPending={false}
                 total={price}

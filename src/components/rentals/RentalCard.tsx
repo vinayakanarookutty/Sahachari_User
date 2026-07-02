@@ -50,17 +50,35 @@ export function RentalCard({ item }: { item: Rental }) {
                         resizeMode="cover"
                     />
 
-                    {/* Rental Badge */}
-                    <View className="absolute top-2 left-2 bg-purple-600 px-2 py-1 rounded-full">
-                        <Text className="text-white text-xs font-bold">
+                    <View
+                        style={{
+                            position: "absolute",
+                            top: 8,
+                            left: 8,
+                            backgroundColor: "#7C3AED",
+                            paddingHorizontal: 8,
+                            paddingVertical: 4,
+                            borderRadius: 999,
+                        }}
+                    >
+                        <Text style={{ color: "#fff", fontWeight: "700", fontSize: 12 }}>
                             Rental
                         </Text>
                     </View>
 
-                    {/* Discount Badge */}
                     {hasDiscount && (
-                        <View className="absolute top-2 right-2 bg-red-500 px-2 py-1 rounded-full">
-                            <Text className="text-white text-xs font-bold">
+                        <View
+                            style={{
+                                position: "absolute",
+                                top: 8,
+                                right: 8,
+                                backgroundColor: "#EF4444",
+                                paddingHorizontal: 8,
+                                paddingVertical: 4,
+                                borderRadius: 999,
+                            }}
+                        >
+                            <Text style={{ color: "#fff", fontWeight: "700", fontSize: 12 }}>
                                 -{discountPercent}%
                             </Text>
                         </View>
@@ -113,14 +131,14 @@ export function RentalCard({ item }: { item: Rental }) {
                         <View className="mt-2">
                             <View
                                 className={`self-start px-3 py-1 rounded-full ${item.isAvailable
-                                        ? "bg-green-50"
-                                        : "bg-red-50"
+                                    ? "bg-green-50"
+                                    : "bg-red-50"
                                     }`}
                             >
                                 <Text
                                     className={`text-xs font-semibold ${item.isAvailable
-                                            ? "text-green-700"
-                                            : "text-red-700"
+                                        ? "text-green-700"
+                                        : "text-red-700"
                                         }`}
                                 >
                                     {item.isAvailable
