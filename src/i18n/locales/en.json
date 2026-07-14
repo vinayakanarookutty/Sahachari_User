@@ -243,5 +243,13 @@
     },
     "Open": "Open",
     "Closed": "Closed",
-    "my_bookings":"My Bookings"
+    "my_bookings": "My Bookings",
+    "please_enter_street_address": "Please enter street address",
+    "please_enter_city": "Please enter city",
+    "please_enter_zip_code": "Please enter zip code",
+    "please_enter_valid_zip_code": "Please enter a valid 6-digit zip code",
+    "please_enter_phone_number": "Please enter phone number",
+    "please_enter_valid_phone_number": "Please enter a valid 10-digit phone number",
+    "please_select_place": "Please select place",
+    "please_select_payment_method": "Please select payment method"
 }

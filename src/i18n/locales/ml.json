@@ -244,5 +244,13 @@
     },
     "Open": "തുറന്നു",
     "Closed": "അടച്ചു",
-    "my_bookings":"എന്റെ ബുക്കിംഗുകൾ"
+    "my_bookings": "എന്റെ ബുക്കിംഗുകൾ",
+    "please_enter_street_address": "ദയവായി സ്ട്രീറ്റ് വിലാസം നൽകുക",
+    "please_enter_city": "ദയവായി നഗരം നൽകുക",
+    "please_enter_zip_code": "ദയവായി പിൻകോഡ് നൽകുക",
+    "please_enter_valid_zip_code": "ദയവായി ശരിയായ 6 അക്ക പിൻകോഡ് നൽകുക",
+    "please_enter_phone_number": "ദയവായി ഫോൺ നമ്പർ നൽകുക",
+    "please_enter_valid_phone_number": "ദയവായി ശരിയായ 10 അക്ക ഫോൺ നമ്പർ നൽകുക",
+    "please_select_place": "ദയവായി സ്ഥലം തിരഞ്ഞെടുക്കുക",
+    "please_select_payment_method": "ദയവായി പേയ്‌മെന്റ് രീതി തിരഞ്ഞെടുക്കുക"
 }

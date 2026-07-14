@@ -474,7 +474,33 @@ export function CheckoutModal({
                 {/* Place Order */}
                 <Pressable
                   onPress={() => {
-                    if (!address.city) {
+                    if (!address.street || !address.street.trim()) {
+                      alert(t("please_enter_street_address"));
+                      return;
+                    }
+                    if (!address.city || !address.city.trim()) {
+                      alert(t("please_enter_city"));
+                      return;
+                    }
+                    if (!address.zipCode || !address.zipCode.trim()) {
+                      alert(t("please_enter_zip_code"));
+                      return;
+                    }
+                    const cleanZip = address.zipCode.trim();
+                    if (!/^\d{6}$/.test(cleanZip)) {
+                      alert(t("please_enter_valid_zip_code"));
+                      return;
+                    }
+                    if (!address.phone || !address.phone.trim()) {
+                      alert(t("please_enter_phone_number"));
+                      return;
+                    }
+                    const cleanPhone = address.phone.replace(/[\s\-()]/g, '');
+                    if (!/^(?:\+91|0)?[6-9]\d{9}$/.test(cleanPhone)) {
+                      alert(t("please_enter_valid_phone_number"));
+                      return;
+                    }
+                    if (places.length > 0 && (!address.place || !address.place.trim())) {
                       alert(t("please_select_place"));
                       return;
                     }
@@ -485,6 +511,7 @@ export function CheckoutModal({
 
                     onConfirm({
                       ...address,
+                      phone: cleanPhone,
                       paymentMethod: address.paymentMethod,
                     });
                   }}
