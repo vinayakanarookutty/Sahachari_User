@@ -31,7 +31,7 @@ export default function TabsLayout() {
     const runConfig = async () => {
       isConfigured.current = true;
       try {
-        if (insets.bottom >= 30) {
+        if (insets.bottom >= 20) {
           // Software menu bar enabled device - make app above the menu bar
           await NavigationBar.setPositionAsync("relative");
           await NavigationBar.setBackgroundColorAsync("#ffffff");
@@ -72,7 +72,7 @@ export default function TabsLayout() {
   }
 
   const bottomInset = Platform.OS === "android"
-    ? (insets.bottom >= 30 ? 0 : insets.bottom)
+    ? (insets.bottom >= 20 ? 0 : insets.bottom)
     : insets.bottom;
 
   return (
