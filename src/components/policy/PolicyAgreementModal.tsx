@@ -3,13 +3,14 @@ import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
     ActivityIndicator,
-    Dimensions,
     Modal,
     Pressable,
     ScrollView,
     Text,
     View,
+    useWindowDimensions,
 } from "react-native";
+import { useAppFonts } from "../../hooks/useAppFonts";
 
 interface PolicyAgreementModalProps {
     visible: boolean;
@@ -19,8 +20,6 @@ interface PolicyAgreementModalProps {
     onAccept: () => void;
 }
 
-const { width, height } = Dimensions.get("window");
-
 export function PolicyAgreementModal({
     visible,
     title,
@@ -28,8 +27,10 @@ export function PolicyAgreementModal({
     loading = false,
     onAccept,
 }: PolicyAgreementModalProps) {
+    const { width, height } = useWindowDimensions();
     const [hasReachedBottom, setHasReachedBottom] = useState(false);
-    const {t} = useTranslation();
+    const { t } = useTranslation();
+    const { styleRegular, styleBold } = useAppFonts();
 
     const handleScroll = (event: any) => {
         const {
@@ -49,6 +50,8 @@ export function PolicyAgreementModal({
         }
     };
 
+    const modalHeight = height * (height < 600 ? 0.95 : 0.85);
+
     return (
         <Modal
             visible={visible}
@@ -66,9 +69,9 @@ export function PolicyAgreementModal({
             >
                 <View
                     style={{
-                        width: width > 768 ? 700 : "100%",
-                        maxWidth: 700,
-                        height: height * 0.85,
+                        width: width > 768 ? 640 : "100%",
+                        maxWidth: 640,
+                        height: modalHeight,
                         backgroundColor: "#FFFFFF",
                         borderRadius: 28,
                         overflow: "hidden",
@@ -85,21 +88,21 @@ export function PolicyAgreementModal({
                         }}
                     >
                         <Text
-                            style={{
+                            style={[{
                                 color: "#FFFFFF",
-                                fontSize: 24,
+                                fontSize: 22,
                                 fontWeight: "700",
-                            }}
+                            }, styleBold]}
                         >
                             {title}
                         </Text>
 
                         <Text
-                            style={{
+                            style={[{
                                 color: "#DBEAFE",
                                 marginTop: 6,
-                                fontSize: 14,
-                            }}
+                                fontSize: 13,
+                            }, styleRegular]}
                         >
                             {t("please_read_policy_carefully")}
                         </Text>
@@ -110,7 +113,7 @@ export function PolicyAgreementModal({
                         onScroll={handleScroll}
                         scrollEventThrottle={16}
                         onContentSizeChange={(contentWidth, contentHeight) => {
-                            const visibleHeight = height * 0.85 - 220;
+                            const visibleHeight = modalHeight - 180;
 
                             if (contentHeight <= visibleHeight) {
                                 setHasReachedBottom(true);
@@ -126,11 +129,11 @@ export function PolicyAgreementModal({
                         }}
                     >
                         <Text
-                            style={{
-                                fontSize: 15,
-                                lineHeight: 26,
+                            style={[{
+                                fontSize: 14,
+                                lineHeight: 24,
                                 color: "#374151",
-                            }}
+                            }, styleRegular]}
                         >
                             {content}
                         </Text>
@@ -145,11 +148,12 @@ export function PolicyAgreementModal({
                                 }}
                             >
                                 <Text
-                                    style={{
+                                    style={[{
                                         color: "#1D4ED8",
                                         textAlign: "center",
                                         fontWeight: "600",
-                                    }}
+                                        fontSize: 13,
+                                    }, styleBold]}
                                 >
                                    {t("scroll_to_bottom_to_enable_agreement")}
                                 </Text>
@@ -179,8 +183,8 @@ export function PolicyAgreementModal({
                                 start={{ x: 0, y: 0 }}
                                 end={{ x: 1, y: 1 }}
                                 style={{
-                                    paddingVertical: 18,
-                                    borderRadius: 18,
+                                    paddingVertical: 16,
+                                    borderRadius: 16,
                                     alignItems: "center",
                                     justifyContent: "center",
                                 }}
@@ -189,11 +193,11 @@ export function PolicyAgreementModal({
                                     <ActivityIndicator color="#FFFFFF" />
                                 ) : (
                                     <Text
-                                        style={{
+                                        style={[{
                                             color: "#FFFFFF",
                                             fontSize: 16,
                                             fontWeight: "700",
-                                        }}
+                                        }, styleBold]}
                                     >
                                         {t("i_agree_and_continue")}
                                     </Text>
