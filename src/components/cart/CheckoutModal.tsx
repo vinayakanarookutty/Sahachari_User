@@ -14,6 +14,57 @@ import {
 } from 'react-native';
 import { useAppFonts } from "../../hooks/useAppFonts";
 
+function splitAddress(fullAddress: string): { street: string; city: string } {
+  const cleaned = fullAddress.trim();
+  if (!cleaned) {
+    return { street: "", city: "" };
+  }
+
+  // 1. If commas are present, use comma splitting
+  if (cleaned.includes(',')) {
+    const parts = cleaned.split(',').map(p => p.trim()).filter(Boolean);
+    if (parts.length >= 3) {
+      const mid = Math.ceil(parts.length / 2);
+      return {
+        street: parts.slice(0, mid).join(', '),
+        city: parts.slice(mid).join(', ')
+      };
+    } else if (parts.length === 2) {
+      return {
+        street: parts[0],
+        city: parts[1]
+      };
+    }
+  }
+
+  // 2. No commas. Let's split by spaces.
+  // First, strip any trailing pincode (e.g. 682001 or 682 001) from the end
+  let addressWithoutPincode = cleaned.replace(/\b\d{6}\b/g, '').trim();
+  addressWithoutPincode = addressWithoutPincode.replace(/\b\d{3}\s?\d{3}\b/g, '').trim();
+
+  const words = addressWithoutPincode.split(/\s+/).filter(Boolean);
+  if (words.length <= 1) {
+    return { street: cleaned, city: "" };
+  }
+
+  // We have at least 2 words.
+  const commonPrefixes = ["fort", "new", "east", "west", "north", "south", "old"];
+  const lastWord = words[words.length - 1];
+  const secondLastWord = words[words.length - 2];
+
+  if (words.length >= 3 && commonPrefixes.includes(secondLastWord.toLowerCase())) {
+    // Take last two words as city (e.g. "Fort Kochi")
+    const street = words.slice(0, words.length - 2).join(' ');
+    const city = words.slice(words.length - 2).join(' ');
+    return { street, city };
+  } else {
+    // Take last word as city (e.g. "Kochi")
+    const street = words.slice(0, words.length - 1).join(' ');
+    const city = lastWord;
+    return { street, city };
+  }
+}
+
 export function CheckoutModal({
   visible,
   onClose,
@@ -69,28 +120,14 @@ export function CheckoutModal({
     if (profile && visible) {
       // Split the full address into street and city parts
       const fullAddress = profile.address || '';
-      let streetPart = fullAddress;
-      let cityPart = (prev: any) => prev.city || '';
-
-      if (fullAddress.includes(',')) {
-        const parts = fullAddress.split(',').map((p: string) => p.trim());
-        if (parts.length >= 3) {
-          // e.g. "123 Main Street, Fort Kochi, Kerala" -> street: "123 Main Street", city: "Fort Kochi, Kerala"
-          streetPart = parts.slice(0, Math.ceil(parts.length / 2)).join(', ');
-          cityPart = (_prev: any) => parts.slice(Math.ceil(parts.length / 2)).join(', ');
-        } else if (parts.length === 2) {
-          // e.g. "123 Main Street, Fort Kochi" -> street: "123 Main Street", city: "Fort Kochi"
-          streetPart = parts[0];
-          cityPart = (_prev: any) => parts[1];
-        }
-      }
+      const parsed = splitAddress(fullAddress);
 
       setAddress((prev: any) => ({
         ...prev,
 
         // Auto fill user details with smart splitting
-        street: streetPart,
-        city: cityPart(prev) || profile.address2 || prev.city || '',
+        street: parsed.street,
+        city: parsed.city || profile.address2 || prev.city || '',
         zipCode:
           profile.serviceablePincodes?.[0] || prev.zipCode || '',
         phone: profile.mobileNumber || '',
