@@ -80,37 +80,30 @@ export default function Cart() {
     >
       <View className="flex-1 bg-gray-50">
 
-        {/* Premium Header */}
+        {/* HEADER */}
         <LinearGradient
-          colors={["#1E3A8A", "#2563EB", "#3B82F6"]}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={{ paddingTop: insets.top + 10, paddingBottom: 24 }}
+          colors={["#2563EB", "#1D4ED8"]}
+          // style={{ paddingBottom: 16 }
+          style={{ paddingTop: insets.top + 10, paddingBottom: 20 }}
         >
-          {/* Decorative overlay */}
-          <View style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, opacity: 0.08 }}>
-            <View style={{ width: 140, height: 140, borderRadius: 70, backgroundColor: "white", position: "absolute", top: -40, right: -30 }} />
-            <View style={{ width: 100, height: 100, borderRadius: 50, backgroundColor: "white", position: "absolute", bottom: -20, left: -20 }} />
-          </View>
+          <View className="flex-row items-center px-4 pt-4">
 
-          <View className="flex-row items-center px-5 pt-4">
+            {/* BACK BUTTON */}
             <Pressable
               onPress={() => router.back()}
-              style={({ pressed }) => ({
-                backgroundColor: pressed ? "rgba(255,255,255,0.3)" : "rgba(255,255,255,0.15)",
-                padding: 10,
-                borderRadius: 16,
-              })}
+              className="bg-white/20 p-2 rounded-full"
             >
-              <ArrowLeft size={22} color="#fff" strokeWidth={2.5} />
+              <ArrowLeft size={22} color="#fff" />
             </Pressable>
 
+            {/* TITLE */}
             <View className="flex-1 items-center">
-              <Text style={{ fontSize: 22, fontWeight: "900", color: "#FFFFFF", letterSpacing: 0.5 }}>
+              <Text className="text-2xl font-bold text-white">
                 {t("Shopping_Cart")}
               </Text>
+
               {!isEmpty && (
-                <Text style={{ fontSize: 13, color: "#BFDBFE", fontWeight: "600", marginTop: 4 }}>
+                <Text className="text-blue-100 text-sm mt-1">
                   {cart.items.length} {t("items")}
                 </Text>
               )}
@@ -122,69 +115,27 @@ export default function Cart() {
 
         {/* EMPTY STATE */}
         {isEmpty ? (
-          <View className="flex-1 items-center justify-center px-8">
-            <View style={{
-              width: 120,
-              height: 120,
-              borderRadius: 40,
-              overflow: "hidden",
-              marginBottom: 28,
-              shadowColor: "#2563EB",
-              shadowOffset: { width: 0, height: 12 },
-              shadowOpacity: 0.2,
-              shadowRadius: 20,
-              elevation: 15,
-            }}>
-              <LinearGradient
-                colors={["#EFF6FF", "#DBEAFE", "#BFDBFE"]}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={{
-                  flex: 1,
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                <ShoppingBag size={52} color="#2563EB" strokeWidth={1.8} />
-              </LinearGradient>
+          <View className="flex-1 items-center justify-center px-6">
+            <View className="bg-blue-50 rounded-full p-6 mb-6">
+              <ShoppingBag size={64} color="#2563EB" />
             </View>
 
-            <Text style={{ fontSize: 24, fontWeight: "900", color: "#0F172A", marginBottom: 10, letterSpacing: -0.3 }}>
+            <Text className="text-2xl font-bold text-gray-800 mb-2">
               {t("Your_cart_is_empty")}
             </Text>
 
-            <Text style={{ fontSize: 15, color: "#94A3B8", textAlign: "center", marginBottom: 32, lineHeight: 22, fontWeight: "500" }}>
+            <Text className="text-gray-500 text-center mb-6">
               {t("Start_adding_items_to_see_them_here")}
             </Text>
 
             <Pressable
               onPress={() => router.push("/home")}
-              style={({ pressed }) => ({
-                transform: [{ scale: pressed ? 0.96 : 1 }],
-              })}
+              className="bg-blue-600 px-8 py-4 rounded-xl flex-row items-center"
             >
-              <LinearGradient
-                colors={["#2563EB", "#1D4ED8"]}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 0 }}
-                style={{
-                  paddingHorizontal: 36,
-                  paddingVertical: 16,
-                  borderRadius: 20,
-                  flexDirection: "row",
-                  alignItems: "center",
-                  shadowColor: "#1E40AF",
-                  shadowOffset: { width: 0, height: 6 },
-                  shadowOpacity: 0.3,
-                  shadowRadius: 12,
-                  elevation: 10,
-                }}
-              >
-                <Text style={{ color: "#FFFFFF", fontWeight: "800", fontSize: 16, marginRight: 8, letterSpacing: 0.3 }}>
-                  {t("Start_Shopping")}
-                </Text>
-                <ArrowRight size={20} color="white" strokeWidth={2.5} />
-              </LinearGradient>
+              <Text className="text-white font-semibold mr-2">
+                {t("Start_Shopping")}
+              </Text>
+              <ArrowRight size={20} color="white" />
             </Pressable>
           </View>
         ) : (
@@ -216,75 +167,38 @@ export default function Cart() {
               )}
             />
 
-            {/* BOTTOM SUMMARY BAR */}
             <View
+              className="absolute bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-6"
               style={{
-                position: "absolute",
-                bottom: 0,
-                left: 0,
-                right: 0,
-                backgroundColor: "#FFFFFF",
-                borderTopLeftRadius: 28,
-                borderTopRightRadius: 28,
-                paddingHorizontal: 24,
-                paddingTop: 24,
-                paddingBottom: 24,
-                shadowColor: "#1E3A8A",
-                shadowOffset: { width: 0, height: -12 },
-                shadowOpacity: 0.12,
-                shadowRadius: 30,
-                elevation: 25,
+                shadowColor: "#000",
+                shadowOffset: { width: 0, height: -2 },
+                shadowOpacity: 0.08,
+                shadowRadius: 8,
+                elevation: 10,
               }}
-            >
-              <View className="flex-row justify-between items-center mb-5">
-                <View>
-                  <Text style={{ fontSize: 13, color: "#94A3B8", fontWeight: "600", letterSpacing: 0.5, marginBottom: 4 }}>
-                    {t("Total_Amount")}
-                  </Text>
-                  <Text style={{ fontSize: 28, fontWeight: "900", color: "#0F172A", letterSpacing: -0.5 }}>
-                    ₹{total.toFixed(2)}
-                  </Text>
-                </View>
-                <View style={{
-                  backgroundColor: "#EFF6FF",
-                  paddingHorizontal: 14,
-                  paddingVertical: 6,
-                  borderRadius: 20,
-                }}>
-                  <Text style={{ fontSize: 13, fontWeight: "700", color: "#2563EB" }}>
-                    {cart.items.length} {t("items")}
-                  </Text>
-                </View>
+            ></View>
+
+            {/* BOTTOM SUMMARY BAR */}
+            <View className="absolute bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-6">
+
+              <View className="flex-row justify-between items-center mb-4">
+                <Text className="text-xl font-bold text-gray-800">
+                  {t("Total_Amount")}
+                </Text>
+
+                <Text className="text-2xl font-bold text-blue-600">
+                  ₹{total.toFixed(2)}
+                </Text>
               </View>
 
               <Pressable
                 onPress={() => setShowCheckoutModal(true)}
-                style={({ pressed }) => ({
-                  transform: [{ scale: pressed ? 0.97 : 1 }],
-                })}
+                className="bg-blue-600 py-4 rounded-xl flex-row items-center justify-center"
               >
-                <LinearGradient
-                  colors={["#2563EB", "#1D4ED8", "#1E40AF"]}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 0 }}
-                  style={{
-                    paddingVertical: 18,
-                    borderRadius: 20,
-                    flexDirection: "row",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    shadowColor: "#1E40AF",
-                    shadowOffset: { width: 0, height: 8 },
-                    shadowOpacity: 0.35,
-                    shadowRadius: 16,
-                    elevation: 12,
-                  }}
-                >
-                  <Text style={{ color: "#FFFFFF", fontWeight: "800", fontSize: 17, marginRight: 8, letterSpacing: 0.5 }}>
-                    {t("Proceed_to_Checkout")}
-                  </Text>
-                  <ArrowRight size={20} color="white" strokeWidth={2.5} />
-                </LinearGradient>
+                <Text className="text-white font-bold text-lg mr-2">
+                  {t("Proceed_to_Checkout")}
+                </Text>
+                <ArrowRight size={22} color="white" />
               </Pressable>
             </View>
           </>

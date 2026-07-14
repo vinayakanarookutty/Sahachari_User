@@ -3,12 +3,12 @@ import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
     ActivityIndicator,
+    Dimensions,
     Modal,
     Pressable,
     ScrollView,
     Text,
     View,
-    useWindowDimensions,
 } from "react-native";
 
 interface PolicyAgreementModalProps {
@@ -19,7 +19,7 @@ interface PolicyAgreementModalProps {
     onAccept: () => void;
 }
 
-
+const { width, height } = Dimensions.get("window");
 
 export function PolicyAgreementModal({
     visible,
@@ -28,7 +28,6 @@ export function PolicyAgreementModal({
     loading = false,
     onAccept,
 }: PolicyAgreementModalProps) {
-    const { width, height } = useWindowDimensions();
     const [hasReachedBottom, setHasReachedBottom] = useState(false);
     const {t} = useTranslation();
 
