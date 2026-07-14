@@ -84,16 +84,13 @@ export default function TabsLayout() {
             headerLeft: () => null,
             tabBarShowLabel: false,
             tabBarStyle: {
-              height: 70 + bottomInset,
+              height: 60 + bottomInset,
               paddingBottom: bottomInset,
-              paddingTop: 8,
-              borderTopWidth: 0,
-              backgroundColor: "#FFFFFF",
-              shadowColor: "#1E3A8A",
-              shadowOffset: { width: 0, height: -8 },
-              shadowOpacity: 0.08,
-              shadowRadius: 24,
-              elevation: 20,
+              paddingTop: 6,
+              borderTopWidth: 1,
+              borderTopColor: "#e5e7eb",
+              backgroundColor: "#fff",
+              elevation: 8,
             },
           }}
         >
@@ -103,46 +100,20 @@ export default function TabsLayout() {
               name={name}
               options={{
                 tabBarIcon: ({ focused }) => (
-                  <View style={{
-                    alignItems: "center",
-                    justifyContent: "center",
-                    width: 56,
-                    paddingTop: 4,
-                  }}>
-                    <View style={{
-                      backgroundColor: focused ? "#EFF6FF" : "transparent",
-                      borderRadius: 16,
-                      padding: 8,
-                      marginBottom: 2,
-                    }}>
-                      <Icon
-                        size={22}
-                        strokeWidth={focused ? 2.6 : 1.8}
-                        color={focused ? "#2563EB" : "#94A3B8"}
-                      />
-                    </View>
+                  <View className="items-center justify-center w-[64px] mt-2">
+                    <Icon
+                      size={24}
+                      strokeWidth={focused ? 2.6 : 2}
+                      color={focused ? "#2563eb" : "#6b7280"}
+                    />
                     <Text
                       numberOfLines={1}
                       ellipsizeMode="tail"
-                      style={{
-                        fontSize: 10,
-                        fontWeight: focused ? "700" : "500",
-                        color: focused ? "#2563EB" : "#94A3B8",
-                        letterSpacing: 0.3,
-                        marginTop: 1,
-                      }}
+                      className={`text-[11px] mt-1 ${focused ? "text-blue-600 font-semibold" : "text-gray-500"
+                        }`}
                     >
                       {t(label)}
                     </Text>
-                    {focused && (
-                      <View style={{
-                        width: 4,
-                        height: 4,
-                        borderRadius: 2,
-                        backgroundColor: "#2563EB",
-                        marginTop: 3,
-                      }} />
-                    )}
                   </View>
                 ),
               }}

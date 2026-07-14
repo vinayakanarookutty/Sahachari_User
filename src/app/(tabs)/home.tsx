@@ -36,12 +36,10 @@ import { useProducts } from "../../hooks/useProducts";
 import { useProfile } from "../../hooks/useProfile";
 import { useRentals } from "../../hooks/useRentals";
 import { useServices } from "../../hooks/useServices";
+
 import { useTranslation } from "react-i18next";
-import { useAppFonts } from "../../hooks/useAppFonts";
 
 import { resolveCategoryRoute } from "../market/utils/marketplaceRouter";
-
-
 
 // Icon mapping for different categories
 const CATEGORY_ICONS: Record<string, any> = {
@@ -140,7 +138,6 @@ export default function Home() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { t } = useTranslation();
-  const { styleRegular, styleBold, classRegular, classBold } = useAppFonts();
 
   const { data: carouselData = [] } = useCarousel();
 
@@ -441,14 +438,15 @@ export default function Home() {
           <View className="flex-row items-center justify-between">
             <View className="flex-1">
               <View className="flex-row items-center mb-1">
+
                 <Text
                   className="text-4xl font-black text-white ml-2"
-                  style={[{
+                  style={{
                     letterSpacing: 1,
                     textShadowColor: 'rgba(0, 0, 0, 0.1)',
                     textShadowOffset: { width: 0, height: 2 },
                     textShadowRadius: 4,
-                  }, styleBold]}
+                  }}
                 >
                   {/* Sahachari */}
                   {t("sahachari")}
@@ -456,8 +454,9 @@ export default function Home() {
               </View>
               <View className="flex-row items-center mt-1">
                 <View className="w-12 h-0.5 bg-blue-200 mr-3 rounded-full" />
-                <Text className="text-blue-50 text-sm font-semibold tracking-wide" style={styleRegular}>
+                <Text className="text-blue-50 text-sm font-semibold tracking-wide">
                   {t("Premium_Local_Services")}
+
                 </Text>
               </View>
             </View>
@@ -669,10 +668,10 @@ export default function Home() {
                   <View className="flex-row items-center mb-3">
 
                   </View>
-                  <Text className="text-3xl font-black text-blue-900 mb-2" style={[{ letterSpacing: 0.5 }, styleBold]}>
+                  <Text className="text-3xl font-black text-blue-900 mb-2" style={{ letterSpacing: 0.5 }}>
                     {t("Happy_60")}
                   </Text>
-                  <Text className="text-blue-600 text-sm font-semibold leading-5" style={styleRegular}>
+                  <Text className="text-blue-600 text-sm font-semibold leading-5">
                     {t("Exclusive_for_senior_citizens")}
                   </Text>
                 </View>
@@ -713,31 +712,28 @@ export default function Home() {
 
         {/* Premium Categories Section */}
         <View className="mt-10 px-6">
-          <View className="flex-row items-center justify-between mb-8">
+          <View className="flex-row items-center justify-between mb-7">
             <View className="flex-1">
-              <Text style={[{ fontSize: 26, fontWeight: "900", color: "#0F172A", letterSpacing: -0.3 }, styleBold]}>
+              <Text className="text-3xl font-black text-gray-900 tracking-tight" style={{ letterSpacing: 0.3 }}>
                 {t("Our_Services")}
               </Text>
-              <View className="flex-row items-center mt-3">
-                <View style={{ width: 32, height: 3, backgroundColor: "#2563EB", borderRadius: 2, marginRight: 10 }} />
-                <Text style={[{ fontSize: 13, color: "#2563EB", fontWeight: "700", letterSpacing: 0.8, textTransform: "uppercase" }, styleBold]}>
+              <View className="flex-row items-center mt-2">
+                <View className="w-8 h-0.5 bg-blue-500 rounded-full mr-2" />
+                <Text className="text-blue-600 text-sm font-bold tracking-wide">
                   {t("Discover_Excellence")}
                 </Text>
               </View>
             </View>
             <View
+              className="bg-blue-50 rounded-2xl p-3"
               style={{
-                backgroundColor: "#EFF6FF",
-                borderRadius: 18,
-                padding: 12,
                 shadowColor: "#2563EB",
-                shadowOffset: { width: 0, height: 4 },
-                shadowOpacity: 0.1,
-                shadowRadius: 8,
-                elevation: 4,
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.08,
+                shadowRadius: 6,
               }}
             >
-              <ChevronRight size={20} color="#2563EB" strokeWidth={2.5} />
+              <ChevronRight size={22} color="#2563EB" strokeWidth={2.5} />
             </View>
           </View>
 
@@ -762,7 +758,7 @@ export default function Home() {
                     style={{
                       transform: [{ scale: scaleAnims[index] || 1 }],
                       width: "48%",
-                      marginBottom: 20,
+                      marginBottom: 18,
                     }}
                   >
                     <Pressable
@@ -771,14 +767,13 @@ export default function Home() {
                       onPressOut={() => handleCategoryPressOut(index)}
                     >
                       <View
+                        className="rounded-3xl overflow-hidden"
                         style={{
-                          borderRadius: 28,
-                          overflow: "hidden",
                           shadowColor: category.shadowColor,
-                          shadowOffset: { width: 0, height: 10 },
-                          shadowOpacity: 0.2,
-                          shadowRadius: 20,
-                          elevation: 10,
+                          shadowOffset: { width: 0, height: 6 },
+                          shadowOpacity: 0.15,
+                          shadowRadius: 14,
+                          elevation: 8,
                           borderWidth: 1,
                           borderColor: '#F1F5F9',
                         }}
@@ -787,40 +782,34 @@ export default function Home() {
                           colors={category.gradient}
                           start={{ x: 0, y: 0 }}
                           end={{ x: 1, y: 1 }}
-                          style={{ paddingVertical: 28, paddingHorizontal: 16 }}
+                          style={{ padding: 24 }}
                         >
                           <View className="items-center">
                             <View
+                              className="rounded-2xl p-4 mb-4"
                               style={{
                                 backgroundColor: '#FFFFFF',
-                                borderRadius: 22,
-                                padding: 16,
-                                marginBottom: 14,
                                 shadowColor: category.iconColor,
-                                shadowOffset: { width: 0, height: 6 },
-                                shadowOpacity: 0.25,
-                                shadowRadius: 12,
-                                elevation: 8,
+                                shadowOffset: { width: 0, height: 4 },
+                                shadowOpacity: 0.2,
+                                shadowRadius: 8,
+                                elevation: 6,
                                 borderWidth: 1,
-                                borderColor: '#F8FAFC',
+                                borderColor: '#F1F5F9',
                               }}
                             >
                               <IconComponent
-                                size={30}
+                                size={32}
                                 color={category.iconColor}
-                                strokeWidth={2.2}
+                                strokeWidth={2.5}
                               />
                             </View>
                             <Text
+                              className="text-gray-900 font-black text-base text-center"
                               numberOfLines={1}
-                              style={[{
-                                color: "#0F172A",
-                                fontWeight: "900",
-                                fontSize: 13,
-                                textAlign: "center",
-                                letterSpacing: 0.3,
-                              }, styleBold]}
+                              style={{ letterSpacing: 0.5 }}
                             >
+                              {/* {category.name} */}
                               {t(`categories.${category.translationKey}`)}
                             </Text>
                           </View>

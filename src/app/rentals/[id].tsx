@@ -27,7 +27,6 @@ import { createBooking } from "@/services/booking.api";
 import { getImageUrl } from "@/utils/image";
 
 
-
 export default function RentalDetailsScreen() {
     const { id } = useLocalSearchParams<{ id: string }>();
     const { width } = useWindowDimensions();

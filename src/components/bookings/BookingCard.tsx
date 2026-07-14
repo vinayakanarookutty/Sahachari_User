@@ -1,9 +1,7 @@
 import { Calendar, CreditCard, Package } from "lucide-react-native";
 import { Pressable, Text, View } from "react-native";
-import { useAppFonts } from "../../hooks/useAppFonts";
 
 export function BookingCard({ item, onPress }: any) {
-    const { styleRegular, styleBold } = useAppFonts();
     const formatDate = (date: string) => {
         const d = new Date(date);
         return d.toLocaleDateString("en-IN", {
@@ -15,24 +13,24 @@ export function BookingCard({ item, onPress }: any) {
 
     const getStatusColor = (status: string) => {
         const colors: Record<string, string> = {
-            PLACED: "bg-yellow-50 border border-yellow-200",
-            CONFIRMED: "bg-blue-50 border border-blue-200",
-            PROCESSING: "bg-purple-50 border border-purple-200",
-            COMPLETED: "bg-green-50 border border-green-200",
-            CANCELLED: "bg-red-50 border border-red-200",
+            PLACED: "bg-yellow-100",
+            CONFIRMED: "bg-blue-100",
+            PROCESSING: "bg-purple-100",
+            COMPLETED: "bg-green-100",
+            CANCELLED: "bg-red-100",
         };
-        return colors[status] || "bg-gray-50 border border-gray-200";
+        return colors[status] || "bg-gray-100";
     };
 
     const getStatusTextColor = (status: string) => {
         const colors: Record<string, string> = {
-            PLACED: "text-yellow-700",
-            CONFIRMED: "text-blue-700",
-            PROCESSING: "text-purple-700",
-            COMPLETED: "text-green-700",
-            CANCELLED: "text-red-700",
+            PLACED: "text-yellow-800",
+            CONFIRMED: "text-blue-800",
+            PROCESSING: "text-purple-800",
+            COMPLETED: "text-green-800",
+            CANCELLED: "text-red-800",
         };
-        return colors[status] || "text-gray-700";
+        return colors[status] || "text-gray-800";
     };
 
     const getStatusEmoji = (status: string) => {
@@ -49,45 +47,35 @@ export function BookingCard({ item, onPress }: any) {
     return (
         <Pressable
             onPress={() => onPress(item)}
-            style={({ pressed }) => ({
-                backgroundColor: '#FFFFFF',
-                borderRadius: 24,
-                borderWidth: 1,
-                borderColor: '#F1F5F9',
-                shadowColor: '#1E3A8A',
-                shadowOffset: { width: 0, height: 6 },
-                shadowOpacity: 0.05,
-                shadowRadius: 16,
-                elevation: 3,
-                overflow: 'hidden',
-                transform: [{ scale: pressed ? 0.98 : 1 }]
-            })}
+            className="bg-white rounded-3xl shadow-lg overflow-hidden"
         >
             {/* HEADER */}
-            <View style={{ backgroundColor: "#F8FAFC", paddingHorizontal: 16, paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: "#F1F5F9" }}>
-                <View className="flex-row justify-between items-center">
+            <View className="bg-gradient-to-r from-blue-50 to-indigo-50 p-5">
+                <View className="flex-row justify-between items-start">
+
                     {/* ID */}
                     <View className="flex-1">
-                        <Text style={[{ fontSize: 10, color: "#94A3B8", fontWeight: "600", textTransform: "uppercase", letterSpacing: 0.5 }, styleRegular]}>
+                        <Text className="text-xs text-gray-500 font-semibold uppercase">
                             Booking ID
                         </Text>
-                        <Text style={[{ fontSize: 14, fontWeight: "800", color: "#334155", marginTop: 2 }, styleBold]} numberOfLines={1}>
+                        <Text className="text-lg font-bold text-gray-800" numberOfLines={1}>
                             #{item._id.slice(-6)}
                         </Text>
                     </View>
 
                     {/* STATUS */}
                     <View
-                        className={`px-3 py-1 rounded-full flex-row items-center ${getStatusColor(
+                        className={`px-4 py-2 rounded-full flex-row items-center ${getStatusColor(
                             item.status
                         )}`}
                     >
-                        <Text className="text-sm mr-1">
+                        <Text className="text-xl mr-1">
                             {getStatusEmoji(item.status)}
                         </Text>
                         <Text
-                            style={[{ fontSize: 10, fontWeight: "800" }, styleBold]}
-                            className={`${getStatusTextColor(item.status)}`}
+                            className={`text-xs font-bold uppercase ${getStatusTextColor(
+                                item.status
+                            )}`}
                         >
                             {item.status}
                         </Text>
@@ -96,43 +84,44 @@ export function BookingCard({ item, onPress }: any) {
             </View>
 
             {/* BODY */}
-            <View style={{ padding: 16 }}>
+            <View className="p-5">
                 {/* SERVICE INFO */}
-                <View style={{ marginBottom: 12 }}>
-                    <View className="flex-row items-center mb-2.5">
-                        <View className="bg-green-50 border border-green-100 p-1.5 rounded-lg mr-2">
-                            <Package size={14} color="#10B981" />
+                <View className="mb-4">
+                    <View className="flex-row items-center mb-3">
+                        <View className="bg-green-100 p-2 rounded-lg mr-2">
+                            <Package size={16} color="#10B981" />
                         </View>
 
-                        <Text style={[{ fontSize: 13, fontWeight: "800", color: "#1E293B" }, styleBold]}>
+                        <Text className="text-base font-bold text-gray-800">
                             Service Details
                         </Text>
                     </View>
 
-                    <Text style={[{ fontSize: 13, fontWeight: "700", color: "#334155" }, styleBold]}>
+                    <Text className="text-sm font-semibold text-gray-800">
                         {item.item?.itemName}
                     </Text>
 
-                    <Text style={[{ fontSize: 11, color: "#94A3B8", marginTop: 2 }, styleRegular]}>
+                    <Text className="text-xs text-gray-500 mt-1">
                         Type: {item.bookingType}
                     </Text>
                 </View>
 
                 {/* FOOTER INFO */}
-                <View style={{ paddingTop: 12, borderTopWidth: 1, borderTopColor: "#F1F5F9" }}>
+                <View className="pt-4 border-t border-gray-100 space-y-3">
+
                     {/* PRICE */}
-                    <View className="flex-row items-center justify-between mb-2">
+                    <View className="flex-row items-center justify-between">
                         <View className="flex-row items-center">
-                            <View className="bg-blue-50 border border-blue-100 p-1.5 rounded-lg mr-2">
-                                <CreditCard size={12} color="#3B82F6" />
+                            <View className="bg-blue-100 p-2 rounded-lg mr-2">
+                                <CreditCard size={14} color="#3B82F6" />
                             </View>
 
-                            <Text style={[{ fontSize: 12, color: "#64748B" }, styleRegular]}>
+                            <Text className="text-sm text-gray-600">
                                 Total Amount
                             </Text>
                         </View>
 
-                        <Text style={[{ fontSize: 16, fontWeight: "900", color: "#2563EB" }, styleBold]}>
+                        <Text className="text-xl font-bold text-blue-600">
                             ₹{item.totalAmount}
                         </Text>
                     </View>
@@ -140,16 +129,16 @@ export function BookingCard({ item, onPress }: any) {
                     {/* DATE */}
                     <View className="flex-row items-center justify-between">
                         <View className="flex-row items-center">
-                            <View className="bg-purple-50 border border-purple-100 p-1.5 rounded-lg mr-2">
-                                <Calendar size={12} color="#8B5CF6" />
+                            <View className="bg-purple-100 p-2 rounded-lg mr-2">
+                                <Calendar size={14} color="#8B5CF6" />
                             </View>
 
-                            <Text style={[{ fontSize: 12, color: "#64748B" }, styleRegular]}>
+                            <Text className="text-sm text-gray-600">
                                 Booking Date
                             </Text>
                         </View>
 
-                        <Text style={[{ fontSize: 12, fontWeight: "700", color: "#475569" }, styleBold]}>
+                        <Text className="text-sm font-semibold text-gray-700">
                             {formatDate(item.createdAt)}
                         </Text>
                     </View>
@@ -158,4 +147,3 @@ export function BookingCard({ item, onPress }: any) {
         </Pressable>
     );
 }
-
