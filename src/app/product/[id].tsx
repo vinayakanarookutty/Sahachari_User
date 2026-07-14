@@ -18,13 +18,13 @@ import { useTranslation } from "react-i18next";
 import {
   ActivityIndicator,
   Animated,
-  Dimensions,
   Image,
   Pressable,
   ScrollView,
   Share,
   Text,
   View,
+  useWindowDimensions,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { AddToCartModal } from "../../components/cart/AddToCartModal";
@@ -38,9 +38,10 @@ export const unstable_settings = {
   headerShown: false,
 };
 
-const { width } = Dimensions.get("window");
+
 
 export default function ProductDetails() {
+  const { width } = useWindowDimensions();
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const insets = useSafeAreaInsets();
@@ -217,7 +218,7 @@ export default function ProductDetails() {
         style={{ paddingTop: insets.top + 12 }}
       >
         <Pressable
-          onPress={() => router.back() ?? router.push("/(tabs)/products")}
+          onPress={() => router.back() ?? router.push("/home")}
           className="bg-white/90 backdrop-blur-sm rounded-full p-2.5 shadow-lg"
         >
           <ArrowLeft size={24} color="#1F2937" strokeWidth={2.5} />

@@ -82,23 +82,35 @@ export default function Orders() {
           {orders.length} {orders.length === 1 ? 'order' : 'orders'} in total
         </Text>
       </View> */}
-        {/* HEADER */}
+        {/* Premium Header */}
         <LinearGradient
-          colors={["#2563EB", "#1D4ED8"]}
-          // style={{ paddingBottom: 16 }
-          style={{ paddingTop: insets.top + 10, paddingBottom: 20 }
-          } >
-          <View className="flex-row items-center px-4 pt-4">
-            {/* BACK BUTTON */}
-            <Pressable onPress={() => router.back()} className="bg-white/20 p-2 rounded-full" >
-              <ArrowLeft size={22} color="#fff" />
+          colors={["#1E3A8A", "#2563EB", "#3B82F6"]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={{ paddingTop: insets.top + 10, paddingBottom: 24 }}
+        >
+          {/* Decorative overlay */}
+          <View style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, opacity: 0.08 }}>
+            <View style={{ width: 140, height: 140, borderRadius: 70, backgroundColor: "white", position: "absolute", top: -40, right: -30 }} />
+            <View style={{ width: 100, height: 100, borderRadius: 50, backgroundColor: "white", position: "absolute", bottom: -20, left: -20 }} />
+          </View>
+
+          <View className="flex-row items-center px-5 pt-4">
+            <Pressable
+              onPress={() => router.back()}
+              style={({ pressed }) => ({
+                backgroundColor: pressed ? "rgba(255,255,255,0.3)" : "rgba(255,255,255,0.15)",
+                padding: 10,
+                borderRadius: 16,
+              })}
+            >
+              <ArrowLeft size={22} color="#fff" strokeWidth={2.5} />
             </Pressable>
-            {/* TITLE */}
             <View className="flex-1 items-center">
-              <Text className="text-2xl font-bold text-white">
+              <Text style={{ fontSize: 22, fontWeight: "900", color: "#FFFFFF", letterSpacing: 0.5 }}>
                 {t("my_orders")}
               </Text>
-              <Text className="text-blue-100 text-sm mt-1">
+              <Text style={{ fontSize: 13, color: "#BFDBFE", fontWeight: "600", marginTop: 4 }}>
                 {orders.length}{" "}
                 {orders.length === 1 ? t("order") : t("orders")}
               </Text>

@@ -65,12 +65,30 @@ export function CheckoutModal({
 
   useEffect(() => {
     if (profile && visible) {
+      // Split the full address into street and city parts
+      const fullAddress = profile.address || '';
+      let streetPart = fullAddress;
+      let cityPart = (prev: any) => prev.city || '';
+
+      if (fullAddress.includes(',')) {
+        const parts = fullAddress.split(',').map((p: string) => p.trim());
+        if (parts.length >= 3) {
+          // e.g. "123 Main Street, Fort Kochi, Kerala" -> street: "123 Main Street", city: "Fort Kochi, Kerala"
+          streetPart = parts.slice(0, Math.ceil(parts.length / 2)).join(', ');
+          cityPart = (_prev: any) => parts.slice(Math.ceil(parts.length / 2)).join(', ');
+        } else if (parts.length === 2) {
+          // e.g. "123 Main Street, Fort Kochi" -> street: "123 Main Street", city: "Fort Kochi"
+          streetPart = parts[0];
+          cityPart = (_prev: any) => parts[1];
+        }
+      }
+
       setAddress((prev: any) => ({
         ...prev,
 
-        // Auto fill user details
-        street: profile.address || '',
-        city: prev.city || '',
+        // Auto fill user details with smart splitting
+        street: streetPart,
+        city: cityPart(prev) || profile.address2 || prev.city || '',
         zipCode:
           profile.serviceablePincodes?.[0] || prev.zipCode || '',
         phone: profile.mobileNumber || '',
@@ -188,12 +206,12 @@ export function CheckoutModal({
           ) : (
             <>
               {/* Overlay for closing dropdown */}
-              {showPaymentDropdown && (
+              {/* {showPaymentDropdown && (
                 <Pressable
                   className="absolute inset-0 z-10"
                   onPress={() => setShowPaymentDropdown(false)}
                 />
-              )}
+              )} */}
 
               <ScrollView
                 className="px-6 py-4"

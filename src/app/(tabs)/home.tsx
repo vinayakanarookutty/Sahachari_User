@@ -3,12 +3,15 @@ import { useRouter } from "expo-router";
 import {
   Briefcase,
   ChevronRight,
+  Coffee,
+  Cookie,
   Fish,
   HomeIcon,
   Leaf,
   Package,
   Phone,
   Plug,
+  Sandwich,
   ShoppingCart,
   User,
   Utensils,
@@ -18,7 +21,6 @@ import { useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Animated,
-  Dimensions,
   Image,
   Linking,
   Pressable,
@@ -26,22 +28,20 @@ import {
   ScrollView,
   Text,
   View,
+  useWindowDimensions,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useCarousel } from "../../hooks/useCarousel";
 import { useProducts } from "../../hooks/useProducts";
 import { useProfile } from "../../hooks/useProfile";
-
+import { useRentals } from "../../hooks/useRentals";
+import { useServices } from "../../hooks/useServices";
 import { useTranslation } from "react-i18next";
+import { useAppFonts } from "../../hooks/useAppFonts";
 
-const { width } = Dimensions.get("window");
-// const CAROUSEL_IMAGES = [
-//   require("../../../assets/WhatsApp Image 2026-02-11 at 10.13.48 AM.jpeg"),
-//   require("../../../assets/WhatsApp Image 2026-02-11 at 5.19.25 PM.jpeg"),
-//   require("../../../assets/WhatsApp Image 2026-02-11 at 11.25.36 AM.jpeg"),
-//   require("../../../assets/pexels-jack-sparrow-4198972.jpg"),
-//   require("../../../assets/im3.jpg"),
-// ];
+import { resolveCategoryRoute } from "../market/utils/marketplaceRouter";
+
+
 
 // Icon mapping for different categories
 const CATEGORY_ICONS: Record<string, any> = {
@@ -53,6 +53,9 @@ const CATEGORY_ICONS: Record<string, any> = {
   "Fish meat": Fish,
   "rent": Wrench,
   "electronics": Plug,
+  "Snacks": Cookie,
+  "Fast Food": Sandwich,
+  "Beverages": Coffee,
   "default": Package,
 };
 // Premium white and blue color gradients
@@ -106,6 +109,23 @@ const CATEGORY_GRADIENTS: Record<
     iconColor: "#7C3AED",
     shadowColor: "#C4B5FD",
   },
+  "Snacks": {
+    gradient: ["#FFFFFF", "#FFF7ED"],
+    iconColor: "#C2410C",
+    shadowColor: "#FDBA74",
+  },
+
+  "Fast Food": {
+    gradient: ["#FFFFFF", "#FEF2F2"],
+    iconColor: "#DC2626",
+    shadowColor: "#FCA5A5",
+  },
+
+  "Beverages": {
+    gradient: ["#FFFFFF", "#EFF6FF"],
+    iconColor: "#2563EB",
+    shadowColor: "#93C5FD",
+  },
 
   "default": {
     gradient: ["#FFFFFF", "#F1F5F9"],
@@ -116,9 +136,11 @@ const CATEGORY_GRADIENTS: Record<
 
 
 export default function Home() {
+  const { width } = useWindowDimensions();
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { t } = useTranslation();
+  const { styleRegular, styleBold, classRegular, classBold } = useAppFonts();
 
   const { data: carouselData = [] } = useCarousel();
 
@@ -127,9 +149,19 @@ export default function Home() {
   const scrollViewRef = useRef<ScrollView>(null);
 
   const [searchQuery, setSearchQuery] = useState("");
-  const { data, isLoading, refetch: refetchProducts, } = useProducts(
+  // const { data, isLoading, refetch: refetchProducts, } = useProducts(
+  //   searchQuery ? { search: searchQuery } : undefined,
+  // );
+  const { data: products = [], isLoading: productsLoading, refetch: refetchProducts, } = useProducts(
     searchQuery ? { search: searchQuery } : undefined,
   );
+
+  const { data: services = [], isLoading: servicesLoading, } = useServices();
+
+  const { data: rentals = [], isLoading: rentalsLoading, } = useRentals();
+
+  const isLoading = productsLoading || servicesLoading || rentalsLoading;
+
   const [refreshing, setRefreshing] = useState(false);
 
   const onRefresh = async () => {
@@ -139,6 +171,7 @@ export default function Home() {
       await Promise.all([
         refetchProducts?.(),
         refetchProfile?.(),
+        // need to add services and rentals
       ]);
     } catch (error) {
       console.log("Refresh error:", error);
@@ -148,66 +181,159 @@ export default function Home() {
   };
 
   // Extract unique categories from products data
-  const categories = useMemo(() => {
-    if (!data || data.length === 0) return [];
+  // const categories = useMemo(() => {
+  //   if (!data || data.length === 0) return [];
 
+  //   const uniqueCategories = new Set<string>();
+  //   data.forEach((product: any) => {
+  //     if (product.category) {
+  //       const cleanCategory = product.category.trim();
+  //       uniqueCategories.add(cleanCategory);
+  //     }
+  //   });
+
+  //   return Array.from(uniqueCategories).map((category, index) => {
+  //     // const colors = CATEGORY_GRADIENTS[category] || CATEGORY_GRADIENTS["default"];
+  //     // const icon = CATEGORY_ICONS[category] || CATEGORY_ICONS["default"];
+  //     const normalizedCategory = category.trim().toLowerCase();
+
+  //     const iconMap: Record<string, any> = {
+  //       "food": Utensils,
+  //       "vegetables and fruits": Leaf,
+  //       "groceries": ShoppingCart,
+  //       "home made": HomeIcon,
+  //       "service": Briefcase,
+  //       "fish & meat": Fish,
+  //       "rent": Wrench,
+  //       "electronics": Plug,
+  //       "snacks": Cookie,
+  //       "fast food": Sandwich,
+  //       "beverages": Coffee,
+  //     };
+
+  //     const gradientMap: Record<string, any> = {
+  //       "food": CATEGORY_GRADIENTS["Food"],
+  //       "vegetables and fruits":
+  //         CATEGORY_GRADIENTS["Vegetables and fruits"],
+  //       "groceries": CATEGORY_GRADIENTS["Groceries"],
+  //       "home made": CATEGORY_GRADIENTS["Home made"],
+  //       "service": CATEGORY_GRADIENTS["Service"],
+  //       "fish & meat": CATEGORY_GRADIENTS["Fish meat"],
+  //       "rent": CATEGORY_GRADIENTS["rent"],
+  //       "electronics": CATEGORY_GRADIENTS["electronics"],
+  //       "snacks": CATEGORY_GRADIENTS["Snacks"],
+  //       "fast food": CATEGORY_GRADIENTS["Fast Food"],
+  //       "beverages": CATEGORY_GRADIENTS["Beverages"],
+  //     };
+
+  //     const icon = iconMap[normalizedCategory] || Package;
+
+  //     const colors =
+  //       gradientMap[normalizedCategory] ||
+  //       CATEGORY_GRADIENTS["default"];
+
+  //     const translationKey = normalizedCategory
+  //       .replace(/\s*&\s*/g, "_")
+  //       .replace(/\s+/g, "_");
+
+  //     return {
+  //       id: `category-${index}`,
+  //       name: category,
+  //       translationKey,
+  //       icon: icon,
+  //       gradient: colors.gradient,
+  //       iconColor: colors.iconColor,
+  //       shadowColor: colors.shadowColor,
+  //     };
+  //   });
+  // }, [data]);
+
+  const categories = useMemo(() => {
     const uniqueCategories = new Set<string>();
-    data.forEach((product: any) => {
-      if (product.category) {
-        const cleanCategory = product.category.trim();
-        uniqueCategories.add(cleanCategory);
+
+    products.forEach((item: any) => {
+      if (item.category) {
+        uniqueCategories.add(item.category.trim());
       }
     });
 
-    return Array.from(uniqueCategories).map((category, index) => {
-      // const colors = CATEGORY_GRADIENTS[category] || CATEGORY_GRADIENTS["default"];
-      // const icon = CATEGORY_ICONS[category] || CATEGORY_ICONS["default"];
-      const normalizedCategory = category.trim().toLowerCase();
+    if (services.length > 0) {
+      uniqueCategories.add("Service");
+    }
 
-      const iconMap: Record<string, any> = {
-        "food": Utensils,
-        "vegetables and fruits": Leaf,
-        "groceries": ShoppingCart,
-        "home made": HomeIcon,
-        "service": Briefcase,
-        "fish & meat": Fish,
-        "rent": Wrench,
-        "electronics": Plug,
-      };
+    if (rentals.length > 0) {
+      uniqueCategories.add("Rent");
+    }
 
-      const gradientMap: Record<string, any> = {
-        "food": CATEGORY_GRADIENTS["Food"],
-        "vegetables and fruits":
-          CATEGORY_GRADIENTS["Vegetables and fruits"],
-        "groceries": CATEGORY_GRADIENTS["Groceries"],
-        "home made": CATEGORY_GRADIENTS["Home made"],
-        "service": CATEGORY_GRADIENTS["Service"],
-        "fish & meat": CATEGORY_GRADIENTS["Fish meat"],
-        "rent": CATEGORY_GRADIENTS["rent"],
-        "electronics": CATEGORY_GRADIENTS["electronics"],
-      };
+    return Array.from(uniqueCategories).map(
+      (category, index) => {
+        const normalizedCategory =
+          category.trim().toLowerCase();
 
-      const icon = iconMap[normalizedCategory] || Package;
+        const iconMap: Record<string, any> = {
+          food: Utensils,
+          "vegetables and fruits": Leaf,
+          groceries: ShoppingCart,
+          "home made": HomeIcon,
+          service: Briefcase,
+          rent: Wrench,
+          electronics: Plug,
+          snacks: Cookie,
+          "fast food": Sandwich,
+          beverages: Coffee,
+          "fish & meat": Fish,
+        };
 
-      const colors =
-        gradientMap[normalizedCategory] ||
-        CATEGORY_GRADIENTS["default"];
+        const gradientMap: Record<string, any> = {
+          food: CATEGORY_GRADIENTS["Food"],
+          "vegetables and fruits":
+            CATEGORY_GRADIENTS[
+            "Vegetables and fruits"
+            ],
+          groceries:
+            CATEGORY_GRADIENTS["Groceries"],
+          "home made":
+            CATEGORY_GRADIENTS["Home made"],
+          service:
+            CATEGORY_GRADIENTS["Service"],
+          rent:
+            CATEGORY_GRADIENTS["rent"],
+          electronics:
+            CATEGORY_GRADIENTS["electronics"],
+          snacks:
+            CATEGORY_GRADIENTS["Snacks"],
+          "fast food":
+            CATEGORY_GRADIENTS["Fast Food"],
+          beverages:
+            CATEGORY_GRADIENTS["Beverages"],
+          "fish & meat":
+            CATEGORY_GRADIENTS["Fish meat"],
+        };
 
-      const translationKey = normalizedCategory
-        .replace(/\s*&\s*/g, "_")
-        .replace(/\s+/g, "_");
+        const icon =
+          iconMap[normalizedCategory] ||
+          Package;
 
-      return {
-        id: `category-${index}`,
-        name: category,
-        translationKey,
-        icon: icon,
-        gradient: colors.gradient,
-        iconColor: colors.iconColor,
-        shadowColor: colors.shadowColor,
-      };
-    });
-  }, [data]);
+        const colors =
+          gradientMap[normalizedCategory] ||
+          CATEGORY_GRADIENTS["default"];
+
+        return {
+          id: `category-${index}`,
+          name: category,
+          translationKey:
+            normalizedCategory.replace(
+              /\s*&\s*/g,
+              "_",
+            ).replace(/\s+/g, "_"),
+          icon,
+          gradient: colors.gradient,
+          iconColor: colors.iconColor,
+          shadowColor: colors.shadowColor,
+        };
+      }
+    );
+  }, [products, services, rentals]);
 
   const scaleAnims = useRef(
     Array(10).fill(0).map(() => new Animated.Value(1))
@@ -244,9 +370,27 @@ export default function Home() {
     }
   };
 
+  // const handleCategoryPress = (categoryName: string) => {
+  //   router.push({
+  //     pathname: "/products",
+  //     params: { category: categoryName },
+  //   });
+  // };
   const handleCategoryPress = (categoryName: string) => {
+    const route = resolveCategoryRoute(categoryName);
+
+    if (route === "services") {
+      router.push("/services");
+      return;
+    }
+
+    if (route === "rentals") {
+      router.push("/rentals");
+      return;
+    }
+
     router.push({
-      pathname: "/products",
+      pathname: "/product",
       params: { category: categoryName },
     });
   };
@@ -297,15 +441,14 @@ export default function Home() {
           <View className="flex-row items-center justify-between">
             <View className="flex-1">
               <View className="flex-row items-center mb-1">
-
                 <Text
                   className="text-4xl font-black text-white ml-2"
-                  style={{
+                  style={[{
                     letterSpacing: 1,
                     textShadowColor: 'rgba(0, 0, 0, 0.1)',
                     textShadowOffset: { width: 0, height: 2 },
                     textShadowRadius: 4,
-                  }}
+                  }, styleBold]}
                 >
                   {/* Sahachari */}
                   {t("sahachari")}
@@ -313,9 +456,8 @@ export default function Home() {
               </View>
               <View className="flex-row items-center mt-1">
                 <View className="w-12 h-0.5 bg-blue-200 mr-3 rounded-full" />
-                <Text className="text-blue-50 text-sm font-semibold tracking-wide">
+                <Text className="text-blue-50 text-sm font-semibold tracking-wide" style={styleRegular}>
                   {t("Premium_Local_Services")}
-
                 </Text>
               </View>
             </View>
@@ -527,10 +669,10 @@ export default function Home() {
                   <View className="flex-row items-center mb-3">
 
                   </View>
-                  <Text className="text-3xl font-black text-blue-900 mb-2" style={{ letterSpacing: 0.5 }}>
+                  <Text className="text-3xl font-black text-blue-900 mb-2" style={[{ letterSpacing: 0.5 }, styleBold]}>
                     {t("Happy_60")}
                   </Text>
-                  <Text className="text-blue-600 text-sm font-semibold leading-5">
+                  <Text className="text-blue-600 text-sm font-semibold leading-5" style={styleRegular}>
                     {t("Exclusive_for_senior_citizens")}
                   </Text>
                 </View>
@@ -571,28 +713,31 @@ export default function Home() {
 
         {/* Premium Categories Section */}
         <View className="mt-10 px-6">
-          <View className="flex-row items-center justify-between mb-7">
+          <View className="flex-row items-center justify-between mb-8">
             <View className="flex-1">
-              <Text className="text-3xl font-black text-gray-900 tracking-tight" style={{ letterSpacing: 0.3 }}>
+              <Text style={[{ fontSize: 26, fontWeight: "900", color: "#0F172A", letterSpacing: -0.3 }, styleBold]}>
                 {t("Our_Services")}
               </Text>
-              <View className="flex-row items-center mt-2">
-                <View className="w-8 h-0.5 bg-blue-500 rounded-full mr-2" />
-                <Text className="text-blue-600 text-sm font-bold tracking-wide">
+              <View className="flex-row items-center mt-3">
+                <View style={{ width: 32, height: 3, backgroundColor: "#2563EB", borderRadius: 2, marginRight: 10 }} />
+                <Text style={[{ fontSize: 13, color: "#2563EB", fontWeight: "700", letterSpacing: 0.8, textTransform: "uppercase" }, styleBold]}>
                   {t("Discover_Excellence")}
                 </Text>
               </View>
             </View>
             <View
-              className="bg-blue-50 rounded-2xl p-3"
               style={{
+                backgroundColor: "#EFF6FF",
+                borderRadius: 18,
+                padding: 12,
                 shadowColor: "#2563EB",
-                shadowOffset: { width: 0, height: 2 },
-                shadowOpacity: 0.08,
-                shadowRadius: 6,
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 0.1,
+                shadowRadius: 8,
+                elevation: 4,
               }}
             >
-              <ChevronRight size={22} color="#2563EB" strokeWidth={2.5} />
+              <ChevronRight size={20} color="#2563EB" strokeWidth={2.5} />
             </View>
           </View>
 
@@ -617,7 +762,7 @@ export default function Home() {
                     style={{
                       transform: [{ scale: scaleAnims[index] || 1 }],
                       width: "48%",
-                      marginBottom: 18,
+                      marginBottom: 20,
                     }}
                   >
                     <Pressable
@@ -626,13 +771,14 @@ export default function Home() {
                       onPressOut={() => handleCategoryPressOut(index)}
                     >
                       <View
-                        className="rounded-3xl overflow-hidden"
                         style={{
+                          borderRadius: 28,
+                          overflow: "hidden",
                           shadowColor: category.shadowColor,
-                          shadowOffset: { width: 0, height: 6 },
-                          shadowOpacity: 0.15,
-                          shadowRadius: 14,
-                          elevation: 8,
+                          shadowOffset: { width: 0, height: 10 },
+                          shadowOpacity: 0.2,
+                          shadowRadius: 20,
+                          elevation: 10,
                           borderWidth: 1,
                           borderColor: '#F1F5F9',
                         }}
@@ -641,34 +787,40 @@ export default function Home() {
                           colors={category.gradient}
                           start={{ x: 0, y: 0 }}
                           end={{ x: 1, y: 1 }}
-                          style={{ padding: 24 }}
+                          style={{ paddingVertical: 28, paddingHorizontal: 16 }}
                         >
                           <View className="items-center">
                             <View
-                              className="rounded-2xl p-4 mb-4"
                               style={{
                                 backgroundColor: '#FFFFFF',
+                                borderRadius: 22,
+                                padding: 16,
+                                marginBottom: 14,
                                 shadowColor: category.iconColor,
-                                shadowOffset: { width: 0, height: 4 },
-                                shadowOpacity: 0.2,
-                                shadowRadius: 8,
-                                elevation: 6,
+                                shadowOffset: { width: 0, height: 6 },
+                                shadowOpacity: 0.25,
+                                shadowRadius: 12,
+                                elevation: 8,
                                 borderWidth: 1,
-                                borderColor: '#F1F5F9',
+                                borderColor: '#F8FAFC',
                               }}
                             >
                               <IconComponent
-                                size={32}
+                                size={30}
                                 color={category.iconColor}
-                                strokeWidth={2.5}
+                                strokeWidth={2.2}
                               />
                             </View>
                             <Text
-                              className="text-gray-900 font-black text-base text-center"
                               numberOfLines={1}
-                              style={{ letterSpacing: 0.5 }}
+                              style={[{
+                                color: "#0F172A",
+                                fontWeight: "900",
+                                fontSize: 13,
+                                textAlign: "center",
+                                letterSpacing: 0.3,
+                              }, styleBold]}
                             >
-                              {/* {category.name} */}
                               {t(`categories.${category.translationKey}`)}
                             </Text>
                           </View>

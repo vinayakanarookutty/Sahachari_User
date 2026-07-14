@@ -7,7 +7,7 @@
     "icon": "./assets/sahachari.jpeg",
     "scheme": "customers",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,
+    "newArchEnabled": false,
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.corestoneinnovation.sahachariuser",
@@ -32,7 +32,8 @@
       "favicon": "./assets/sahachari.jpeg"
     },
     "plugins": [
-      "expo-router"
+      "expo-router",
+      "expo-localization"
     ],
     "experiments": {
       "typedRoutes": true,

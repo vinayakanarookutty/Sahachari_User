@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { Image, Pressable, Text, View } from "react-native";
 import { Product } from "../../types/product";
+import { getImageUrl } from "@/utils/image";
+import { useAppFonts } from "../../hooks/useAppFonts";
 
 export function ProductCard({
   product,
@@ -9,6 +11,9 @@ export function ProductCard({
   product: Product;
   onPress?: (id: string) => void;
 }) {
+  const { styleRegular, styleBold } = useAppFonts();
+  if (!product) return null;
+
   // Extract numeric price
   const extractPrice = (value: any) => {
     if (!value) return 0;
@@ -18,7 +23,6 @@ export function ProductCard({
     return match ? Number(match[0]) : 0;
   };
 
-  // const originalPrice = extractPrice(product.price);
   const originalPrice = extractPrice(product.price);
 
   const finalPrice =
@@ -33,30 +37,6 @@ export function ProductCard({
     )
     : 0;
 
-  // const finalPrice = product.finalPrice ?? originalPrice;
-
-  // const hasDiscount = finalPrice < originalPrice;
-
-  // const activeOffer = product.offers?.find((offer: any) => {
-  //   const now = new Date();
-
-  //   return (
-  //     offer.isActive &&
-  //     new Date(offer.startDate) <= now &&
-  //     new Date(offer.endDate) >= now
-  //   );
-  // });
-
-  // let finalPrice = originalPrice;
-
-  // if (activeOffer?.type === "PERCENTAGE") {
-  //   finalPrice =
-  //     originalPrice -
-  //     (originalPrice * activeOffer.value) / 100;
-  // }
-
-  // const hasDiscount = finalPrice < originalPrice;
-
   // Extract unit from strings like "100/Kg"
   const unit =
     typeof product.price === "string" &&
@@ -64,71 +44,95 @@ export function ProductCard({
       ? product.price.split("/")[1].trim()
       : "";
 
-  const S3_BASE_URL = process.env.EXPO_PUBLIC_S3_BASE_URL;
-
   const imageUri = product.images?.[0]
-    ? `${S3_BASE_URL}/${product.images[0]}`
+    ? getImageUrl(product.images[0])
     : null;
-
-  const [imgSrc, setImgSrc] = useState<any>(null);
-
-  useEffect(() => {
-    if (!imageUri) return;
-
-    setImgSrc(null);
-
-    const t = setTimeout(() => {
-      setImgSrc({ uri: imageUri });
-    }, 30);
-
-    return () => clearTimeout(t);
-  }, [imageUri]);
 
   return (
     <Pressable
-      className="flex-1 p-2"
+      style={{ flex: 1, padding: 6 }}
       onPress={() => {
         if (onPress) onPress(product.id);
       }}
     >
-      <View className="bg-white rounded-lg p-3 shadow">
-        {imgSrc ? (
-          <Image
-            source={imgSrc}
-            style={{ width: "100%", height: 128, borderRadius: 8 }}
-            resizeMode="cover"
-          />
+      <View
+        style={{
+          backgroundColor: "#FFFFFF",
+          borderRadius: 20,
+          padding: 10,
+          borderWidth: 1,
+          borderColor: "#F1F5F9",
+          shadowColor: "#1E3A8A",
+          shadowOffset: { width: 0, height: 4 },
+          shadowOpacity: 0.05,
+          shadowRadius: 10,
+          elevation: 3,
+        }}
+      >
+        {imageUri ? (
+          <View style={{ borderRadius: 14, overflow: "hidden" }}>
+            <Image
+              source={{ uri: imageUri }}
+              style={{ width: "100%", height: 110 }}
+              resizeMode="cover"
+            />
+            {hasDiscount && (
+              <View style={{
+                position: "absolute",
+                top: 8,
+                right: 8,
+                backgroundColor: "#EF4444",
+                paddingHorizontal: 8,
+                paddingVertical: 3,
+                borderRadius: 999,
+              }}>
+                <Text style={[{ color: "#FFFFFF", fontSize: 10, fontWeight: "800" }, styleBold]}>
+                  -{discountPercent}%
+                </Text>
+              </View>
+            )}
+          </View>
         ) : (
           <View
             style={{
               width: "100%",
-              height: 128,
-              borderRadius: 8,
-              backgroundColor: "#eee",
+              height: 110,
+              borderRadius: 14,
+              backgroundColor: "#F8FAFC",
+              borderWidth: 1,
+              borderColor: "#E2E8F0",
+              alignItems: "center",
+              justifyContent: "center",
             }}
           />
         )}
 
-        <Text className="font-semibold mt-2">
+        <Text
+          numberOfLines={1}
+          style={[{
+            color: "#0F172A",
+            fontSize: 13,
+            fontWeight: "700",
+            marginTop: 8,
+          }, styleBold]}
+        >
           {product.name}
         </Text>
 
         {/* Price */}
-        <View className="mt-1">
-          <View className="flex-row items-end">
-            <Text className="font-bold text-lg">
-              ₹{finalPrice}
-            </Text>
+        <View style={{ marginTop: 4, flexDirection: "row", alignItems: "baseline", flexWrap: "wrap" }}>
+          <Text style={[{ fontSize: 15, fontWeight: "800", color: "#2563EB" }, styleBold]}>
+            ₹{finalPrice}
+          </Text>
 
-            {unit ? (
-              <Text className="text-gray-500 text-sm ml-1 mb-0.5">
-                /{unit}
-              </Text>
-            ) : null}
-          </View>
+          {unit ? (
+            <Text style={[{ fontSize: 10, color: "#94A3B8", marginLeft: 2 }, styleRegular]}>
+              /{unit}
+            </Text>
+          ) : null}
 
           {hasDiscount && (
-            <Text className="text-gray-500 line-through">
+            <Text style={[{ fontSize: 11, color: "#94A3B8", textDecorationLine: "line-through", marginLeft: 6 }, styleRegular]}>
               ₹{originalPrice}
             </Text>
           )}

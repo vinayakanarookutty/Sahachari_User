@@ -1,29 +1,13 @@
 import { Wrench } from "lucide-react-native";
-import React, { useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
 import { Image, Pressable, Text, View } from "react-native";
+import { useTranslation } from "react-i18next";
+import { getImageUrl } from "@/utils/image";
+import { useAppFonts } from "../../hooks/useAppFonts";
 
 export function ServiceCard({ item, onPress }: any) {
-  const imgUrl = item.images?.[0] || null;
-  const [imgSrc, setImgSrc] = useState<any>(null);
-  const {t} = useTranslation();
+  const { t } = useTranslation();
+  const { styleRegular, styleBold } = useAppFonts();
 
-  useEffect(() => {
-    if (!imgUrl) {
-      setImgSrc(null);
-      return;
-    }
-
-    setImgSrc(null);
-
-    const t = setTimeout(() => {
-      setImgSrc({ uri: imgUrl });
-    }, 30);
-
-    return () => clearTimeout(t);
-  }, [imgUrl]);
-
-  // Extract numeric price from strings like "100/Hour"
   const extractPrice = (value: any) => {
     if (!value) return 0;
 
@@ -33,112 +17,124 @@ export function ServiceCard({ item, onPress }: any) {
   };
 
   const originalPrice = extractPrice(item.price);
-  // const originalPrice = extractPrice(item.price);
+  const finalPrice = item.finalPrice ?? originalPrice;
 
-  const finalPrice =
-    item.finalPrice ?? originalPrice;
+  const hasDiscount = finalPrice < originalPrice;
 
-  const hasDiscount =
-    finalPrice < originalPrice;
-  // let finalPrice = originalPrice;
+  const discountPercent = hasDiscount
+    ? Math.round(
+      ((originalPrice - finalPrice) / originalPrice) * 100
+    )
+    : 0;
 
-  // Apply active percentage offer
-  // if (item.offers?.length > 0) {
-  //   // const activeOffer = item.offers.find(
-  //   //   (offer: any) => offer.isActive
-  //   // );
-  //   const activeOffer = item.offers?.find((offer: any) => {
-  //     const now = new Date();
+  const imageUrl = getImageUrl(item.images?.[0]);
 
-  //     return (
-  //       offer.isActive &&
-  //       new Date(offer.startDate) <= now &&
-  //       new Date(offer.endDate) >= now
-  //     );
-  //   });
-
-  //   if (activeOffer?.type === "PERCENTAGE") {
-  //     finalPrice =
-  //       originalPrice -
-  //       (originalPrice * activeOffer.value) / 100;
-  //   }
-  // }
-
-  // const hasDiscount = finalPrice < originalPrice;
-
-  // Extract unit from "100/Hour"
   const unit =
-    typeof item.price === "string" && item.price.includes("/")
-      ? item.price.split("/")[1]
-      : "";
+    typeof item.price === "string" &&
+      item.price.includes("/")
+      ? item.price.split("/")[1].trim()
+      : "hr";
 
   return (
     <Pressable
-      onPress={() => onPress(item.id)}
-      className="flex-1 bg-white rounded-2xl overflow-hidden shadow-sm active:opacity-70"
+      onPress={() => onPress?.(item)}
+      style={({ pressed }) => ({
+        marginBottom: 14,
+        marginHorizontal: 16,
+        borderRadius: 24,
+        overflow: "hidden",
+        backgroundColor: "#FFFFFF",
+        borderWidth: 1,
+        borderColor: "#F1F5F9",
+        shadowColor: "#1E3A8A",
+        shadowOffset: { width: 0, height: 6 },
+        shadowOpacity: 0.08,
+        shadowRadius: 16,
+        elevation: 4,
+        transform: [{ scale: pressed ? 0.98 : 1 }]
+      })}
     >
-      <View className="relative">
-        {imgSrc ? (
-          <Image
-            source={imgSrc}
-            style={{ width: "100%", height: 160 }}
-            resizeMode="cover"
-          />
-        ) : (
-          <View className="w-full h-40 bg-blue-50 items-center justify-center">
-            <Wrench size={48} color="#1877F2" strokeWidth={1.5} />
-          </View>
-        )}
+      <View className="flex-row">
+        {/* IMAGE */}
+        <View style={{ width: 110, height: 110, position: "relative" }}>
+          {imageUrl ? (
+            <Image
+              source={{ uri: imageUrl }}
+              style={{ width: "100%", height: "100%" }}
+              resizeMode="cover"
+            />
+          ) : (
+            <View className="w-full h-full bg-slate-50 items-center justify-center">
+              <Wrench size={24} color="#94A3B8" />
+            </View>
+          )}
 
-        {/* Discount Badge */}
-        {hasDiscount && (
-          <View className="absolute top-2 right-2 bg-red-500 px-2 py-1 rounded-lg">
-            <Text className="text-white text-xs font-bold">
-              {Math.round(
-                ((originalPrice - finalPrice) / originalPrice) * 100
-              )}
-              % {t("off")}
+          {/* Service Badge */}
+          <View className="absolute top-2 left-2 bg-blue-600 px-2 py-0.5 rounded-full">
+            <Text style={[{ color: "#FFFFFF", fontSize: 9, fontWeight: "800" }, styleBold]}>
+              {t("Service")}
             </Text>
           </View>
-        )}
-      </View>
 
-      <View className="p-3">
-        {/* Service Name */}
-        <Text
-          className="text-gray-800 font-semibold text-base"
-          numberOfLines={2}
-        >
-          {item.name}
-        </Text>
+          {/* Discount Badge */}
+          {hasDiscount && (
+            <View className="absolute bottom-2 left-2 bg-red-500 px-2 py-0.5 rounded-full">
+              <Text style={[{ color: "#FFFFFF", fontSize: 9, fontWeight: "800" }, styleBold]}>
+                -{discountPercent}%
+              </Text>
+            </View>
+          )}
+        </View>
 
-        {/* Description */}
-        <Text
-          className="text-gray-500 text-xs mt-1"
-          numberOfLines={2}
-        >
-          {item.description || t("professional_service")}
-        </Text>
-
-        {/* Price */}
-        <View className="mt-2">
-          <View className="flex-row items-end">
-            <Text className="text-blue-600 font-bold text-lg">
-              ₹{finalPrice.toFixed(0)}
+        {/* DETAILS */}
+        <View className="flex-1 p-3.5 justify-between">
+          <View>
+            <Text
+              style={[{
+                fontSize: 15,
+                fontWeight: "800",
+                color: "#0F172A",
+              }, styleBold]}
+              numberOfLines={1}
+            >
+              {item.name}
             </Text>
 
-            {unit ? (
-              <Text className="text-gray-500 text-sm ml-1 mb-0.5">
+            <Text
+              style={[{
+                fontSize: 12,
+                color: "#64748B",
+                marginTop: 2,
+              }, styleRegular]}
+              numberOfLines={1}
+            >
+              {item.description || t("professional_service")}
+            </Text>
+          </View>
+
+          <View className="flex-row items-center justify-between mt-2">
+            <View className="flex-row items-baseline">
+              <Text style={[{ fontSize: 18, fontWeight: "800", color: "#2563EB" }, styleBold]}>
+                ₹{finalPrice}
+              </Text>
+
+              <Text style={[{ fontSize: 10, color: "#94A3B8", marginLeft: 2 }, styleRegular]}>
                 /{unit}
               </Text>
-            ) : null}
-          </View>
 
-          {hasDiscount && (
-            <Text className="text-gray-400 text-sm line-through">
-              ₹{originalPrice.toFixed(0)}
-            </Text>
-          )}
+              {hasDiscount && (
+                <Text style={[{ fontSize: 11, color: "#94A3B8", textDecorationLine: "line-through", marginLeft: 6 }, styleRegular]}>
+                  ₹{originalPrice}
+                </Text>
+              )}
+            </View>
+
+            <View className="px-2.5 py-0.5 rounded-full bg-blue-50">
+              <Text style={[{ fontSize: 10, fontWeight: "700", color: "#2563EB" }, styleBold]}>
+                {t("Available")}
+              </Text>
+            </View>
+          </View>
         </View>
       </View>
     </Pressable>
