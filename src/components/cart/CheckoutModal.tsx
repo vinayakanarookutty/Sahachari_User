@@ -12,6 +12,7 @@ import {
   TextInput,
   View,
 } from 'react-native';
+import { useAppFonts } from "../../hooks/useAppFonts";
 
 export function CheckoutModal({
   visible,
@@ -30,6 +31,7 @@ export function CheckoutModal({
   const [deliveryCharge, setDeliveryCharge] = useState(0);
   const [placeDetails, setPlaceDetails] = useState<any[]>([]);
   const { t } = useTranslation();
+  const { styleRegular, styleBold } = useAppFonts();
 
   interface UserProfile {
     _id: string;
@@ -188,7 +190,7 @@ export function CheckoutModal({
         <View className="bg-white rounded-t-3xl flex-1 mt-16">
           {/* Header */}
           <View className="flex-row items-center justify-between px-6 py-4 border-b border-gray-200">
-            <Text className="text-2xl font-bold text-gray-800">
+            <Text className="text-2xl font-bold text-gray-800" style={styleBold}>
               {t("Delivery_Details")}
             </Text>
             <Pressable onPress={onClose} className="p-2 bg-gray-100 rounded-full">
@@ -199,7 +201,7 @@ export function CheckoutModal({
           {isLoading ? (
             <View className="py-8 items-center">
               <ActivityIndicator size="large" color="#2563eb" />
-              <Text className="text-gray-500 mt-2">
+              <Text className="text-gray-500 mt-2" style={styleRegular}>
                 {t("Loading_your_details")}
               </Text>
             </View>

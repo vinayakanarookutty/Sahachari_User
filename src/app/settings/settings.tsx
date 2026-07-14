@@ -36,6 +36,7 @@ import { EditProfileModal } from "../../components/settings/EditProfileModal";
 import { changeLanguage } from "../../i18n";
 import i18n from "../../i18n";
 import { useAuthStore } from "../../store/auth.store";
+import { useAppFonts } from "../../hooks/useAppFonts";
 
 const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000";
 const S3_BASE_URL =
@@ -60,6 +61,7 @@ export default function Settings() {
   const insets = useSafeAreaInsets();
   const queryClient = useQueryClient();
   const { t } = useTranslation();
+  const { styleRegular, styleBold } = useAppFonts();
 
   const [showEditModal, setShowEditModal] = useState(false);
   const [editField, setEditField] = useState<
@@ -358,10 +360,11 @@ export default function Settings() {
           <Icon size={20} color="#2563EB" strokeWidth={2} />
         </View>
         <View className="flex-1">
-          <Text className="text-gray-500 text-xs mb-1">{label}</Text>
+          <Text className="text-gray-500 text-xs mb-1" style={styleRegular}>{label}</Text>
           <Text
             className="text-gray-800 font-semibold text-base"
             numberOfLines={1}
+            style={styleBold}
           >
             {value || "Not set"}
           </Text>
@@ -394,7 +397,7 @@ export default function Settings() {
             >
               <ArrowLeft size={24} color="#FFFFFF" strokeWidth={2.5} />
             </Pressable>
-            <Text className="text-2xl font-bold text-white flex-1 text-center">
+            <Text className="text-2xl font-bold text-white flex-1 text-center" style={styleBold}>
               {t("settings")}
             </Text>
             <View className="w-12" />
@@ -436,11 +439,11 @@ export default function Settings() {
                   <Camera size={18} color="#2563EB" strokeWidth={2.5} />
                 </View>
               </Pressable>
-              <Text className="text-white font-bold text-2xl mt-4">
+              <Text className="text-white font-bold text-2xl mt-4" style={styleBold}>
                 {profile?.name || "User"}
               </Text>
               {profile?.email && (
-                <Text className="text-blue-100 text-sm mt-1">
+                <Text className="text-blue-100 text-sm mt-1" style={styleRegular}>
                   {profile.email}
                 </Text>
               )}

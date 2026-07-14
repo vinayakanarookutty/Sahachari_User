@@ -9,6 +9,7 @@ import {
   TextInput,
   View,
 } from "react-native";
+import { useAppFonts } from "../../hooks/useAppFonts";
 
 interface EditProfileModalProps {
   visible: boolean;
@@ -46,6 +47,7 @@ export function EditProfileModal({
   isPending = false,
 }: EditProfileModalProps) {
   const {t } = useTranslation();
+  const { styleRegular, styleBold } = useAppFonts();
   // const getFieldLabel = () => (field ? FIELD_LABELS[field] : "");
   const getFieldLabel = () => field ? t(FIELD_LABELS[field]) : "";
   const isMultiline = field === "address" || field === "address2";
@@ -68,7 +70,7 @@ export function EditProfileModal({
         >
           {/* Header */}
           <View className="flex-row items-center justify-between p-6 border-b border-gray-100">
-            <Text className="text-2xl font-bold text-gray-900">
+            <Text className="text-2xl font-bold text-gray-900" style={styleBold}>
               {t("edit")} {getFieldLabel()}
             </Text>
             <Pressable
@@ -81,14 +83,13 @@ export function EditProfileModal({
 
           {/* Input Field */}
           <View className="p-6">
-            <Text className="text-sm font-semibold text-gray-700 mb-3">
+            <Text className="text-sm font-semibold text-gray-700 mb-3" style={styleBold}>
               {getFieldLabel()}
             </Text>
             
             <TextInput
               value={value}
               onChangeText={onChange}
-              // placeholder={`Enter ${getFieldLabel().toLowerCase()}`}
               placeholder={t(FIELD_PLACEHOLDERS[field!])}
               placeholderTextColor="#9CA3AF"
               multiline={isMultiline}
@@ -98,11 +99,14 @@ export function EditProfileModal({
               className={`bg-gray-50 rounded-2xl px-4 border border-gray-200 text-base text-gray-900 ${
                 isMultiline ? "py-4 min-h-[100px]" : "py-4"
               }`}
-              style={isMultiline ? { textAlignVertical: "top" } : undefined}
+              style={[
+                isMultiline ? { textAlignVertical: "top" } : undefined,
+                styleRegular
+              ]}
             />
 
             {field === "serviceablePincodes" && (
-              <Text className="text-xs text-gray-500 mt-2">
+              <Text className="text-xs text-gray-500 mt-2" style={styleRegular}>
                 {t("enter_pincodes")}
               </Text>
             )}
@@ -131,7 +135,7 @@ export function EditProfileModal({
                 {isPending ? (
                   <ActivityIndicator color="#FFFFFF" />
                 ) : (
-                  <Text className="text-white font-bold text-lg">
+                  <Text className="text-white font-bold text-lg" style={styleBold}>
                     {t("save_changes")}
                   </Text>
                 )}
@@ -143,7 +147,7 @@ export function EditProfileModal({
               disabled={isPending}
               className="bg-gray-100 py-4 rounded-2xl"
             >
-              <Text className="text-center text-gray-700 font-semibold text-base">
+              <Text className="text-center text-gray-700 font-semibold text-base" style={styleBold}>
                 {t("cancel")}
               </Text>
             </Pressable>

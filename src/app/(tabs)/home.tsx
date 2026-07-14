@@ -38,6 +38,7 @@ import { useRentals } from "../../hooks/useRentals";
 import { useServices } from "../../hooks/useServices";
 
 import { useTranslation } from "react-i18next";
+import { useAppFonts } from "../../hooks/useAppFonts";
 
 import { resolveCategoryRoute } from "../market/utils/marketplaceRouter";
 
@@ -138,6 +139,7 @@ export default function Home() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { t } = useTranslation();
+  const { styleRegular, styleBold } = useAppFonts();
 
   const { data: carouselData = [] } = useCarousel();
 
@@ -441,12 +443,12 @@ export default function Home() {
 
                 <Text
                   className="text-4xl font-black text-white ml-2"
-                  style={{
+                  style={[{
                     letterSpacing: 1,
                     textShadowColor: 'rgba(0, 0, 0, 0.1)',
                     textShadowOffset: { width: 0, height: 2 },
                     textShadowRadius: 4,
-                  }}
+                  }, styleBold]}
                 >
                   {/* Sahachari */}
                   {t("sahachari")}
@@ -454,9 +456,8 @@ export default function Home() {
               </View>
               <View className="flex-row items-center mt-1">
                 <View className="w-12 h-0.5 bg-blue-200 mr-3 rounded-full" />
-                <Text className="text-blue-50 text-sm font-semibold tracking-wide">
+                <Text className="text-blue-50 text-sm font-semibold tracking-wide" style={styleRegular}>
                   {t("Premium_Local_Services")}
-
                 </Text>
               </View>
             </View>
@@ -668,10 +669,10 @@ export default function Home() {
                   <View className="flex-row items-center mb-3">
 
                   </View>
-                  <Text className="text-3xl font-black text-blue-900 mb-2" style={{ letterSpacing: 0.5 }}>
+                  <Text className="text-3xl font-black text-blue-900 mb-2" style={[{ letterSpacing: 0.5 }, styleBold]}>
                     {t("Happy_60")}
                   </Text>
-                  <Text className="text-blue-600 text-sm font-semibold leading-5">
+                  <Text className="text-blue-600 text-sm font-semibold leading-5" style={styleRegular}>
                     {t("Exclusive_for_senior_citizens")}
                   </Text>
                 </View>
@@ -714,12 +715,12 @@ export default function Home() {
         <View className="mt-10 px-6">
           <View className="flex-row items-center justify-between mb-7">
             <View className="flex-1">
-              <Text className="text-3xl font-black text-gray-900 tracking-tight" style={{ letterSpacing: 0.3 }}>
+              <Text className="text-3xl font-black text-gray-900 tracking-tight" style={[{ letterSpacing: 0.3 }, styleBold]}>
                 {t("Our_Services")}
               </Text>
               <View className="flex-row items-center mt-2">
                 <View className="w-8 h-0.5 bg-blue-500 rounded-full mr-2" />
-                <Text className="text-blue-600 text-sm font-bold tracking-wide">
+                <Text className="text-blue-600 text-sm font-bold tracking-wide" style={styleBold}>
                   {t("Discover_Excellence")}
                 </Text>
               </View>
@@ -807,7 +808,7 @@ export default function Home() {
                             <Text
                               className="text-gray-900 font-black text-base text-center"
                               numberOfLines={1}
-                              style={{ letterSpacing: 0.5 }}
+                              style={[{ letterSpacing: 0.5 }, styleBold]}
                             >
                               {/* {category.name} */}
                               {t(`categories.${category.translationKey}`)}
