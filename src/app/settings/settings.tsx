@@ -36,7 +36,6 @@ import { EditProfileModal } from "../../components/settings/EditProfileModal";
 import { changeLanguage } from "../../i18n";
 import i18n from "../../i18n";
 import { useAuthStore } from "../../store/auth.store";
-import { useAppFonts } from "../../hooks/useAppFonts";
 
 const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000";
 const S3_BASE_URL =
@@ -61,7 +60,6 @@ export default function Settings() {
   const insets = useSafeAreaInsets();
   const queryClient = useQueryClient();
   const { t } = useTranslation();
-  const { styleRegular, styleBold } = useAppFonts();
 
   const [showEditModal, setShowEditModal] = useState(false);
   const [editField, setEditField] = useState<
@@ -360,9 +358,9 @@ export default function Settings() {
           <Icon size={20} color="#2563EB" strokeWidth={2} />
         </View>
         <View className="flex-1">
-          <Text style={[{ fontSize: 11, color: "#94A3B8", marginBottom: 3 }, styleRegular]}>{label}</Text>
+          <Text className="text-gray-500 text-xs mb-1">{label}</Text>
           <Text
-            style={[{ fontSize: 15, fontWeight: "700", color: "#334155" }, styleBold]}
+            className="text-gray-800 font-semibold text-base"
             numberOfLines={1}
           >
             {value || "Not set"}
@@ -396,7 +394,7 @@ export default function Settings() {
             >
               <ArrowLeft size={24} color="#FFFFFF" strokeWidth={2.5} />
             </Pressable>
-            <Text style={[{ fontSize: 22, fontWeight: "900", color: "#FFFFFF", letterSpacing: 0.5 }, styleBold]} className="flex-1 text-center">
+            <Text className="text-2xl font-bold text-white flex-1 text-center">
               {t("settings")}
             </Text>
             <View className="w-12" />
@@ -438,11 +436,11 @@ export default function Settings() {
                   <Camera size={18} color="#2563EB" strokeWidth={2.5} />
                 </View>
               </Pressable>
-              <Text style={[{ fontSize: 22, fontWeight: "900", color: "#FFFFFF", marginTop: 16 }, styleBold]}>
+              <Text className="text-white font-bold text-2xl mt-4">
                 {profile?.name || "User"}
               </Text>
               {profile?.email && (
-                <Text style={[{ fontSize: 13, color: "#BFDBFE", marginTop: 4 }, styleRegular]}>
+                <Text className="text-blue-100 text-sm mt-1">
                   {profile.email}
                 </Text>
               )}
@@ -458,7 +456,7 @@ export default function Settings() {
 
           {/* Profile Details */}
           <View className="p-4">
-            <Text style={[{ fontSize: 15, fontWeight: "800", color: "#1E293B", marginBottom: 12, paddingHorizontal: 8 }, styleBold]}>
+            <Text className="text-base font-bold text-gray-900 mb-3 px-2">
               {t("personal_information")}
             </Text>
             <SettingItem
@@ -480,7 +478,7 @@ export default function Settings() {
         {/* Address Section */}
         <View className="bg-white mx-4 mt-4 rounded-3xl shadow-lg overflow-hidden">
           <View className="p-4">
-            <Text style={[{ fontSize: 15, fontWeight: "800", color: "#1E293B", marginBottom: 12, paddingHorizontal: 8 }, styleBold]}>
+            <Text className="text-base font-bold text-gray-900 mb-3 px-2">
               {t("address_details")}
             </Text>
             <SettingItem
@@ -513,12 +511,36 @@ export default function Settings() {
               <View className="w-10 h-10 rounded-full bg-blue-50 items-center justify-center mr-3">
                 <SettingsIcon size={20} color="#2563EB" strokeWidth={2} />
               </View>
-              <Text style={[{ fontSize: 14, fontWeight: "700", color: "#1E293B" }, styleBold]} className="flex-1">
+              <Text className="text-gray-900 font-semibold flex-1">
                 {t("settings")}
               </Text>
               <ChevronRight size={18} color="#9CA3AF" strokeWidth={2} />
             </View>
           </Pressable>
+          {/* <Pressable
+            onPress={handleLanguageChange}
+            className="bg-white rounded-2xl shadow-sm overflow-hidden active:opacity-80"
+          >
+            <View className="flex-row items-center p-4">
+              <View className="w-10 h-10 rounded-full bg-blue-50 items-center justify-center mr-3">
+                <Languages size={20} color="#2563EB" strokeWidth={2} />
+              </View>
+
+              <View className="flex-1">
+                <Text className="text-gray-900 font-semibold">
+                  Language
+                </Text>
+
+                <Text className="text-xs text-gray-500">
+                  {i18n.resolvedLanguage === "ml"
+                    ? t("malayalam")
+                    : t("english")}
+                </Text>
+              </View>
+
+              <ChevronRight size={18} color="#9CA3AF" strokeWidth={2} />
+            </View>
+          </Pressable> */}
           <Pressable
             onPress={toggleLanguage}
             className="bg-white rounded-2xl shadow-sm overflow-hidden"
@@ -529,11 +551,11 @@ export default function Settings() {
               </View>
 
               <View className="flex-1">
-                <Text style={[{ fontSize: 14, fontWeight: "700", color: "#1E293B" }, styleBold]}>
+                <Text className="text-gray-900 font-semibold">
                   {t("language")}
                 </Text>
 
-                <Text style={[{ fontSize: 11, color: "#94A3B8", marginTop: 2 }, styleRegular]}>
+                <Text className="text-xs text-gray-500">
                   {i18n.resolvedLanguage === "ml"
                     ? "മലയാളം"
                     : "English"}
@@ -554,7 +576,7 @@ export default function Settings() {
               <View className="w-10 h-10 rounded-full bg-blue-50 items-center justify-center mr-3">
                 <BanIcon size={20} color="#2563EB" strokeWidth={2} />
               </View>
-              <Text style={[{ fontSize: 14, fontWeight: "700", color: "#1E293B" }, styleBold]} className="flex-1">
+              <Text className="text-gray-900 font-semibold flex-1">
                 {t("complaints")}
               </Text>
               <ChevronRight size={18} color="#9CA3AF" strokeWidth={2} />
@@ -568,7 +590,7 @@ export default function Settings() {
               <View className="w-10 h-10 rounded-full bg-blue-50 items-center justify-center mr-3">
                 <HelpCircle size={20} color="#2563EB" strokeWidth={2} />
               </View>
-              <Text style={[{ fontSize: 14, fontWeight: "700", color: "#1E293B" }, styleBold]} className="flex-1">
+              <Text className="text-gray-900 font-semibold flex-1">
                 {t("help_support")}
               </Text>
               <ChevronRight size={18} color="#9CA3AF" strokeWidth={2} />
@@ -577,9 +599,13 @@ export default function Settings() {
 
           {/* Logout Button */}
           <Pressable
+            // onPress={handleLogout}
+
             onPress={() => {
+              // console.log("HANDLE CALLED");
               handleLogout();
             }}
+
             className="rounded-2xl overflow-hidden shadow-lg active:scale-[0.98]"
           >
             <LinearGradient
@@ -594,7 +620,7 @@ export default function Settings() {
               }}
             >
               <LogOut size={20} color="#FFFFFF" strokeWidth={2.5} />
-              <Text style={[{ color: "#FFFFFF", fontWeight: "800", fontSize: 15, marginLeft: 8 }, styleBold]}>
+              <Text className="text-white font-bold text-base ml-2">
                 {t("logout")}
               </Text>
             </LinearGradient>
