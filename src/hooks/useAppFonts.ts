@@ -6,17 +6,17 @@ export function useAppFonts() {
 
   return {
     isMl,
-    fontRegular: isMl ? "NotoSansMalayalam_400Regular" : "Outfit_400Regular",
-    fontMedium: isMl ? "NotoSansMalayalam_400Regular" : "Outfit_600SemiBold",
-    fontBold: isMl ? "NotoSansMalayalam_700Bold" : "Outfit_700Bold",
+    fontRegular: isMl ? "NotoSansMalayalam_400Regular" : "Montserrat_400Regular",
+    fontMedium: isMl ? "NotoSansMalayalam_400Regular" : "Montserrat_600SemiBold",
+    fontBold: isMl ? "NotoSansMalayalam_700Bold" : "PlayfairDisplay_700Bold",
     // Tailwind class helpers
-    classRegular: isMl ? "font-malayalam" : "font-outfit",
-    classMedium: isMl ? "font-malayalam" : "font-outfit-medium",
-    classBold: isMl ? "font-malayalam-bold" : "font-outfit-bold",
+    classRegular: isMl ? "font-malayalam" : "font-montserrat",
+    classMedium: isMl ? "font-malayalam" : "font-montserrat-medium",
+    classBold: isMl ? "font-malayalam-bold" : "font-playfair",
     
     // Style helper for direct font family assignment
-    styleRegular: { fontFamily: isMl ? "NotoSansMalayalam_400Regular" : "Outfit_400Regular" },
-    styleMedium: { fontFamily: isMl ? "NotoSansMalayalam_400Regular" : "Outfit_600SemiBold" },
-    styleBold: { fontFamily: isMl ? "NotoSansMalayalam_700Bold" : "Outfit_700Bold" },
+    styleRegular: { fontFamily: isMl ? "NotoSansMalayalam_400Regular" : "Montserrat_400Regular" },
+    styleMedium: { fontFamily: isMl ? "NotoSansMalayalam_400Regular" : "Montserrat_600SemiBold" },
+    styleBold: { fontFamily: isMl ? "NotoSansMalayalam_700Bold" : "PlayfairDisplay_700Bold" },
   };
 }

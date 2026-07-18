@@ -28,10 +28,10 @@ export default function TabsLayout() {
   useEffect(() => {
     if (Platform.OS !== "android" || isConfigured.current) return;
 
-    const runConfig = async () => {
+    const runConfig = async (bottomInset: number) => {
       isConfigured.current = true;
       try {
-        if (insets.bottom >= 20) {
+        if (bottomInset >= 20) {
           // Software menu bar enabled device - make app above the menu bar
           await NavigationBar.setPositionAsync("relative");
           await NavigationBar.setBackgroundColorAsync("#ffffff");
@@ -48,13 +48,13 @@ export default function TabsLayout() {
     };
 
     if (insets.bottom > 0) {
-      runConfig();
+      runConfig(insets.bottom);
     } else {
       const timer = setTimeout(() => {
         if (!isConfigured.current) {
-          runConfig();
+          runConfig(0);
         }
-      }, 100);
+      }, 1000);
       return () => clearTimeout(timer);
     }
   }, [insets.bottom]);
@@ -71,9 +71,7 @@ export default function TabsLayout() {
     return <Redirect href="/(auth)/login" />;
   }
 
-  const bottomInset = Platform.OS === "android"
-    ? (insets.bottom >= 20 ? 0 : insets.bottom)
-    : insets.bottom;
+  const bottomInset = insets.bottom;
 
   return (
     <View style={{ flex: 1 }}>

@@ -396,6 +396,10 @@ export default function Home() {
 
   const S3_BASE_URL = process.env.EXPO_PUBLIC_S3_BASE_URL;
 
+  // Tab bar height + bottom safe area to avoid overlap
+  const TAB_BAR_HEIGHT = 60;
+  const contentPaddingBottom = TAB_BAR_HEIGHT + insets.bottom + 24;
+
   return (
     <View className="flex-1" style={{ backgroundColor: "#F8FAFC" }}>
       {/* Luxurious Blue Gradient Header */}
@@ -440,7 +444,6 @@ export default function Home() {
           <View className="flex-row items-center justify-between">
             <View className="flex-1">
               <View className="flex-row items-center mb-1">
-
                 <Text
                   className="text-4xl font-black text-white ml-2"
                   style={[{
@@ -450,7 +453,6 @@ export default function Home() {
                     textShadowRadius: 4,
                   }, styleBold]}
                 >
-                  {/* Sahachari */}
                   {t("sahachari")}
                 </Text>
               </View>
@@ -523,7 +525,7 @@ export default function Home() {
       <ScrollView
         showsVerticalScrollIndicator={false}
         className="flex-1"
-        contentContainerStyle={{ paddingBottom: 32 }}
+        contentContainerStyle={{ paddingBottom: contentPaddingBottom }}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
@@ -810,7 +812,6 @@ export default function Home() {
                               numberOfLines={1}
                               style={[{ letterSpacing: 0.5 }, styleBold]}
                             >
-                              {/* {category.name} */}
                               {t(`categories.${category.translationKey}`)}
                             </Text>
                           </View>

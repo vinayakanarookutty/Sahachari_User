@@ -7,7 +7,7 @@
     "icon": "./assets/sahachari.jpeg",
     "scheme": "customers",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": false,
+    "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.corestoneinnovation.sahachariuser",

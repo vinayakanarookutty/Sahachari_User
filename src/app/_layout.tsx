@@ -9,10 +9,12 @@ import { useAuthStore } from '../store/auth.store';
 import { initializeLanguage } from "../i18n";
 import { useFonts } from 'expo-font';
 import {
-  Outfit_400Regular,
-  Outfit_600SemiBold,
-  Outfit_700Bold,
-} from '@expo-google-fonts/outfit';
+  Montserrat_400Regular,
+  Montserrat_600SemiBold,
+} from '@expo-google-fonts/montserrat';
+import {
+  PlayfairDisplay_700Bold,
+} from '@expo-google-fonts/playfair-display';
 import {
   NotoSansMalayalam_400Regular,
   NotoSansMalayalam_700Bold,
@@ -24,9 +26,9 @@ export default function RootLayout() {
   const [languageReady, setLanguageReady] = useState(false);
 
   const [fontsLoaded] = useFonts({
-    Outfit_400Regular,
-    Outfit_600SemiBold,
-    Outfit_700Bold,
+    Montserrat_400Regular,
+    Montserrat_600SemiBold,
+    PlayfairDisplay_700Bold,
     NotoSansMalayalam_400Regular,
     NotoSansMalayalam_700Bold,
   });
