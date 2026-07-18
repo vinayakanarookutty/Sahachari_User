@@ -346,7 +346,7 @@ export default function Home() {
   };
 
   const handleCallHappy60 = () => {
-    Linking.openURL("tel:9567771549");
+    Linking.openURL("tel:7025548470");
   };
 
   const handleCategoryPressIn = (index: number) => {

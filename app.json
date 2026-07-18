@@ -20,7 +20,8 @@
         "foregroundImage": "./assets/sahachari.jpeg",
         "backgroundColor": "#ffffff"
       },
-      "softwareKeyboardLayoutMode": "resize"
+      "softwareKeyboardLayoutMode": "resize",
+      "edgeToEdgeEnabled": true
     },
     "splash": {
       "image": "./assets/sahachari.jpeg",
