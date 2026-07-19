@@ -28,36 +28,20 @@ export default function TabsLayout() {
   useEffect(() => {
     if (Platform.OS !== "android" || isConfigured.current) return;
 
-    const runConfig = async (bottomInset: number) => {
+    const runConfig = async () => {
       isConfigured.current = true;
       try {
-        if (bottomInset >= 20) {
-          // Software menu bar enabled device - make app above the menu bar
-          await NavigationBar.setPositionAsync("relative");
-          await NavigationBar.setBackgroundColorAsync("#ffffff");
-          await NavigationBar.setButtonStyleAsync("dark");
-        } else {
-          // Menubar-less device (gestures/physical buttons) - full screen
-          await NavigationBar.setPositionAsync("absolute");
-          await NavigationBar.setBackgroundColorAsync("#ffffff00");
-          await NavigationBar.setButtonStyleAsync("dark");
-        }
+        // Always position relative to prevent the Android system navigation bar from overlapping the app content
+        await NavigationBar.setPositionAsync("relative");
+        await NavigationBar.setBackgroundColorAsync("#ffffff");
+        await NavigationBar.setButtonStyleAsync("dark");
       } catch (err) {
         console.warn("Failed to configure navigation bar:", err);
       }
     };
 
-    if (insets.bottom > 0) {
-      runConfig(insets.bottom);
-    } else {
-      const timer = setTimeout(() => {
-        if (!isConfigured.current) {
-          runConfig(0);
-        }
-      }, 1000);
-      return () => clearTimeout(timer);
-    }
-  }, [insets.bottom]);
+    runConfig();
+  }, []);
 
   if (!hydrated) {
     return (

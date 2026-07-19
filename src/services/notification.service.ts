@@ -3,15 +3,17 @@ import { Platform } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 // Configure how notifications are handled when the app is in the foreground
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowAlert: true,
-    shouldPlaySound: true,
-    shouldSetBadge: false,
-    shouldShowBanner: true,
-    shouldShowList: true,
-  }),
-});
+if (Platform.OS !== "web") {
+  Notifications.setNotificationHandler({
+    handleNotification: async () => ({
+      shouldShowAlert: true,
+      shouldPlaySound: true,
+      shouldSetBadge: false,
+      shouldShowBanner: true,
+      shouldShowList: true,
+    }),
+  });
+}
 
 const ORDER_STATUSES_KEY = "order_statuses";
 
@@ -20,7 +22,13 @@ const ORDER_STATUSES_KEY = "order_statuses";
  * On Android, also configures the custom notification channel.
  */
 export async function requestNotificationPermissions(): Promise<boolean> {
-  if (Platform.OS === "web") return false;
+  if (Platform.OS === "web") {
+    if (typeof window !== "undefined" && "Notification" in window) {
+      const permission = await Notification.requestPermission();
+      return permission === "granted";
+    }
+    return false;
+  }
 
   try {
     const { status: existingStatus } = await Notifications.getPermissionsAsync();
@@ -61,7 +69,27 @@ export async function scheduleOrderNotification(
   body: string,
   data?: any
 ): Promise<string | undefined> {
-  if (Platform.OS === "web") return;
+  if (Platform.OS === "web") {
+    if (typeof window !== "undefined" && "Notification" in window) {
+      if (Notification.permission === "granted") {
+        const notification = new Notification(title, { body });
+        notification.onclick = () => {
+          window.focus();
+          window.dispatchEvent(new CustomEvent("notification-clicked", { detail: data }));
+        };
+      } else if (Notification.permission !== "denied") {
+        const permission = await Notification.requestPermission();
+        if (permission === "granted") {
+          const notification = new Notification(title, { body });
+          notification.onclick = () => {
+            window.focus();
+            window.dispatchEvent(new CustomEvent("notification-clicked", { detail: data }));
+          };
+        }
+      }
+    }
+    return "web-notification";
+  }
 
   try {
     const identifier = await Notifications.scheduleNotificationAsync({

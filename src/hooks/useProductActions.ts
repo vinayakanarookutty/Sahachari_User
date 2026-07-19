@@ -18,7 +18,7 @@ export function useProductActions(product: any) {
     place: "",
     phone: "",
     notes: "",
-    paymentMethod: "COD",
+    paymentMethod: "CASH_ON_DELIVERY",
   });
 
   const handleAddToCart = async (quantity: number) => {

@@ -1,5 +1,6 @@
 import React, { useEffect } from "react";
 import { useRouter } from "expo-router";
+import { Platform } from "react-native";
 import * as Notifications from "expo-notifications";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useAuthStore } from "../store/auth.store";
@@ -17,20 +18,37 @@ export function OrderNotificationObserver() {
   useEffect(() => {
     requestNotificationPermissions();
 
-    const responseSubscription = Notifications.addNotificationResponseReceivedListener(
-      (response) => {
+    if (Platform.OS !== "web") {
+      const responseSubscription = Notifications.addNotificationResponseReceivedListener(
+        (response) => {
+          try {
+            // Navigate to the orders screen when the user taps the notification
+            router.push("/(tabs)/orders");
+          } catch (error) {
+            console.error("Failed to navigate to orders screen on notification press:", error);
+          }
+        }
+      );
+
+      return () => {
+        responseSubscription.remove();
+      };
+    } else {
+      const handleWebNotificationClick = (event: any) => {
         try {
-          // Navigate to the orders screen when the user taps the notification
           router.push("/(tabs)/orders");
         } catch (error) {
-          console.error("Failed to navigate to orders screen on notification press:", error);
+          console.error("Failed to navigate to orders screen on web notification press:", error);
         }
-      }
-    );
+      };
 
-    return () => {
-      responseSubscription.remove();
-    };
+      if (typeof window !== "undefined") {
+        window.addEventListener("notification-clicked", handleWebNotificationClick);
+        return () => {
+          window.removeEventListener("notification-clicked", handleWebNotificationClick);
+        };
+      }
+    }
   }, [router]);
 
   // Periodically check orders status updates
