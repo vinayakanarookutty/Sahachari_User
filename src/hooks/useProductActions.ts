@@ -3,6 +3,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { Alert, Platform, ToastAndroid } from "react-native";
 import { addToCart, placeSingleOrder } from "../services/orders.api";
+import { registerOrderStatus, scheduleOrderNotification } from "../services/notification.service";
 
 export function useProductActions(product: any) {
   const queryClient = useQueryClient();
@@ -17,7 +18,7 @@ export function useProductActions(product: any) {
     place: "",
     phone: "",
     notes: "",
-    paymentMethod: "",
+    paymentMethod: "COD",
   });
 
   const handleAddToCart = async (quantity: number) => {
@@ -27,19 +28,15 @@ export function useProductActions(product: any) {
       await queryClient.invalidateQueries({ queryKey: ["cart"] });
 
       if (Platform.OS === "android") {
-        ToastAndroid.show(
-          `Added ${quantity} item(s) to cart`,
-          ToastAndroid.SHORT,
-        );
+        ToastAndroid.show("Product added to cart", ToastAndroid.SHORT);
       } else {
-        Alert.alert("Success", `Added ${quantity} item(s) to cart`);
+        Alert.alert("Success", "Product added to cart");
       }
-
-      return true; // Success indicator
-    } catch (err) {
+      setShowQuantityModal(false);
+    } catch (err: any) {
       console.error("Add to cart error:", err);
-      Alert.alert("Error", "Failed to add to cart");
-      return false;
+      const msg = err?.response?.data?.message;
+      Alert.alert("Error", Array.isArray(msg) ? msg[0] : msg || "Error");
     } finally {
       setLoading(false);
     }
@@ -53,7 +50,7 @@ export function useProductActions(product: any) {
 
     setLoading(true);
     try {
-      await placeSingleOrder({
+      const data = await placeSingleOrder({
         productId: product.id,
         quantity,
         deliveryAddress: {
@@ -65,8 +62,31 @@ export function useProductActions(product: any) {
           notes: address.notes,
           paymentMethod: address.paymentMethod,
         },
-        paymentMethod: address.paymentMethod,
+        place: address.place,
       });
+
+      // Handle local notification triggering and status registration
+      try {
+        const orderObj = data?.order || data;
+        if (orderObj && (orderObj._id || orderObj.id)) {
+          const orderId = orderObj._id || orderObj.id;
+          const checkoutId = orderObj.checkoutId || orderId.slice(-6);
+          const status = orderObj.status || "PLACED";
+          registerOrderStatus(orderId, status);
+          scheduleOrderNotification(
+            "Order Placed Successfully 📦",
+            `Your order #${checkoutId} has been placed.`
+          );
+        } else {
+          scheduleOrderNotification(
+            "Order Placed Successfully 📦",
+            "Your order has been placed."
+          );
+        }
+      } catch (err) {
+        console.error("Failed to trigger local order placement notification:", err);
+      }
+
       await queryClient.invalidateQueries({ queryKey: ["orders"] });
       setShowAddressModal(false);
       setShowSuccessModal(true);

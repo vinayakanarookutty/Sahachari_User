@@ -19,6 +19,7 @@ import {
   NotoSansMalayalam_400Regular,
   NotoSansMalayalam_700Bold,
 } from '@expo-google-fonts/noto-sans-malayalam';
+import { OrderNotificationObserver } from '../components/OrderNotificationObserver';
 
 export default function RootLayout() {
   const hydrate = useAuthStore((s) => s.hydrate);
@@ -55,6 +56,7 @@ export default function RootLayout() {
     <SafeAreaProvider>
       <QueryClientProvider client={queryClient}>
         <Slot />
+        <OrderNotificationObserver />
       </QueryClientProvider>
     </SafeAreaProvider>
   );

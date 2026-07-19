@@ -6,6 +6,7 @@ import {
   removeCartItem,
   updateCartItemQuantity,
 } from "../services/orders.api";
+import { registerOrderStatus, scheduleOrderNotification } from "../services/notification.service";
 
 export function useCart() {
   const queryClient = useQueryClient();
@@ -137,7 +138,7 @@ export function useCart() {
   const placeOrderMutation = useMutation({
     mutationFn: placeOrder,
 
-    onSuccess: () => {
+    onSuccess: (data: any) => {
       queryClient.invalidateQueries({
         queryKey: ["cart"],
       });
@@ -147,6 +148,27 @@ export function useCart() {
       setTimeout(() => {
         setShowSuccessModal(true);
       }, 250);
+
+      try {
+        const orderObj = data?.order || data;
+        if (orderObj && (orderObj._id || orderObj.id)) {
+          const orderId = orderObj._id || orderObj.id;
+          const checkoutId = orderObj.checkoutId || orderId.slice(-6);
+          const status = orderObj.status || "PLACED";
+          registerOrderStatus(orderId, status);
+          scheduleOrderNotification(
+            "Order Placed Successfully 📦",
+            `Your order #${checkoutId} has been placed.`
+          );
+        } else {
+          scheduleOrderNotification(
+            "Order Placed Successfully 📦",
+            "Your order has been placed."
+          );
+        }
+      } catch (err) {
+        console.error("Failed to trigger local order placement notification:", err);
+      }
 
       setAddress({
         street: "",
