@@ -14,3 +14,13 @@ export const getProfile = (token?: string) =>
       ...(token && { headers: { Authorization: `Bearer ${token}` } }),
     })
     .then(r => r.data);
+
+export const forgotPasswordApi = (email: string) =>
+  api.post<{ message: string }>("/auth/forgot-password", { email }).then(r => r.data);
+
+export const resetPasswordApi = (data: { email: string; otp: string; newPass: string }) =>
+  api.post<{ message: string }>("/auth/reset-password", {
+    email: data.email,
+    otp: data.otp,
+    newPassword: data.newPass,
+  }).then(r => r.data);

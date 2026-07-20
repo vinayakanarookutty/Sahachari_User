@@ -96,7 +96,7 @@ export default function BookingScreen() {
         <View className="bg-white rounded-3xl shadow-xl p-8 items-center">
           <Calendar size={48} color="#2563eb" />
           <Text className="text-xl font-bold text-gray-800 mt-4">
-            {t("no_bookings_yet")}
+            {t("No Bookings Yet")}
           </Text>
         </View>
       </SafeAreaView>

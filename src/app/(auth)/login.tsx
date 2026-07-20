@@ -171,6 +171,17 @@ export default function Login() {
                 </Pressable>
               </View>
             </View>
+
+            <View className="items-end mb-6 mt-2">
+              <Pressable
+                onPress={() => router.push("/(auth)/forgot-password" as any)}
+                className="active:opacity-70"
+              >
+                <Text className="text-blue-600 font-semibold text-sm">
+                  {t("forgot_password")}
+                </Text>
+              </Pressable>
+            </View>
             {/* Error Message */}
             {errorMsg && (
               <View className="mb-6 bg-red-50 border border-red-200 rounded-xl px-4 py-3">

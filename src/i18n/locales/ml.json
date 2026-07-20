@@ -252,5 +252,19 @@
     "please_enter_phone_number": "ദയവായി ഫോൺ നമ്പർ നൽകുക",
     "please_enter_valid_phone_number": "ദയവായി ശരിയായ 10 അക്ക ഫോൺ നമ്പർ നൽകുക",
     "please_select_place": "ദയവായി സ്ഥലം തിരഞ്ഞെടുക്കുക",
-    "please_select_payment_method": "ദയവായി പേയ്‌മെന്റ് രീതി തിരഞ്ഞെടുക്കുക"
+    "please_select_payment_method": "ദയവായി പേയ്‌മെന്റ് രീതി തിരഞ്ഞെടുക്കുക",
+    "forgot_password": "പാസ്‌വേഡ് മറന്നുപോയോ?",
+    "welcome_back": "വീണ്ടും സ്വാഗതം",
+    "sign_in_to_access_account": "നിങ്ങളുടെ അക്കൗണ്ടിലേക്ക് പ്രവേശിക്കുക",
+    "forgotPasswordTitle": "പാസ്‌വേഡ് മറന്നുപോയോ?",
+    "enterEmailSubtitle": "OTP ലഭിക്കുന്നതിന് നിങ്ങളുടെ ഇമെയിൽ നൽകുക",
+    "otpPlaceholder": "OTP (6 അക്കങ്ങൾ)",
+    "newPasswordPlaceholder": "പുതിയ പാസ്‌വേഡ്",
+    "resetPasswordBtn": "പാസ്‌വേഡ് മാറ്റുക",
+    "sendOtpBtn": "OTP അയക്കുക",
+    "otpSentSuccess": "OTP വിജയകരമായി നിങ്ങളുടെ ഇമെയിലിലേക്ക് അയച്ചിട്ടുണ്ട്",
+    "passwordResetSuccess": "പാസ്‌വേഡ് വിജയകരമായി മാറ്റി!",
+    "backToLogin": "ലോഗിൻ പേജിലേക്ക് മടങ്ങുക",
+    "successTitle": "വിജയം",
+    "failedTitle": "എറർ"
 }
