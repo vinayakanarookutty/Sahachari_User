@@ -43,6 +43,7 @@ import { useServices } from "../../hooks/useServices";
 
 import { useTranslation } from "react-i18next";
 import { useAppFonts } from "../../hooks/useAppFonts";
+import { S3_BASE_URL } from "@/config/env";
 
 import { resolveCategoryRoute } from "../market/utils/marketplaceRouter";
 
