@@ -9,6 +9,7 @@ import {
   Text,
   View,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 interface AddToCartModalProps {
   visible: boolean;
@@ -30,6 +31,7 @@ export function AddToCartModal({
   product,
   isPending = false,
 }: AddToCartModalProps) {
+  const insets = useSafeAreaInsets();
   const [quantity, setQuantity] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { t } = useTranslation();
@@ -79,6 +81,7 @@ export function AddToCartModal({
         <Pressable
           onPress={(e) => e.stopPropagation()}
           className="bg-white rounded-t-3xl"
+          style={{ paddingBottom: insets.bottom }}
         >
           {/* Header */}
           <View className="flex-row items-center justify-between p-6 border-b border-gray-100">

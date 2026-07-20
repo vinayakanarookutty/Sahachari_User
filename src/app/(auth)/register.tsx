@@ -20,12 +20,14 @@ import { Role } from "../../types/user";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { Eye, EyeOff, ChevronDown, Check, Search, X } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const AVAILABLE_PINCODES = [
-  "670562","670563","670567"
+  "670562","670563","670567","682022","688532"
 ];
 
 export default function Register() {
+  const insets = useSafeAreaInsets();
   const register = useRegister();
   const [showPassword, setShowPassword] = useState(false);
   const {t} = useTranslation();
@@ -299,7 +301,10 @@ export default function Register() {
         onRequestClose={() => setModalVisible(false)}
       >
         <View className="flex-1 justify-end bg-black/50">
-          <View className="bg-white rounded-t-3xl h-[65%] px-6 pt-5 pb-8 shadow-2xl">
+          <View
+            className="bg-white rounded-t-3xl h-[65%] px-6 pt-5 shadow-2xl"
+            style={{ paddingBottom: insets.bottom > 0 ? insets.bottom + 16 : 32 }}
+          >
             {/* Header */}
             <View className="flex-row justify-between items-center mb-4">
               <Text className="text-lg font-bold text-gray-900">
