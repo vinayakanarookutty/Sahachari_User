@@ -12,10 +12,12 @@ import {
   Phone,
   Plug,
   Sandwich,
+  Search,
   ShoppingCart,
   User,
   Utensils,
   Wrench,
+  X,
 } from "lucide-react-native";
 import { useMemo, useRef, useState } from "react";
 import {
@@ -27,8 +29,10 @@ import {
   RefreshControl,
   ScrollView,
   Text,
+  TextInput,
   View,
   useWindowDimensions,
+  Keyboard,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useCarousel } from "../../hooks/useCarousel";
@@ -517,6 +521,46 @@ export default function Home() {
                   )}
                 </LinearGradient>
               </View>
+            </Pressable>
+          </View>
+
+          {/* Search Bar */}
+          <View className="flex-row items-center bg-white rounded-full pl-4 pr-1.5 py-1.5 mt-4 shadow-md border border-gray-100/60">
+            <Search size={18} color="#4B5563" strokeWidth={2.5} />
+            <TextInput
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+              placeholder={t("Search") || "Search products, services..."}
+              placeholderTextColor="#9CA3AF"
+              className="flex-1 ml-2 text-gray-800 text-sm font-medium py-1"
+              onSubmitEditing={() => {
+                if (searchQuery.trim()) {
+                  Keyboard.dismiss();
+                  router.push({
+                    pathname: "/product",
+                    params: { search: searchQuery.trim() },
+                  } as any);
+                }
+              }}
+            />
+            {searchQuery.length > 0 && (
+              <Pressable onPress={() => setSearchQuery("")} className="mr-3 p-1 rounded-full active:bg-gray-100">
+                <X size={16} color="#6B7280" />
+              </Pressable>
+            )}
+            <Pressable 
+              onPress={() => {
+                if (searchQuery.trim()) {
+                  Keyboard.dismiss();
+                  router.push({
+                    pathname: "/product",
+                    params: { search: searchQuery.trim() },
+                  } as any);
+                }
+              }}
+              className="bg-blue-600 rounded-full p-2.5 flex-row items-center justify-center active:bg-blue-700 shadow-sm"
+            >
+              <Search size={16} color="#FFFFFF" strokeWidth={2.5} />
             </Pressable>
           </View>
         </View>

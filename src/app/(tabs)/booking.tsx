@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import {
@@ -5,6 +6,8 @@ import {
   ArrowLeft,
   Calendar,
   RefreshCw,
+  Search,
+  X,
 } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 import {
@@ -13,7 +16,9 @@ import {
   Pressable,
   RefreshControl,
   Text,
+  TextInput,
   View,
+  Keyboard,
 } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -25,7 +30,25 @@ export default function BookingScreen() {
   const insets = useSafeAreaInsets();
   const { t } = useTranslation();
 
+  const [searchQuery, setSearchQuery] = useState("");
+
   const { data = [], isLoading, isError, refetch } = useBookings();
+
+  const queryWords = searchQuery.toLowerCase().split(/\s+/).filter(Boolean);
+
+  const filteredBookings = data.filter((booking: any) => {
+    if (queryWords.length === 0) return true;
+    const itemName = booking.item?.itemName?.toLowerCase() || "";
+    const bookingType = booking.bookingType?.toLowerCase() || "";
+    const status = booking.status?.toLowerCase() || "";
+    const id = booking._id?.toLowerCase() || "";
+    return queryWords.every((word) =>
+      itemName.includes(word) ||
+      bookingType.includes(word) ||
+      status.includes(word) ||
+      id.includes(word)
+    );
+  });
 
   // LOADING
   if (isLoading) {
@@ -102,17 +125,41 @@ export default function BookingScreen() {
                 {t("my_bookings")}
               </Text>
               <Text className="text-blue-100 text-sm mt-1">
-                {data.length} {data.length === 1 ? t("booking") : t("bookings")}
+                {filteredBookings.length} {filteredBookings.length === 1 ? t("booking") : t("bookings")}
               </Text>
             </View>
 
             <View className="w-10" />
           </View>
+
+          {/* Search Bar */}
+          <View className="flex-row items-center bg-white rounded-full pl-4 pr-1.5 py-1.5 mt-3 mx-4 shadow-md border border-gray-100/60">
+            <Search size={18} color="#4B5563" strokeWidth={2.5} />
+            <TextInput
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+              placeholder={t("search") || "Search..."}
+              placeholderTextColor="#9CA3AF"
+              className="flex-1 ml-2 text-gray-800 text-sm font-medium py-1"
+              onSubmitEditing={() => Keyboard.dismiss()}
+            />
+            {searchQuery.length > 0 && (
+              <Pressable onPress={() => setSearchQuery("")} className="mr-3 p-1 rounded-full active:bg-gray-100">
+                <X size={16} color="#6B7280" />
+              </Pressable>
+            )}
+            <Pressable 
+              onPress={() => Keyboard.dismiss()}
+              className="bg-blue-600 rounded-full p-2.5 flex-row items-center justify-center active:bg-blue-700 shadow-sm"
+            >
+              <Search size={16} color="#FFFFFF" strokeWidth={2.5} />
+            </Pressable>
+          </View>
         </LinearGradient>
 
         {/* LIST */}
         <FlatList
-          data={data}
+          data={filteredBookings}
           keyExtractor={(item) => item._id}
           contentContainerStyle={{ padding: 16, paddingBottom: 24 }}
           ItemSeparatorComponent={() => <View className="h-3" />}

@@ -14,6 +14,7 @@ import {
   Text,
   TextInput,
   View,
+  Keyboard,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useCategoryStores } from "../../hooks/Usecategorystores";
@@ -58,7 +59,7 @@ export default function ProductsScreen() {
   const activeCategory = categoryFilter ?? "Service";
 
   const storeId = params.storeId as string | undefined;
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState((params.search as string) || "");
   const { token } = useAuthStore();
 
   const isDefaultServiceMode = !params.category;
@@ -88,7 +89,6 @@ export default function ProductsScreen() {
   const { data: allProducts = [], isLoading: isLoadingAllProducts, refetch: refetchProducts, } =
     useProducts({
       category: effectiveCategory,
-      search: searchQuery || undefined,
     });
 
 
@@ -120,6 +120,22 @@ export default function ProductsScreen() {
     : allProducts.filter((p) =>
       allowedStoreIds.includes(p.storeId || "")
     );
+
+  const queryWords = searchQuery.toLowerCase().split(/\s+/).filter(Boolean);
+
+  const filteredStores = stores.filter((store) => {
+    if (queryWords.length === 0) return true;
+    const name = store.name?.toLowerCase() || "";
+    const address = store.address?.toLowerCase() || "";
+    return queryWords.every((word) => name.includes(word) || address.includes(word));
+  });
+
+  const filteredDisplayProducts = displayProducts.filter((product) => {
+    if (queryWords.length === 0) return true;
+    const name = product.name?.toLowerCase() || "";
+    const description = product.description?.toLowerCase() || "";
+    return queryWords.every((word) => name.includes(word) || description.includes(word));
+  });
 
   const isLoadingProducts = storeId
     ? !!isLoadingStoreProducts
@@ -598,25 +614,49 @@ export default function ProductsScreen() {
                     : t("All_Products")}
               </Text>
 
-              {showingStores && stores.length > 0 && (
+              {showingStores && filteredStores.length > 0 && (
                 <Text className="text-blue-100 text-sm mt-0.5">
-                  {stores.length}{" "}
-                  {stores.length === 1 ? t("store") : t("stores")}
+                  {filteredStores.length}{" "}
+                  {filteredStores.length === 1 ? t("store") : t("stores")}
                 </Text>
               )}
 
               {showingProducts &&
-                displayProducts &&
-                displayProducts.length > 0 && (
+                filteredDisplayProducts &&
+                filteredDisplayProducts.length > 0 && (
                   <Text className="text-blue-100 text-sm mt-0.5">
-                    {displayProducts.length}{" "}
-                    {displayProducts.length === 1 ? t("item") : t("items")}
+                    {filteredDisplayProducts.length}{" "}
+                    {filteredDisplayProducts.length === 1 ? t("item") : t("items")}
                   </Text>
                 )}
             </View>
 
             {/* Right spacer = same width as button */}
             <View className="w-[44px]" />
+          </View>
+
+          {/* Search Bar */}
+          <View className="flex-row items-center bg-white rounded-full pl-4 pr-1.5 py-1.5 mt-3 shadow-md border border-gray-100/60">
+            <Search size={18} color="#4B5563" strokeWidth={2.5} />
+            <TextInput
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+              placeholder={t("search") || "Search..."}
+              placeholderTextColor="#9CA3AF"
+              className="flex-1 ml-2 text-gray-800 text-sm font-medium py-1"
+              onSubmitEditing={() => Keyboard.dismiss()}
+            />
+            {searchQuery.length > 0 && (
+              <Pressable onPress={clearSearch} className="mr-3 p-1 rounded-full active:bg-gray-100">
+                <X size={16} color="#6B7280" />
+              </Pressable>
+            )}
+            <Pressable 
+              onPress={() => Keyboard.dismiss()}
+              className="bg-blue-600 rounded-full p-2.5 flex-row items-center justify-center active:bg-blue-700 shadow-sm"
+            >
+              <Search size={16} color="#FFFFFF" strokeWidth={2.5} />
+            </Pressable>
           </View>
         </View>
       </LinearGradient>
@@ -675,9 +715,9 @@ export default function ProductsScreen() {
                 {t("Loading_stores")}
               </Text>
             </View>
-          ) : stores.length > 0 ? (
+          ) : filteredStores.length > 0 ? (
             <FlatList
-              data={stores}
+              data={filteredStores}
               renderItem={renderStore}
               keyExtractor={(item) => item._id}
               contentContainerStyle={{ paddingTop: 16, paddingBottom: 24 }}
@@ -720,9 +760,9 @@ export default function ProductsScreen() {
                 Loading products...
               </Text>
             </View>
-          ) : displayProducts && displayProducts.length > 0 ? (
+          ) : filteredDisplayProducts && filteredDisplayProducts.length > 0 ? (
             <FlatList
-              data={displayProducts}
+              data={filteredDisplayProducts}
               renderItem={renderProduct}
               keyExtractor={(item) => item._id || item.id}
               contentContainerStyle={{ paddingTop: 16, paddingBottom: 24 }}

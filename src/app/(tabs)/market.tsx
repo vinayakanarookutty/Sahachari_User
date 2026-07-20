@@ -12,6 +12,7 @@ import { useRouter } from "expo-router";
 export default function MarketplaceScreen() {
     const [activeTab, setActiveTab] =
         useState<MarketplaceTab>("services");
+    const [searchQuery, setSearchQuery] = useState("");
 
     const { data, isLoading } = useMarketplaceData();
     const router = useRouter();
@@ -25,6 +26,17 @@ export default function MarketplaceScreen() {
                 return data.services;
             // return data.products;
         }
+    };
+
+    const getFilteredData = () => {
+        const rawData = getData() || [];
+        const queryWords = searchQuery.toLowerCase().split(/\s+/).filter(Boolean);
+        if (queryWords.length === 0) return rawData;
+        return rawData.filter((item: any) => {
+            const name = item.name?.toLowerCase() || "";
+            const description = item.description?.toLowerCase() || "";
+            return queryWords.every((word) => name.includes(word) || description.includes(word));
+        });
     };
 
     const renderItem = ({ item }: any) => {
@@ -49,7 +61,12 @@ export default function MarketplaceScreen() {
         <View className="flex-1 bg-gray-50">
             <MarketplaceHeader
                 activeTab={activeTab}
-                onChangeTab={setActiveTab}
+                onChangeTab={(tab) => {
+                    setActiveTab(tab);
+                    setSearchQuery("");
+                }}
+                searchQuery={searchQuery}
+                setSearchQuery={setSearchQuery}
             />
 
             {/* <MarketplaceTabs
@@ -66,7 +83,7 @@ export default function MarketplaceScreen() {
                 </View>
             ) : (
                 <FlatList
-                    data={getData()}
+                    data={getFilteredData()}
                     renderItem={renderItem}
                     keyExtractor={(item: any) => item._id || item.id}
                     contentContainerStyle={{ padding: 12 }}

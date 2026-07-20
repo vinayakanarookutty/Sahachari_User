@@ -1,9 +1,10 @@
 // app/(tabs)/orders/index.tsx
+import { useState } from "react";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
-import { AlertCircle, ArrowLeft, RefreshCw, ShoppingBag } from "lucide-react-native";
+import { AlertCircle, ArrowLeft, RefreshCw, ShoppingBag, Search, X } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
-import { ActivityIndicator, FlatList, Pressable, RefreshControl, Text, View } from "react-native";
+import { ActivityIndicator, FlatList, Pressable, RefreshControl, Text, TextInput, View, Keyboard } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { OrderCard } from "../../components/orders/OrderCard";
 import { OrderDetailsModal } from "../../components/orders/OrderDetailsModal";
@@ -18,6 +19,24 @@ export default function Orders() {
     handleCloseModal, refetch
   } = useOrders();
   const {t} = useTranslation();
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const queryWords = searchQuery.toLowerCase().split(/\s+/).filter(Boolean);
+
+  const filteredOrders = orders.filter((order: any) => {
+    if (queryWords.length === 0) return true;
+    const checkoutId = order.checkoutId?.toLowerCase() || "";
+    const id = order._id?.toLowerCase() || "";
+    const status = order.status?.toLowerCase() || "";
+    return queryWords.every((word) =>
+      checkoutId.includes(word) ||
+      id.includes(word) ||
+      status.includes(word) ||
+      order.items?.some((item: any) =>
+        item.productId?.name?.toLowerCase().includes(word)
+      )
+    );
+  });
 
   if (isLoading) {
     return (
@@ -99,17 +118,41 @@ export default function Orders() {
                 {t("my_orders")}
               </Text>
               <Text className="text-blue-100 text-sm mt-1">
-                {orders.length}{" "}
-                {orders.length === 1 ? t("order") : t("orders")}
+                {filteredOrders.length}{" "}
+                {filteredOrders.length === 1 ? t("order") : t("orders")}
               </Text>
             </View>
             <View className="w-10" />
+          </View>
+
+          {/* Search Bar */}
+          <View className="flex-row items-center bg-white rounded-full pl-4 pr-1.5 py-1.5 mt-3 mx-4 shadow-md border border-gray-100/60">
+            <Search size={18} color="#4B5563" strokeWidth={2.5} />
+            <TextInput
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+              placeholder={t("search") || "Search..."}
+              placeholderTextColor="#9CA3AF"
+              className="flex-1 ml-2 text-gray-800 text-sm font-medium py-1"
+              onSubmitEditing={() => Keyboard.dismiss()}
+            />
+            {searchQuery.length > 0 && (
+              <Pressable onPress={() => setSearchQuery("")} className="mr-3 p-1 rounded-full active:bg-gray-100">
+                <X size={16} color="#6B7280" />
+              </Pressable>
+            )}
+            <Pressable 
+              onPress={() => Keyboard.dismiss()}
+              className="bg-blue-600 rounded-full p-2.5 flex-row items-center justify-center active:bg-blue-700 shadow-sm"
+            >
+              <Search size={16} color="#FFFFFF" strokeWidth={2.5} />
+            </Pressable>
           </View>
         </LinearGradient>
 
 
         <FlatList
-          data={orders}
+          data={filteredOrders}
           contentContainerStyle={{ padding: 16, paddingBottom: 24 }}
           keyExtractor={(item) => item._id}
           renderItem={({ item }) => (

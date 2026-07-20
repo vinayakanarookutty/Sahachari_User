@@ -1,6 +1,6 @@
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
-import { ArrowLeft } from "lucide-react-native";
+import { ArrowLeft, Search, X } from "lucide-react-native";
 import { useState } from "react";
 import {
     ActivityIndicator,
@@ -8,8 +8,11 @@ import {
     Pressable,
     RefreshControl,
     Text,
+    TextInput,
     View,
+    Keyboard,
 } from "react-native";
+import { useTranslation } from "react-i18next";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { ServiceCard } from "../../components/products/ServiceCard";
@@ -21,9 +24,11 @@ import { useStoreServices } from "../../hooks/useStoreServices";
 export default function ServicesScreen() {
     const router = useRouter();
     const insets = useSafeAreaInsets();
+    const { t } = useTranslation();
 
     const [selectedStore, setSelectedStore] = useState<any>(null);
     const [refreshing, setRefreshing] = useState(false);
+    const [searchQuery, setSearchQuery] = useState("");
 
     const {
         data: stores = [],
@@ -36,6 +41,22 @@ export default function ServicesScreen() {
         isLoading: servicesLoading,
         refetch: refetchServices,
     } = useStoreServices(selectedStore?._id);
+
+    const queryWords = searchQuery.toLowerCase().split(/\s+/).filter(Boolean);
+
+    const filteredStores = stores.filter((store: any) => {
+        if (queryWords.length === 0) return true;
+        const name = store.name?.toLowerCase() || "";
+        const address = store.address?.toLowerCase() || "";
+        return queryWords.every((word) => name.includes(word) || address.includes(word));
+    });
+
+    const filteredServices = services.filter((service: any) => {
+        if (queryWords.length === 0) return true;
+        const name = service.name?.toLowerCase() || "";
+        const description = service.description?.toLowerCase() || "";
+        return queryWords.every((word) => name.includes(word) || description.includes(word));
+    });
 
     const onRefresh = async () => {
         setRefreshing(true);
@@ -65,6 +86,7 @@ export default function ServicesScreen() {
                     onPress={() => {
                         if (selectedStore) {
                             setSelectedStore(null);
+                            setSearchQuery("");
                         } else {
                             router.back();
                         }
@@ -89,12 +111,36 @@ export default function ServicesScreen() {
 
                     <Text className="text-blue-100 text-sm mt-0.5">
                         {selectedStore
-                            ? `${services.length} services`
-                            : `${stores.length} stores`}
+                            ? `${filteredServices.length} services`
+                            : `${filteredStores.length} stores`}
                     </Text>
                 </View>
 
                 <View className="w-[46px]" />
+            </View>
+
+            {/* Search Bar */}
+            <View className="flex-row items-center bg-white rounded-full pl-4 pr-1.5 py-1.5 mt-3 shadow-md border border-gray-100/60">
+                <Search size={18} color="#4B5563" strokeWidth={2.5} />
+                <TextInput
+                    value={searchQuery}
+                    onChangeText={setSearchQuery}
+                    placeholder={t("search") || "Search..."}
+                    placeholderTextColor="#9CA3AF"
+                    className="flex-1 ml-2 text-gray-800 text-sm font-medium py-1"
+                    onSubmitEditing={() => Keyboard.dismiss()}
+                />
+                {searchQuery.length > 0 && (
+                    <Pressable onPress={() => setSearchQuery("")} className="mr-3 p-1 rounded-full active:bg-gray-100">
+                        <X size={16} color="#6B7280" />
+                    </Pressable>
+                )}
+                <Pressable 
+                    onPress={() => Keyboard.dismiss()}
+                    className="bg-blue-600 rounded-full p-2.5 flex-row items-center justify-center active:bg-blue-700 shadow-sm"
+                >
+                    <Search size={16} color="#FFFFFF" strokeWidth={2.5} />
+                </Pressable>
             </View>
         </LinearGradient>
     );
@@ -124,7 +170,7 @@ export default function ServicesScreen() {
 
             {!selectedStore ? (
                 <FlatList
-                    data={stores}
+                    data={filteredStores}
                     keyExtractor={(item: any) => item._id}
                     contentContainerStyle={{
                         padding: 12,
@@ -133,9 +179,10 @@ export default function ServicesScreen() {
                     renderItem={({ item }) => (
                         <StoreCard
                             store={item}
-                            onPress={() =>
-                                setSelectedStore(item)
-                            }
+                            onPress={() => {
+                                setSelectedStore(item);
+                                setSearchQuery("");
+                            }}
                         />
                     )}
                     ListEmptyComponent={
@@ -176,7 +223,7 @@ export default function ServicesScreen() {
                 </View>
             ) : (
                 <FlatList
-                    data={services}
+                    data={filteredServices}
                     keyExtractor={(item: any) => item._id}
                     contentContainerStyle={{
                         paddingTop: 16,
