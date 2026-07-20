@@ -28,7 +28,8 @@ export function useCarousel() {
                 );
             }
 
-            return response.json();
+            const data: CarouselItem[] = await response.json();
+            return data.sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
         },
     });
 }
