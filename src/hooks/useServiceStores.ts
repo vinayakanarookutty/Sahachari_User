@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { useAuthStore } from "@/store/auth.store";
+import { API_BASE_URL } from "@/config/env";
 
 export interface ServiceStore {
     _id: string;
@@ -18,7 +19,7 @@ export const useServiceStores = () => {
 
         queryFn: async () => {
             const response = await fetch(
-                `${process.env.EXPO_PUBLIC_API_URL}/services/service-stores`,
+                `${API_BASE_URL}/services/service-stores`,
                 {
                     headers: {
                         Authorization: `Bearer ${token}`,

@@ -37,11 +37,7 @@ import { changeLanguage } from "../../i18n";
 import i18n from "../../i18n";
 import { useAuthStore } from "../../store/auth.store";
 import { useAppFonts } from "../../hooks/useAppFonts";
-
-const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000";
-const S3_BASE_URL =
-  process.env.EXPO_PUBLIC_S3_BASE_URL ||
-  "https://sahachari-uploads.s3.ap-south-1.amazonaws.com";
+import { API_BASE_URL, S3_BASE_URL } from "@/config/env";
 
 interface UserProfile {
   _id: string;

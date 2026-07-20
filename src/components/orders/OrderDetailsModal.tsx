@@ -23,6 +23,7 @@ import { useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { getStatusColor } from "./OrderCard";
+import { getImageUrl } from "@/utils/image";
 
 const getStatusEmoji = (status: string) => {
   const emojis: Record<string, string> = {
@@ -169,9 +170,7 @@ export function OrderDetailsModal({
                     /> */}
                     <Image
                       source={{
-                        uri: item.productId?.images?.[0]?.startsWith("http")
-                          ? item.productId.images[0]
-                          : `${process.env.EXPO_PUBLIC_S3_BASE_URL}/${item.productId?.images?.[0]}`
+                        uri: getImageUrl(item.productId?.images?.[0])
                       }}
                       style={{
                         width: 80,

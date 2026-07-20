@@ -1,12 +1,9 @@
 import axios from "axios";
 import { useAuthStore } from "../store/auth.store";
-
-// Use the environment variable for production builds
-// Fallback to local IP only if the env variable is missing
-const BASE_URL = process.env.EXPO_PUBLIC_API_URL || "http://192.168.2.68:3000";
+import { API_BASE_URL } from "@/config/env";
 
 export const api = axios.create({
-  baseURL: BASE_URL,
+  baseURL: API_BASE_URL,
 });
 
 api.interceptors.request.use((config) => {

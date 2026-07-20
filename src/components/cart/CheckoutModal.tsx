@@ -1,5 +1,7 @@
 import { useAuthStore } from '@/store/auth.store';
 import { useQuery } from '@tanstack/react-query';
+import { API_BASE_URL } from '@/config/env';
+
 import { ArrowRight, X } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
 import { useTranslation } from "react-i18next";
@@ -98,8 +100,6 @@ export function CheckoutModal({
     image?: string;
   }
 
-  const API_BASE_URL =
-    process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3000';
 
   const updateField = (field: string, value: string) =>
     setAddress({ ...address, [field]: value });

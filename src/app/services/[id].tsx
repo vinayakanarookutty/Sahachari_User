@@ -289,7 +289,7 @@ export default function ServiceDetailsScreen() {
                             ) => (
                                 <Image
                                     key={index}
-                                    source={{ uri: getImageUrl(image, process.env.EXPO_PUBLIC_S3_BASE_URL) }}
+                                    source={{ uri: getImageUrl(image) }}
                                     style={{
                                         width,
                                         height: 380,

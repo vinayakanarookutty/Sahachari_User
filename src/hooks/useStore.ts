@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { API_BASE_URL } from "@/config/env";
 
 export const useStoreStatus = (token?: string) => {
   return useQuery({
@@ -6,7 +7,7 @@ export const useStoreStatus = (token?: string) => {
     enabled: !!token,
     queryFn: async () => {
       const res = await fetch(
-        `${process.env.EXPO_PUBLIC_API_URL}/customer/store-status`,
+        `${API_BASE_URL}/customer/store-status`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
