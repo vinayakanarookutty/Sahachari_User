@@ -1,5 +1,6 @@
 import { useAuthStore } from '@/store/auth.store';
 import { useQuery } from '@tanstack/react-query';
+import { API_BASE_URL } from '@/config/env';
 import { ArrowRight, Calendar, X } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
 import { useTranslation } from "react-i18next";
@@ -15,6 +16,11 @@ import {
 } from 'react-native';
 import { useAppFonts } from "../../hooks/useAppFonts";
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
+function extractPincode(fullAddress: string): string {
+  const match = fullAddress.match(/\b\d{6}\b/);
+  return match ? match[0] : '';
+}
 
 function splitAddress(fullAddress: string): { street: string; city: string } {
   const cleaned = fullAddress.trim();
@@ -135,24 +141,19 @@ export function CheckoutModal({
 
   useEffect(() => {
     if (profile && visible) {
-      // Split the full address into street and city parts
       const fullAddress = profile.address || '';
       const parsed = splitAddress(fullAddress);
+      const extractedZip = profile.serviceablePincodes?.[0] || extractPincode(fullAddress) || '';
 
       setAddress((prev: any) => ({
         ...prev,
-
-        // Auto fill user details with smart splitting
-        street: parsed.street,
-        city: parsed.city || profile.address2 || prev.city || '',
-        zipCode:
-          profile.serviceablePincodes?.[0] || prev.zipCode || '',
-        phone: profile.mobileNumber || '',
-
-        // Services/Rentals => Self Pickup only
+        street: prev.street || parsed.street || fullAddress,
+        city: prev.city || parsed.city || profile.address2 || '',
+        zipCode: prev.zipCode || extractedZip || '',
+        phone: prev.phone || profile.mobileNumber || '',
         paymentMethod: isBookable
           ? 'SELF_PICKUP'
-          : prev.paymentMethod || '',
+          : (prev.paymentMethod || 'CASH_ON_DELIVERY'),
       }));
     }
   }, [profile, visible, isBookable]);
@@ -183,44 +184,50 @@ export function CheckoutModal({
 
   useEffect(() => {
     const fetchPlaces = async () => {
-      if (!address.zipCode) return;
+      const cleanZip = address.zipCode?.trim();
+      if (!cleanZip) {
+        setPlaces([]);
+        setPlaceDetails([]);
+        return;
+      }
 
       try {
+        const token = await useAuthStore.getState().token;
         const response = await fetch(
-          `${API_BASE_URL}/customer/delivery-charges/${address.zipCode}`,
+          `${API_BASE_URL}/customer/delivery-charges/${cleanZip}`,
           {
             headers: {
-              Authorization: `Bearer ${await useAuthStore.getState().token}`,
+              Authorization: token ? `Bearer ${token}` : '',
             },
           }
         );
 
+        if (!response.ok) {
+          setPlaces([]);
+          setPlaceDetails([]);
+          return;
+        }
+
         const data = await response.json();
-
-        // assuming backend returns:
-        // { places: [{ place: "Fort Kochi" }, ...] }
-
         const availablePlaces =
           data?.places?.map((p: any) => p.place) || [];
 
         setPlaces(availablePlaces);
-
         setPlaceDetails(data?.places || []);
-        // set delivery charge from backend
-        // set first place charge
+
         if (data?.places?.length > 0) {
           setDeliveryCharge(data.places[0].charge || 0);
-        }
-
-        // auto select first place
-        if (availablePlaces.length > 0) {
-          setAddress((prev: any) => ({
-            ...prev,
-            place: availablePlaces[0],
-          }));
+          if (!address.place || !availablePlaces.includes(address.place)) {
+            setAddress((prev: any) => ({
+              ...prev,
+              place: availablePlaces[0],
+            }));
+          }
         }
       } catch (err) {
         console.error("Failed to fetch places", err);
+        setPlaces([]);
+        setPlaceDetails([]);
       }
     };
 
@@ -240,7 +247,6 @@ export function CheckoutModal({
   return (
     <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
       <View className="flex-1 bg-black/50 justify-end">
-        {/* <View className="bg-white rounded-t-3xl max-h-[85%]"> */}
         <View className="bg-white rounded-t-3xl flex-1 mt-16" style={{ paddingBottom: insets.bottom }}>
           {/* Header */}
           <View className="flex-row items-center justify-between px-6 py-4 border-b border-gray-200">
@@ -261,30 +267,21 @@ export function CheckoutModal({
             </View>
           ) : (
             <>
-              {/* Overlay for closing dropdown */}
-              {/* {showPaymentDropdown && (
-                <Pressable
-                  className="absolute inset-0 z-10"
-                  onPress={() => setShowPaymentDropdown(false)}
-                />
-              )} */}
-
               <ScrollView
                 className="px-6 py-4"
-                // contentContainerStyle={{ paddingBottom: 10 }}
                 showsVerticalScrollIndicator={false}
               >
 
                 {/* Address Fields */}
                 {[
                   { label: `${t("street_address")}`, key: 'street', placeholder: '123 Main Street' },
-                  { label: `${t("city")}`, key: 'city', placeholder: 'Mumbai' },
+                  { label: `${t("city")}`, key: 'city', placeholder: 'Kochi' },
                   {
-                    label: `${t("zip_code")}`,
+                    label: `${t("zip_code") || "Pincode"}`,
                     key: 'zipCode',
-                    placeholder: '400001',
+                    placeholder: '682001',
                     keyboard: 'numeric',
-                    readOnly: true,
+                    readOnly: false,
                   },
 
                   {
@@ -299,12 +296,11 @@ export function CheckoutModal({
                       {f.label}
                     </Text>
                     <TextInput
-                      value={address[f.key]}
+                      value={address[f.key] || ''}
                       editable={!f.readOnly}
                       onChangeText={(v) => updateField(f.key, v)}
                       placeholder={f.placeholder}
                       keyboardType={f.keyboard as any}
-                      // className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-gray-800"
                       className={`border rounded-xl px-4 py-3 text-gray-800 ${f.readOnly
                         ? 'bg-gray-100 border-gray-300'
                         : 'bg-gray-50 border-gray-200'
@@ -312,56 +308,67 @@ export function CheckoutModal({
                     />
                   </View>
                 ))}
-                {/* Place Dropdown */}
+                {/* Place Section */}
                 <View className="mb-4 relative z-20">
                   <Text className="text-gray-700 font-semibold mb-2">
-                    {t("select_place")}
+                    {t("select_place") || "Place / Locality"} *
                   </Text>
 
-                  <Pressable
-                    onPress={() =>
-                      setShowPlaceDropdown(!showPlaceDropdown)
-                    }
-                    className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 flex-row justify-between items-center"
-                  >
-                    <Text className="text-gray-800">
-                      {address.place || t("select_place_placeholder")}
-                    </Text>
+                  {places.length > 0 ? (
+                    <>
+                      <Pressable
+                        onPress={() =>
+                          setShowPlaceDropdown(!showPlaceDropdown)
+                        }
+                        className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 flex-row justify-between items-center"
+                      >
+                        <Text className="text-gray-800 font-medium">
+                          {address.place || t("select_place_placeholder") || "Select Place"}
+                        </Text>
 
-                    <Text className="text-gray-500">▼</Text>
-                  </Pressable>
+                        <Text className="text-gray-500">▼</Text>
+                      </Pressable>
 
-                  {showPlaceDropdown && (
-                    <View className="bg-white border border-gray-200 rounded-xl mt-2 overflow-hidden">
-                      {places.map((place) => (
-                        <Pressable
-                          key={place}
-                          onPress={() => {
-                            updateField("place", place);
+                      {showPlaceDropdown && (
+                        <View className="bg-white border border-gray-200 rounded-xl mt-2 overflow-hidden shadow-lg">
+                          {places.map((placeName) => (
+                            <Pressable
+                              key={placeName}
+                              onPress={() => {
+                                updateField("place", placeName);
 
-                            const selectedPlace = placeDetails.find(
-                              (p: any) => p.place === place
-                            );
+                                const selectedPlace = placeDetails.find(
+                                  (p: any) => p.place === placeName
+                                );
 
-                            setDeliveryCharge(
-                              selectedPlace?.charge || 0
-                            );
+                                setDeliveryCharge(
+                                  selectedPlace?.charge || 0
+                                );
 
-                            setShowPlaceDropdown(false);
-                          }}
-                          className="px-4 py-3 border-b border-gray-100"
-                        >
-                          <Text
-                            className={`${address.place === place
-                              ? "text-blue-600 font-bold"
-                              : "text-gray-800"
-                              }`}
-                          >
-                            {place}
-                          </Text>
-                        </Pressable>
-                      ))}
-                    </View>
+                                setShowPlaceDropdown(false);
+                              }}
+                              className="px-4 py-3 border-b border-gray-100 active:bg-gray-50"
+                            >
+                              <Text
+                                className={`${address.place === placeName
+                                  ? "text-blue-600 font-bold"
+                                  : "text-gray-800"
+                                  }`}
+                              >
+                                {placeName}
+                              </Text>
+                            </Pressable>
+                          ))}
+                        </View>
+                      )}
+                    </>
+                  ) : (
+                    <TextInput
+                      value={address.place || ''}
+                      onChangeText={(v) => updateField('place', v)}
+                      placeholder="e.g. Fort Kochi"
+                      className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-gray-800"
+                    />
                   )}
                 </View>
 
