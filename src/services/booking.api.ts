@@ -24,10 +24,11 @@ export interface ProductOrderPayload
 export interface ServiceBookingPayload {
     serviceId: string;
 
-    // startDate: string;
-    // endDate: string;
+    startDate?: string;
+    endDate?: string;
 
     bookingAddress: {
+        name?: string;
         street: string;
         city: string;
         zipCode: string;
@@ -40,7 +41,12 @@ export interface ServiceBookingPayload {
 export interface RentalBookingPayload {
     rentalId: string;
     quantity?: number;
+
+    startDate?: string;
+    endDate?: string;
+
     bookingAddress: {
+        name?: string;
         street: string;
         city: string;
         zipCode: string;

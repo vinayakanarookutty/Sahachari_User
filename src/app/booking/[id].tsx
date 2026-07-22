@@ -15,6 +15,7 @@ import {
     Phone,
     CreditCard,
     Package,
+    Calendar,
 } from "lucide-react-native";
 import { LinearGradient } from "expo-linear-gradient";
 
@@ -62,11 +63,11 @@ export default function BookingDetailsScreen() {
                     </Pressable>
 
                     <View className="flex-1 items-center">
-                        <Text className="text-white text-xl font-bold">
-                            Booking Details
+                        <Text className="text-white text-xl font-bold" numberOfLines={1}>
+                            {data.item?.itemName || "Booking Details"}
                         </Text>
-                        <Text className="text-blue-100 text-sm mt-1">
-                            Track your service
+                        <Text className="text-blue-100 text-sm mt-0.5">
+                            {data.bookingType === "RENTAL" ? "Rental Booking" : "Service Booking"}
                         </Text>
                     </View>
 
@@ -78,6 +79,30 @@ export default function BookingDetailsScreen() {
                 showsVerticalScrollIndicator={false}
                 contentContainerStyle={{ padding: 16, paddingBottom: 40 }}
             >
+                {/* SERVICE / RENTAL ITEM INFO CARD */}
+                <View className="bg-white rounded-2xl p-5 shadow-sm mb-4">
+                    <View className="flex-row justify-between items-start mb-2">
+                        <Text className="font-bold text-2xl text-gray-900 flex-1 mr-2">
+                            {data.item?.itemName}
+                        </Text>
+                        <View className={`px-3 py-1 rounded-full ${data.bookingType === "RENTAL" ? "bg-purple-100" : "bg-blue-100"}`}>
+                            <Text className={`text-xs font-bold uppercase ${data.bookingType === "RENTAL" ? "text-purple-700" : "text-blue-700"}`}>
+                                {data.bookingType}
+                            </Text>
+                        </View>
+                    </View>
+
+                    {data.item?.description && (
+                        <Text className="text-gray-600 text-sm leading-relaxed mb-2">
+                            {data.item.description}
+                        </Text>
+                    )}
+
+                    <Text className="text-blue-600 font-bold text-2xl mt-1">
+                        ₹{data.totalAmount}
+                    </Text>
+                </View>
+
                 {/* STATUS CARD */}
                 <View className="bg-white rounded-2xl p-5 shadow-sm mb-4">
                     <View className="flex-row items-center mb-3">
@@ -93,18 +118,24 @@ export default function BookingDetailsScreen() {
                     </Text>
                 </View>
 
-                {/* SERVICE INFO */}
+                {/* BOOKED DATE CARD */}
                 <View className="bg-white rounded-2xl p-5 shadow-sm mb-4">
-                    <Text className="font-bold text-lg">
-                        {data.item?.itemName}
-                    </Text>
+                    <View className="flex-row items-center mb-3">
+                        <View className="bg-purple-100 p-2 rounded-lg mr-3">
+                            <Calendar size={20} color="#8B5CF6" />
+                        </View>
 
-                    <Text className="text-gray-500 mt-1">
-                        {data.bookingType}
-                    </Text>
+                        <Text className="font-bold text-lg">
+                            {data.bookingType === "RENTAL" ? "Rental Period" : "Service Date"}
+                        </Text>
+                    </View>
 
-                    <Text className="text-blue-600 font-bold text-xl mt-3">
-                        ₹{data.totalAmount}
+                    <Text className="text-gray-800 font-semibold">
+                        {data.startDate
+                            ? data.bookingType === "RENTAL" && data.endDate
+                                ? `${new Date(data.startDate).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })} - ${new Date(data.endDate).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}`
+                                : new Date(data.startDate).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })
+                            : new Date(data.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
                     </Text>
                 </View>
 

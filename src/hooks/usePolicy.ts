@@ -13,26 +13,29 @@ const API_BASE_URL =
 export function usePolicyAgreement() {
   const queryClient = useQueryClient();
 
-  const token =
-    useAuthStore.getState().token;
+  const token = useAuthStore((s) => s.token);
 
   // Active policy
   const activePolicyQuery = useQuery({
     queryKey: ["policy-active"],
     enabled: !!token,
+    retry: 1,
 
     queryFn: async () => {
-      const response = await fetch(
-        `${API_BASE_URL}/policies/active`
-      );
-
-      if (!response.ok) {
-        throw new Error(
-          "Failed to load active policy"
+      try {
+        const response = await fetch(
+          `${API_BASE_URL}/policies/active`
         );
-      }
 
-      return response.json();
+        if (!response.ok) {
+          return null;
+        }
+
+        return response.json();
+      } catch (err) {
+        console.warn("Failed to fetch active policy:", err);
+        return null;
+      }
     },
   });
 
@@ -40,24 +43,28 @@ export function usePolicyAgreement() {
   const statusQuery = useQuery({
     queryKey: ["policy-status"],
     enabled: !!token,
+    retry: 1,
 
     queryFn: async () => {
-      const response = await fetch(
-        `${API_BASE_URL}/policies/status`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error(
-          "Failed to load policy status"
+      try {
+        const response = await fetch(
+          `${API_BASE_URL}/policies/status`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
         );
-      }
 
-      return response.json();
+        if (!response.ok) {
+          return null;
+        }
+
+        return response.json();
+      } catch (err) {
+        console.warn("Failed to fetch policy status:", err);
+        return null;
+      }
     },
   });
 

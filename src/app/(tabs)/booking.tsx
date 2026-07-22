@@ -31,12 +31,16 @@ export default function BookingScreen() {
   const { t } = useTranslation();
 
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedFilter, setSelectedFilter] = useState<'ALL' | 'SERVICE' | 'RENTAL'>('ALL');
 
   const { data = [], isLoading, isError, refetch } = useBookings();
 
   const queryWords = searchQuery.toLowerCase().split(/\s+/).filter(Boolean);
 
   const filteredBookings = data.filter((booking: any) => {
+    if (selectedFilter !== 'ALL' && booking.bookingType !== selectedFilter) {
+      return false;
+    }
     if (queryWords.length === 0) return true;
     const itemName = booking.item?.itemName?.toLowerCase() || "";
     const bookingType = booking.bookingType?.toLowerCase() || "";
@@ -154,6 +158,36 @@ export default function BookingScreen() {
             >
               <Search size={16} color="#FFFFFF" strokeWidth={2.5} />
             </Pressable>
+          </View>
+
+          {/* Category Filter Pills */}
+          <View className="flex-row items-center justify-center gap-2 px-4 mt-3.5">
+            {[
+              { label: "All", value: "ALL" },
+              { label: "Services", value: "SERVICE" },
+              { label: "Rentals", value: "RENTAL" },
+            ].map((tab) => {
+              const isSelected = selectedFilter === tab.value;
+              return (
+                <Pressable
+                  key={tab.value}
+                  onPress={() => setSelectedFilter(tab.value as any)}
+                  className={`px-5 py-2 rounded-full border ${
+                    isSelected
+                      ? "bg-white border-white shadow-sm"
+                      : "bg-white/15 border-white/20"
+                  }`}
+                >
+                  <Text
+                    className={`text-xs font-bold ${
+                      isSelected ? "text-blue-700 font-extrabold" : "text-white"
+                    }`}
+                  >
+                    {tab.label}
+                  </Text>
+                </Pressable>
+              );
+            })}
           </View>
         </LinearGradient>
 

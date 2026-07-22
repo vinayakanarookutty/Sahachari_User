@@ -63,7 +63,7 @@ export default function RentalDetailsScreen() {
         return (
             <View className="flex-1 items-center justify-center px-6">
                 <Text className="text-gray-600 mb-4">Failed to load rental</Text>
-                <Pressable onPress={refetch} className="bg-blue-600 px-4 py-2 rounded-xl">
+                <Pressable onPress={() => refetch()} className="bg-blue-600 px-4 py-2 rounded-xl">
                     <Text className="text-white">Retry</Text>
                 </Pressable>
             </View>
@@ -108,7 +108,10 @@ export default function RentalDetailsScreen() {
         await createBooking("RENTAL", {
             rentalId: rental._id,
             quantity: 1,
+            startDate: addressData.startDate,
+            endDate: addressData.endDate,
             bookingAddress: {
+                name: addressData.name,
                 street: addressData.street,
                 city: addressData.city,
                 zipCode: addressData.zipCode,
@@ -317,6 +320,7 @@ export default function RentalDetailsScreen() {
                 total={price}
                 itemSCount={1}
                 isBookable={true}
+                itemType="RENTAL"
             />
 
             <SuccessModal

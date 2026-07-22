@@ -1,8 +1,9 @@
 import { useAuthStore } from '@/store/auth.store';
 import { useQuery } from '@tanstack/react-query';
-import { ArrowRight, X } from 'lucide-react-native';
+import { ArrowRight, Calendar, X } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
 import { useTranslation } from "react-i18next";
+import { DatePickerModal } from '../common/DatePickerModal';
 import {
   ActivityIndicator,
   Modal,
@@ -75,14 +76,30 @@ export function CheckoutModal({
   total,
   itemSCount,
   isBookable = false,
+  itemType,
 }: any) {
   const [showPaymentDropdown, setShowPaymentDropdown] = useState(false);
   const [places, setPlaces] = useState<string[]>([]);
   const [showPlaceDropdown, setShowPlaceDropdown] = useState(false);
   const [deliveryCharge, setDeliveryCharge] = useState(0);
   const [placeDetails, setPlaceDetails] = useState<any[]>([]);
+  const getTodayString = () => {
+    const d = new Date();
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
+  const [startDate, setStartDate] = useState(getTodayString());
+  const [endDate, setEndDate] = useState('');
+  const [showStartDatePicker, setShowStartDatePicker] = useState(false);
+  const [showEndDatePicker, setShowEndDatePicker] = useState(false);
   const { t } = useTranslation();
   const { styleRegular, styleBold } = useAppFonts();
+
+  const isRental = itemType === 'RENTAL';
+  const isService = itemType === 'SERVICE' || (isBookable && !isRental);
 
   interface UserProfile {
     _id: string;
@@ -407,30 +424,77 @@ export function CheckoutModal({
                     )}
                   </View>
                 ) : (
-                  <View className="mb-4">
-                    <Text className="text-gray-700 font-semibold mb-2">
-                      {t("pickup_method")}
-                    </Text>
-
-                    <View className="bg-blue-50 border border-blue-200 rounded-xl px-4 py-4">
-                      <Text className="text-blue-700 font-bold">
-                        {t("self_pickup")}
+                  <>
+                    <View className="mb-4">
+                      <Text className="text-gray-700 font-semibold mb-2">
+                        {t("pickup_method")}
                       </Text>
+
+                      <View className="bg-blue-50 border border-blue-200 rounded-xl px-4 py-4">
+                        <Text className="text-blue-700 font-bold">
+                          {t("self_pickup")}
+                        </Text>
+                      </View>
                     </View>
-                  </View>
+
+                    <View className="mb-4">
+                      {isRental ? (
+                        <>
+                          <Text className="text-gray-700 font-semibold mb-2">
+                            {t("Rental Start Date")} *
+                          </Text>
+                          <Pressable
+                            onPress={() => setShowStartDatePicker(true)}
+                            className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 flex-row justify-between items-center mb-3"
+                          >
+                            <View className="flex-row items-center gap-2">
+                              <Calendar size={18} color="#2563EB" />
+                              <Text className={startDate ? "text-gray-800 font-semibold" : "text-gray-400"}>
+                                {startDate || "Select Start Date"}
+                              </Text>
+                            </View>
+                            <Text className="text-blue-600 font-bold text-xs">Change</Text>
+                          </Pressable>
+
+                          <Text className="text-gray-700 font-semibold mb-2">
+                            {t("Rental End Date")} *
+                          </Text>
+                          <Pressable
+                            onPress={() => setShowEndDatePicker(true)}
+                            className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 flex-row justify-between items-center"
+                          >
+                            <View className="flex-row items-center gap-2">
+                              <Calendar size={18} color="#2563EB" />
+                              <Text className={endDate ? "text-gray-800 font-semibold" : "text-gray-400"}>
+                                {endDate || "Select End Date"}
+                              </Text>
+                            </View>
+                            <Text className="text-blue-600 font-bold text-xs">Change</Text>
+                          </Pressable>
+                        </>
+                      ) : (
+                        <>
+                          <Text className="text-gray-700 font-semibold mb-2">
+                            {t("Service Date")} *
+                          </Text>
+                          <Pressable
+                            onPress={() => setShowStartDatePicker(true)}
+                            className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 flex-row justify-between items-center"
+                          >
+                            <View className="flex-row items-center gap-2">
+                              <Calendar size={18} color="#2563EB" />
+                              <Text className={startDate ? "text-gray-800 font-semibold" : "text-gray-400"}>
+                                {startDate || "Select Service Date"}
+                              </Text>
+                            </View>
+                            <Text className="text-blue-600 font-bold text-xs">Change</Text>
+                          </Pressable>
+                        </>
+                      )}
+                    </View>
+                  </>
                 )}
 
-                {/* Summary */}
-                {/* <View className="bg-blue-50 rounded-xl p-4 mb-6">
-                  <View className="flex-row justify-between items-center">
-                    <Text className="text-gray-600">
-                      {itemSCount} {itemSCount === 1 ? 'item' : 'items'}
-                    </Text>
-                    <Text className="text-2xl font-bold text-blue-600">
-                      ₹{total.toFixed(2)}
-                    </Text>
-                  </View>
-                </View> */}
                 {/* Summary */}
                 <View className="bg-blue-50 rounded-xl p-4 mb-6">
 
@@ -509,10 +573,35 @@ export function CheckoutModal({
                       return;
                     }
 
+                    if (isBookable) {
+                      if (isRental) {
+                        if (!startDate || !startDate.trim()) {
+                          alert(t("please_enter_rental_start_date") || "Please enter rental start date");
+                          return;
+                        }
+                        if (!endDate || !endDate.trim()) {
+                          alert(t("please_enter_rental_end_date") || "Please enter rental end date");
+                          return;
+                        }
+                        if (new Date(endDate) < new Date(startDate)) {
+                          alert(t("end_date_after_start_date") || "Rental end date must be on or after start date");
+                          return;
+                        }
+                      } else {
+                        if (!startDate || !startDate.trim()) {
+                          alert(t("please_enter_service_date") || "Please enter service date");
+                          return;
+                        }
+                      }
+                    }
+
                     onConfirm({
                       ...address,
+                      name: profile?.name || address.name,
                       phone: cleanPhone,
                       paymentMethod: address.paymentMethod,
+                      startDate: isBookable ? startDate : undefined,
+                      endDate: isBookable && isRental && endDate ? endDate : undefined,
                     });
                   }}
                   disabled={isPending}
@@ -536,6 +625,24 @@ export function CheckoutModal({
           )}
         </View>
       </View>
+
+      <DatePickerModal
+        visible={showStartDatePicker}
+        onClose={() => setShowStartDatePicker(false)}
+        onSelectDate={(date) => setStartDate(date)}
+        initialDate={startDate}
+        minDate={getTodayString()}
+        title={isRental ? "Select Rental Start Date" : "Select Service Date"}
+      />
+
+      <DatePickerModal
+        visible={showEndDatePicker}
+        onClose={() => setShowEndDatePicker(false)}
+        onSelectDate={(date) => setEndDate(date)}
+        initialDate={endDate || startDate}
+        minDate={startDate || getTodayString()}
+        title="Select Rental End Date"
+      />
     </Modal >
   );
 }

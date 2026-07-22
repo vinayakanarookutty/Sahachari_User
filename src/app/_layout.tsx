@@ -36,9 +36,14 @@ export default function RootLayout() {
 
   useEffect(() => {
     const init = async () => {
-      await hydrate();
-      await initializeLanguage();
-      setLanguageReady(true);
+      try {
+        await hydrate();
+        await initializeLanguage();
+      } catch (err) {
+        console.error("Error during app initialization:", err);
+      } finally {
+        setLanguageReady(true);
+      }
     };
 
     init();

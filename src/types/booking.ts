@@ -18,6 +18,8 @@ export interface Booking {
 
     status: BookingStatus;
 
+    userName?: string;
+
     totalAmount: number;
 
     startDate: string;
@@ -42,6 +44,7 @@ export interface Booking {
     };
 
     bookingAddress: {
+        name?: string;
         street: string;
         city: string;
         zipCode: string;

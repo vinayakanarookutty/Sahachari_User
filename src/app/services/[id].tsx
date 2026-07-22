@@ -186,7 +186,10 @@ export default function ServiceDetailsScreen() {
 
             await createBooking("SERVICE", {
                 serviceId: service._id,
+                startDate: addressData.startDate,
+                endDate: addressData.endDate,
                 bookingAddress: {
+                    name: addressData.name,
                     street: addressData.street,
                     city: addressData.city,
                     zipCode: addressData.zipCode,
@@ -289,7 +292,7 @@ export default function ServiceDetailsScreen() {
                             ) => (
                                 <Image
                                     key={index}
-                                    source={{ uri: getImageUrl(image, process.env.EXPO_PUBLIC_S3_BASE_URL) }}
+                                    source={{ uri: getImageUrl(image) }}
                                     style={{
                                         width,
                                         height: 380,
@@ -485,6 +488,7 @@ export default function ServiceDetailsScreen() {
                 isPending={loading}
                 total={finalPrice}
                 itemSCount={1}
+                isBookable={true}
                 itemType="SERVICE"
             />
 
