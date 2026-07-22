@@ -5,10 +5,7 @@ import {
 } from "@tanstack/react-query";
 
 import { useAuthStore } from "../store/auth.store";
-
-const API_BASE_URL =
-  process.env.EXPO_PUBLIC_API_URL ||
-  "http://localhost:3000";
+import { API_BASE_URL } from "@/config/env";
 
 export function usePolicyAgreement() {
   const queryClient = useQueryClient();

@@ -251,5 +251,19 @@
     "please_enter_phone_number": "Please enter phone number",
     "please_enter_valid_phone_number": "Please enter a valid 10-digit phone number",
     "please_select_place": "Please select place",
-    "please_select_payment_method": "Please select payment method"
+    "please_select_payment_method": "Please select payment method",
+    "forgot_password": "Forgot Password?",
+    "welcome_back": "Welcome Back",
+    "sign_in_to_access_account": "Sign in to access your account",
+    "forgotPasswordTitle": "Forgot Password",
+    "enterEmailSubtitle": "Enter your email to receive an OTP",
+    "otpPlaceholder": "OTP (6-digit)",
+    "newPasswordPlaceholder": "New Password",
+    "resetPasswordBtn": "Reset Password",
+    "sendOtpBtn": "Send OTP",
+    "otpSentSuccess": "OTP has been sent to your email successfully",
+    "passwordResetSuccess": "Password reset successfully!",
+    "backToLogin": "Back to Login",
+    "successTitle": "Success",
+    "failedTitle": "Error"
 }

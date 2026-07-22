@@ -2,6 +2,7 @@
 import { Calendar, CreditCard, Package } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 import { Image, Pressable, Text, View } from "react-native";
+import { getImageUrl } from "@/utils/image";
 
 export const getStatusColor = (status: string) => {
   const colors: Record<string, string> = {
@@ -89,9 +90,7 @@ export function OrderCard({ item, onPress }: any) {
               <Image
                 // source={{ uri: orderItem.productId?.images?.[0] }}
                 source={{
-                  uri: orderItem.productId?.images?.[0]?.startsWith("http")
-                    ? orderItem.productId.images[0]
-                    : `${process.env.EXPO_PUBLIC_S3_BASE_URL}/${orderItem.productId?.images?.[0]}`
+                  uri: getImageUrl(orderItem.productId?.images?.[0])
                 }}
                 className="w-12 h-12 rounded-lg bg-gray-100"
               />

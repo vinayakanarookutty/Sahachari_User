@@ -67,7 +67,6 @@ export function ProductCard({
       ? product.price.split("/")[1].trim()
       : "";
 
-  const S3_BASE_URL = process.env.EXPO_PUBLIC_S3_BASE_URL;
 
   // const imageUri = product.images?.[0]
   //   ? `${S3_BASE_URL}/${product.images[0]}`

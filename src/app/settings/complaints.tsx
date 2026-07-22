@@ -15,9 +15,8 @@ import {
   TextInput,
   View,
 } from "react-native";
+import { API_BASE_URL } from "@/config/env";
 
-const API_BASE_URL =
-  process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000";
 
 const showAlert = (
   title: string,

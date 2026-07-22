@@ -10,6 +10,7 @@ import {
   View,
 } from "react-native";
 import { useAppFonts } from "../../hooks/useAppFonts";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 interface EditProfileModalProps {
   visible: boolean;
@@ -46,6 +47,7 @@ export function EditProfileModal({
   onSave,
   isPending = false,
 }: EditProfileModalProps) {
+  const insets = useSafeAreaInsets();
   const {t } = useTranslation();
   const { styleRegular, styleBold } = useAppFonts();
   // const getFieldLabel = () => (field ? FIELD_LABELS[field] : "");
@@ -67,6 +69,7 @@ export function EditProfileModal({
         <Pressable
           onPress={(e) => e.stopPropagation()}
           className="bg-white rounded-t-3xl"
+          style={{ paddingBottom: insets.bottom }}
         >
           {/* Header */}
           <View className="flex-row items-center justify-between p-6 border-b border-gray-100">

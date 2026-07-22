@@ -1,8 +1,8 @@
 import { Product, ProductsQueryParams, Store } from "../types/product";
 import { api } from "./api";
+import { S3_BASE_URL } from "@/config/env";
 
-const S3_BASE =
-  (process.env.EXPO_PUBLIC_S3_BASE_URL || "").replace(/\/$/, "");
+const S3_BASE = S3_BASE_URL.replace(/\/$/, "");
 
 function normalizeImage(img: any): string | null {
   if (!img) return null;

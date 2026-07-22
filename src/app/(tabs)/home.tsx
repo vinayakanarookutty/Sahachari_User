@@ -43,6 +43,7 @@ import { useServices } from "../../hooks/useServices";
 
 import { useTranslation } from "react-i18next";
 import { useAppFonts } from "../../hooks/useAppFonts";
+import { S3_BASE_URL } from "@/config/env";
 
 import { resolveCategoryRoute } from "../market/utils/marketplaceRouter";
 
@@ -397,9 +398,6 @@ export default function Home() {
       params: { category: categoryName },
     });
   };
-
-  const S3_BASE_URL = process.env.EXPO_PUBLIC_S3_BASE_URL;
-
   // Tab bar height + bottom safe area to avoid overlap
   const TAB_BAR_HEIGHT = 60;
   const contentPaddingBottom = TAB_BAR_HEIGHT + insets.bottom + 24;

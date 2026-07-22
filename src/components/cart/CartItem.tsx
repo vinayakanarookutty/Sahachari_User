@@ -2,18 +2,14 @@ import { Minus, Plus, Trash2 } from "lucide-react-native";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { ActivityIndicator, Image, Pressable, Text, View, } from "react-native";
+import { getImageUrl } from "@/utils/image";
 
 export function CartItem({ item, isUpdating, onQuantityChange, onRemove, parseNumber,
 }: any) {
-  const s3Base = (process.env.EXPO_PUBLIC_S3_BASE_URL || "").replace(/\/$/, "");
   const rawImg = item.productId?.images?.[0];
   const { t } = useTranslation();
 
-  const imgUrl = rawImg
-    ? /^https?:\/\//.test(rawImg)
-      ? rawImg
-      : `${s3Base}/${String(rawImg).replace(/^\/+/, "")}`
-    : undefined;
+  const imgUrl = getImageUrl(rawImg) || undefined;
 
   const itemQuantity = parseNumber(item.quantity ?? item.qty ?? 0);
   // const itemPrice = parseNumber(item.productId?.price ?? item.price ?? 0);

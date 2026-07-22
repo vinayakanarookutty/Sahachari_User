@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
+import { API_BASE_URL } from '@/config/env';
 
 interface Store {
   _id: string;
@@ -21,7 +22,7 @@ export const useCategoryStores = (category: string | undefined, token: string | 
       if (!category) return [];
       
       const response = await fetch(
-        `${process.env.EXPO_PUBLIC_API_URL}/customer/category/${category}/stores`,
+        `${API_BASE_URL}/customer/category/${category}/stores`,
         {
           headers: {
             'Authorization': `Bearer ${token}`,

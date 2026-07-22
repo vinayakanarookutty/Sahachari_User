@@ -14,6 +14,7 @@ import {
   View,
 } from 'react-native';
 import { useAppFonts } from "../../hooks/useAppFonts";
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 function splitAddress(fullAddress: string): { street: string; city: string } {
   const cleaned = fullAddress.trim();
@@ -78,6 +79,7 @@ export function CheckoutModal({
   isBookable = false,
   itemType,
 }: any) {
+  const insets = useSafeAreaInsets();
   const [showPaymentDropdown, setShowPaymentDropdown] = useState(false);
   const [places, setPlaces] = useState<string[]>([]);
   const [showPlaceDropdown, setShowPlaceDropdown] = useState(false);
@@ -113,8 +115,6 @@ export function CheckoutModal({
     image?: string;
   }
 
-  const API_BASE_URL =
-    process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3000';
 
   const updateField = (field: string, value: string) =>
     setAddress({ ...address, [field]: value });
@@ -241,7 +241,7 @@ export function CheckoutModal({
     <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
       <View className="flex-1 bg-black/50 justify-end">
         {/* <View className="bg-white rounded-t-3xl max-h-[85%]"> */}
-        <View className="bg-white rounded-t-3xl flex-1 mt-16">
+        <View className="bg-white rounded-t-3xl flex-1 mt-16" style={{ paddingBottom: insets.bottom }}>
           {/* Header */}
           <View className="flex-row items-center justify-between px-6 py-4 border-b border-gray-200">
             <Text className="text-2xl font-bold text-gray-800" style={styleBold}>

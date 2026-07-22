@@ -11,25 +11,36 @@ import {
   ActivityIndicator,
   TouchableOpacity,
   Image,
+  Modal,
+  FlatList,
 } from "react-native";
 
 import { useRegister } from "../../hooks/useAuth";
 import { Role } from "../../types/user";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
-import { Eye, EyeOff } from "lucide-react-native";
+import { Eye, EyeOff, ChevronDown, Check, Search, X } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+
+const AVAILABLE_PINCODES = [
+  "670562","670563","670567","682022","688532"
+];
 
 export default function Register() {
+  const insets = useSafeAreaInsets();
   const register = useRegister();
   const [showPassword, setShowPassword] = useState(false);
   const {t} = useTranslation();
+
+  const [modalVisible, setModalVisible] = useState(false);
+  const [pincodeSearch, setPincodeSearch] = useState("");
+  const [selectedPincodes, setSelectedPincodes] = useState<string[]>([]);
 
   const [form, setForm] = useState({
     name: "",
     email: "",
     address: "",
     password: "",
-    pincodesInput: "",
   });
 
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -40,19 +51,9 @@ export default function Register() {
       !form.email ||
       !form.address ||
       !form.password ||
-      !form.pincodesInput
+      selectedPincodes.length === 0
     ) {
       setErrorMsg("Please fill all fields");
-      return;
-    }
-
-    const serviceablePincodes = form.pincodesInput
-      .split(",")
-      .map((p) => p.trim())
-      .filter((p) => /^\d{6}$/.test(p));
-
-    if (serviceablePincodes.length === 0) {
-      setErrorMsg("Enter at least one valid 6-digit pincode (comma separated)");
       return;
     }
 
@@ -61,7 +62,7 @@ export default function Register() {
         name: form.name,
         email: form.email,
         address: form.address,
-        serviceablePincodes,
+        serviceablePincodes: selectedPincodes,
         password: form.password,
         role: Role.USER,
       },
@@ -176,40 +177,37 @@ export default function Register() {
               <Text className="text-xs font-semibold text-gray-700 mb-1.5 ml-1">
                 {t("serviceable_pincodes")}
               </Text>
-              <TextInput
-                className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-3.5 text-base text-gray-900"
-                placeholder={t("e_g_110001_110002")}
-                placeholderTextColor="#9CA3AF"
-                keyboardType="numeric"
-                value={form.pincodesInput}
-                onChangeText={(v) => {
-                  setForm({ ...form, pincodesInput: v });
-                  setErrorMsg(null);
-                }}
-              />
-              <Text className="text-[10px] text-gray-400 mt-1 ml-1">
-                {t("comma_separated_6_digit_codes")}
-              </Text>
+              
+              <Pressable
+                onPress={() => setModalVisible(true)}
+                className="flex-row items-center justify-between bg-gray-50 border border-gray-200 rounded-xl px-4 py-3.5 min-h-[54px]"
+              >
+                {selectedPincodes.length === 0 ? (
+                  <Text className="text-base text-gray-400">
+                    {t("Select Pincodes") || "Select serviceable pincodes"}
+                  </Text>
+                ) : (
+                  <View className="flex-row flex-wrap gap-1.5 flex-1 mr-2">
+                    {selectedPincodes.map((pin) => (
+                      <View key={pin} className="flex-row items-center bg-blue-50 border border-blue-100 rounded-full px-2.5 py-1">
+                        <Text className="text-xs font-semibold text-blue-700 mr-1.5">{pin}</Text>
+                        <Pressable
+                          onPress={() => {
+                            setSelectedPincodes(selectedPincodes.filter((p) => p !== pin));
+                          }}
+                          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                        >
+                          <X size={12} color="#1D4ED8" strokeWidth={2.5} />
+                        </Pressable>
+                      </View>
+                    ))}
+                  </View>
+                )}
+                <ChevronDown size={20} color="#6B7280" />
+              </Pressable>
             </View>
 
-            {/* Password */}
-            {/* <View>
-              <Text className="text-xs font-semibold text-gray-700 mb-1.5 ml-1">
-                Password
-              </Text>
-              <TextInput
-                className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-3.5 text-base text-gray-900"
-                placeholder="Create a password"
-                placeholderTextColor="#9CA3AF"
-                secureTextEntry
-                value={form.password}
-                onChangeText={(v) => {
-                  setForm({ ...form, password: v });
-                  setErrorMsg(null);
-                }}
-              />
-            </View>
-          </View> */}
+
             <View>
               <Text className="text-xs font-semibold text-gray-700 mb-1.5 ml-1">
                 {t("password")}
@@ -294,6 +292,103 @@ export default function Register() {
     </KeyboardAvoidingView> */}
         </View>
       </KeyboardAwareScrollView>
+
+      {/* Pincode Multi-Select Modal */}
+      <Modal
+        visible={modalVisible}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View className="flex-1 justify-end bg-black/50">
+          <View
+            className="bg-white rounded-t-3xl h-[65%] px-6 pt-5 shadow-2xl"
+            style={{ paddingBottom: insets.bottom > 0 ? insets.bottom + 16 : 32 }}
+          >
+            {/* Header */}
+            <View className="flex-row justify-between items-center mb-4">
+              <Text className="text-lg font-bold text-gray-900">
+                {t("select_pincodes") || "Select Pincodes"}
+              </Text>
+              <Pressable
+                onPress={() => setModalVisible(false)}
+                className="bg-gray-100 p-2 rounded-full active:bg-gray-200"
+              >
+                <X size={18} color="#4B5563" />
+              </Pressable>
+            </View>
+
+            {/* Modal Search Bar */}
+            <View className="flex-row items-center bg-gray-50 border border-gray-200 rounded-xl px-3 py-1 mb-4">
+              <Search size={18} color="#9CA3AF" />
+              <TextInput
+                value={pincodeSearch}
+                onChangeText={setPincodeSearch}
+                placeholder={t("search_pincode") || "Search pincode..."}
+                placeholderTextColor="#9CA3AF"
+                className="flex-1 ml-2 text-gray-800 text-base py-1.5"
+                keyboardType="numeric"
+              />
+              {pincodeSearch.length > 0 && (
+                <Pressable onPress={() => setPincodeSearch("")}>
+                  <X size={16} color="#9CA3AF" />
+                </Pressable>
+              )}
+            </View>
+
+            {/* Pincode List */}
+            <FlatList
+              data={AVAILABLE_PINCODES.filter((pin) =>
+                pin.includes(pincodeSearch)
+              )}
+              keyExtractor={(item) => item}
+              showsVerticalScrollIndicator={false}
+              renderItem={({ item }) => {
+                const isSelected = selectedPincodes.includes(item);
+                return (
+                  <Pressable
+                    onPress={() => {
+                      if (isSelected) {
+                        setSelectedPincodes(selectedPincodes.filter((p) => p !== item));
+                      } else {
+                        setSelectedPincodes([...selectedPincodes, item]);
+                      }
+                      setErrorMsg(null);
+                    }}
+                    className={`flex-row justify-between items-center py-3.5 px-4 rounded-xl mb-2 border ${
+                      isSelected
+                        ? "bg-blue-50/50 border-blue-200"
+                        : "bg-white border-gray-100"
+                    }`}
+                  >
+                    <Text className={`text-base font-medium ${isSelected ? "text-blue-700" : "text-gray-800"}`}>
+                      {item}
+                    </Text>
+                    {isSelected && <Check size={18} color="#2563EB" strokeWidth={3} />}
+                  </Pressable>
+                );
+              }}
+              ListEmptyComponent={
+                <View className="items-center justify-center py-10">
+                  <Text className="text-gray-400 text-sm">
+                    {t("no_matching_pincodes") || "No matching pincodes found"}
+                  </Text>
+                </View>
+              }
+            />
+
+            {/* Done Button */}
+            <TouchableOpacity
+              onPress={() => setModalVisible(false)}
+              className="bg-blue-600 rounded-xl py-3.5 items-center justify-center mt-4 active:bg-blue-700"
+            >
+              <Text className="text-white text-base font-semibold">
+                {t("done") || "Done"}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </View >
   );
 }

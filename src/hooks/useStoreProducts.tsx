@@ -1,5 +1,6 @@
 import { useAuthStore } from '@/store/auth.store';
 import { useQuery } from '@tanstack/react-query';
+import { API_BASE_URL } from '@/config/env';
 
 interface Product {
   _id: string;
@@ -25,7 +26,7 @@ export const useStoreProducts = (storeId: string | undefined) => {
       if (!storeId) return [];
       
       const response = await fetch(
-        `${process.env.EXPO_PUBLIC_API_URL}/customer/stores/${storeId}/products`,
+        `${API_BASE_URL}/customer/stores/${storeId}/products`,
         {
           headers: {
             'Authorization': `Bearer ${token}`, // Replace with actual token

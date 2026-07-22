@@ -1,5 +1,4 @@
-const S3_BASE_URL =
-    process.env.EXPO_PUBLIC_S3_BASE_URL ?? "";
+import { S3_BASE_URL } from "@/config/env";
 
 export const getImageUrl = (
     path?: string | null,
