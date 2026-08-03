@@ -15,7 +15,7 @@
     },
     "android": {
       "package": "com.corestoneinnovation.sahachariuser",
-      "versionCode": 30,
+      "versionCode": 32,
       "adaptiveIcon": {
         "foregroundImage": "./assets/sahachari.jpeg",
         "backgroundColor": "#ffffff"
@@ -50,7 +50,7 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "77756b3c-c127-412b-a5aa-03472f872186"
+        "projectId": "eced3c97-6f96-49de-abef-866148e11db2"
       }
     }
   }
