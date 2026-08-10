@@ -84,11 +84,18 @@ export default function ProductsScreen() {
   //   searchQuery ? { search: searchQuery } : undefined
   // );
 
-  const effectiveCategory = categoryFilter ?? "Service";
-  const { data: allProducts = [], isLoading: isLoadingAllProducts, refetch: refetchProducts, } =
-    useProducts({
-      category: effectiveCategory,
-    });
+const effectiveCategory = categoryFilter ?? "Service";
+
+const isSearching = searchQuery.trim().length > 0;
+
+const {
+  data: allProducts = [],
+  isLoading: isLoadingAllProducts,
+  refetch: refetchProducts,
+} = useProducts({
+  category: isSearching ? undefined : effectiveCategory,
+  search: searchQuery,
+});
 
 
   const { data: storeProducts, isLoading: isLoadingStoreProducts, refetch: refetchStoreProducts, } = useStoreProducts(storeId);
@@ -112,13 +119,17 @@ export default function ProductsScreen() {
   // Determine which products to show
   // const displayProducts = storeId ? storeProducts : allProducts;
   // const displayProducts = storeId ? filteredProducts : allProducts;
-  const allowedStoreIds = stores.map((s) => s._id);
+ const allowedStoreIds = stores.map((s) => s._id);
 
-  const displayProducts = storeId
-    ? filteredProducts
+//const isSearching = searchQuery.trim().length > 0;
+
+const displayProducts = storeId
+  ? filteredProducts
+  : isSearching
+    ? allProducts
     : allProducts.filter((p) =>
-      allowedStoreIds.includes(p.storeId || "")
-    );
+        allowedStoreIds.includes(p.storeId || "")
+      );
 
   const queryWords = searchQuery.toLowerCase().split(/\s+/).filter(Boolean);
 
@@ -128,6 +139,10 @@ export default function ProductsScreen() {
     const address = store.address?.toLowerCase() || "";
     return queryWords.every((word) => name.includes(word) || address.includes(word));
   });
+console.log("params.search", params.search);
+console.log("searchQuery", searchQuery);
+console.log("allProducts", allProducts.length);
+console.log("displayProducts", displayProducts.length);
 
   const filteredDisplayProducts = displayProducts.filter((product) => {
     if (queryWords.length === 0) return true;
@@ -135,7 +150,7 @@ export default function ProductsScreen() {
     const description = product.description?.toLowerCase() || "";
     return queryWords.every((word) => name.includes(word) || description.includes(word));
   });
-
+console.log("filteredDisplayProducts", filteredDisplayProducts.length);
   const isLoadingProducts = storeId
     ? !!isLoadingStoreProducts
     : !!isLoadingAllProducts;
