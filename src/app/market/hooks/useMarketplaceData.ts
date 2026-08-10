@@ -1,9 +1,9 @@
 import { useServices } from "@/hooks/useServices";
 import { useRentals } from "@/hooks/useRentals";
 
-export function useMarketplaceData() {
-    const services = useServices();
-    const rentals = useRentals();
+export function useMarketplaceData(searchQuery?: string) {
+    const services = useServices(searchQuery ? { search: searchQuery } : undefined);
+    const rentals = useRentals(searchQuery ? { search: searchQuery } : undefined);
 
     const isLoading =
         services.isLoading ||

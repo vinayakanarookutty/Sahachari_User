@@ -145,8 +145,20 @@ export default function Home() {
     searchQuery ? { search: searchQuery } : undefined
   );
 
-  const { data: services = [], isLoading: servicesLoading } = useServices();
-  const { data: rentals = [], isLoading: rentalsLoading } = useRentals();
+  const { data: services = [], isLoading: servicesLoading } = useServices(
+    searchQuery ? { search: searchQuery } : undefined
+  );
+  const { data: rentals = [], isLoading: rentalsLoading } = useRentals(
+    searchQuery ? { search: searchQuery } : undefined
+  );
+
+  const searchSuggestions = useMemo(() => {
+    if (!searchQuery.trim()) return [];
+    const prodItems = (products || []).map((p: any) => ({ ...p, itemType: "product" }));
+    const servItems = (services || []).map((s: any) => ({ ...s, itemType: "service" }));
+    const rentItems = (rentals || []).map((r: any) => ({ ...r, itemType: "rental" }));
+    return [...prodItems, ...servItems, ...rentItems].slice(0, 8);
+  }, [searchQuery, products, services, rentals]);
 
   const isLoading = productsLoading || servicesLoading || rentalsLoading;
   const [refreshing, setRefreshing] = useState(false);
@@ -172,7 +184,7 @@ export default function Home() {
           source: src,
           title: item.title || FEATURED_BANNERS[idx % FEATURED_BANNERS.length].title,
           subtitle: item.subtitle || FEATURED_BANNERS[idx % FEATURED_BANNERS.length].subtitle,
-          tag: "EXCLUSIVES",
+        
         };
       });
     }
@@ -277,79 +289,74 @@ export default function Home() {
   const contentPaddingBottom = TAB_BAR_HEIGHT + insets.bottom + 36;
 
   return (
-    <View style={{ flex: 1, backgroundColor: "#F5F6FA" }}>
+    <View style={{ flex: 1, backgroundColor: "#F8FAFC" }}>
 
       {/* ══════════════════════════════════════════════════════════
           HERO HEADER — Premium Gradient
       ══════════════════════════════════════════════════════════ */}
       <LinearGradient
-        colors={["#1E3A8A", "#1E40AF", "#2563EB"]}
+        colors={["#0B132B", "#1C2541", "#2563EB"]}
         start={{ x: 0, y: 0 }}
-        end={{ x: 0.5, y: 1 }}
-        style={{ paddingTop: insets.top + 12, paddingBottom: 80 }}
+        end={{ x: 0.6, y: 1 }}
+        style={{ paddingTop: insets.top + 8, paddingBottom: 18, zIndex: 10 }}
       >
-        {/* Ambient decorative orbs */}
+        {/* Ambient decorative background glows */}
         <View style={{
-          position: 'absolute', top: -60, right: -50,
-          width: 200, height: 200, borderRadius: 100,
-          backgroundColor: 'rgba(96,165,250,0.07)',
-        }} />
-        <View style={{
-          position: 'absolute', bottom: -10, left: -40,
-          width: 140, height: 140, borderRadius: 70,
-          backgroundColor: 'rgba(255,255,255,0.04)',
+          position: 'absolute', top: -50, right: -40,
+          width: 160, height: 160, borderRadius: 80,
+          backgroundColor: 'rgba(99,102,241,0.10)',
         }} />
 
         <View style={{ paddingHorizontal: horizontalPadding }}>
 
-          {/* ── Top Bar: Logo + Brand + Profile ── */}
-          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+          {/* ── Top Bar: Logo + Brand Title + Profile ── */}
+          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
             
             {/* Logo + Brand title */}
             <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
               <View style={{
-                width: isSmall ? 40 : 46, height: isSmall ? 40 : 46,
-                borderRadius: isSmall ? 13 : 15,
-                borderWidth: 1.5, borderColor: 'rgba(255,255,255,0.3)',
+                width: isSmall ? 36 : 40, height: isSmall ? 36 : 40,
+                borderRadius: isSmall ? 11 : 13,
+                borderWidth: 1.8, borderColor: 'rgba(255,255,255,0.4)',
                 alignItems: 'center', justifyContent: 'center',
                 overflow: 'hidden',
                 ...Platform.select({
                   ios: {
-                    shadowColor: '#1E40AF', shadowOffset: { width: 0, height: 3 },
-                    shadowOpacity: 0.3, shadowRadius: 8,
+                    shadowColor: '#3B82F6', shadowOffset: { width: 0, height: 4 },
+                    shadowOpacity: 0.35, shadowRadius: 10,
                   },
-                  android: { elevation: 6 },
+                  android: { elevation: 7 },
                 }),
               }}>
                 <Image
                   source={require("../../../assets/logo.jpeg")}
-                  style={{ width: isSmall ? 40 : 46, height: isSmall ? 40 : 46, borderRadius: isSmall ? 12 : 14 }}
+                  style={{ width: isSmall ? 36 : 40, height: isSmall ? 36 : 40, borderRadius: isSmall ? 10 : 12 }}
                   resizeMode="cover"
                 />
               </View>
 
-              <View style={{ marginLeft: 11 }}>
+              <View style={{ marginLeft: 10 }}>
                 <Text style={[{
-                  fontSize: isTablet ? 24 : isSmall ? 19 : 22, color: '#FFFFFF',
-                  letterSpacing: 0.3,
+                  fontSize: isTablet ? 21 : isSmall ? 17 : 19, color: '#FFFFFF',
+                  letterSpacing: -0.2,
                 }, styleBold]}>
                   {t("sahachari")}
                 </Text>
                 
-                <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 3 }}>
-                  <View style={{
-                    backgroundColor: 'rgba(255,255,255,0.13)',
-                    borderRadius: 8, paddingHorizontal: 8, paddingVertical: 2.5,
-                    flexDirection: 'row', alignItems: 'center',
-                  }}>
-                    <Star size={8} color="#FBBF24" fill="#FBBF24" style={{ marginRight: 3 }} />
-                    <Text style={[{
-                      fontSize: isSmall ? 8 : 9, color: 'rgba(255,255,255,0.85)',
-                      letterSpacing: 0.8, textTransform: 'uppercase',
-                    }, styleRegular]}>
-                      {t("Premium_Local_Services")}
-                    </Text>
-                  </View>
+                <View style={{
+                  backgroundColor: 'rgba(255,255,255,0.12)',
+                  borderRadius: 10, paddingHorizontal: 7, paddingVertical: 2,
+                  flexDirection: 'row', alignItems: 'center', marginTop: 3,
+                  alignSelf: 'flex-start',
+                  borderWidth: 0.5, borderColor: 'rgba(255,255,255,0.2)',
+                }}>
+                  <Sparkles size={8} color="#FBBF24" style={{ marginRight: 4 }} />
+                  <Text style={[{
+                    fontSize: isSmall ? 8 : 9, color: 'rgba(255,255,255,0.9)',
+                    letterSpacing: 0.5, textTransform: 'uppercase',
+                  }, styleMedium]}>
+                    {t("Your Local Marketplace") || "Your Local Marketplace"}
+                  </Text>
                 </View>
               </View>
             </View>
@@ -360,153 +367,153 @@ export default function Home() {
               style={({ pressed }) => ({ opacity: pressed ? 0.8 : 1 })}
             >
               <View style={{
-                width: isSmall ? 38 : 42, height: isSmall ? 38 : 42,
-                borderRadius: isSmall ? 19 : 21,
-                borderWidth: 2, borderColor: 'rgba(255,255,255,0.4)',
-                overflow: 'hidden', backgroundColor: '#1E3A8A',
+                width: isSmall ? 34 : 38, height: isSmall ? 34 : 38,
+                borderRadius: isSmall ? 17 : 19,
+                borderWidth: 2, borderColor: 'rgba(255,255,255,0.45)',
+                overflow: 'hidden', backgroundColor: '#1E1B4B',
                 ...Platform.select({
                   ios: {
-                    shadowColor: '#000', shadowOffset: { width: 0, height: 3 },
-                    shadowOpacity: 0.2, shadowRadius: 6,
+                    shadowColor: '#000', shadowOffset: { width: 0, height: 4 },
+                    shadowOpacity: 0.25, shadowRadius: 8,
                   },
-                  android: { elevation: 5 },
+                  android: { elevation: 6 },
                 }),
               }}>
                 {profile?.image ? (
                   <Image
                     source={{ uri: S3_BASE_URL + "/" + profile.image }}
-                    style={{ width: isSmall ? 38 : 42, height: isSmall ? 38 : 42, borderRadius: isSmall ? 19 : 21 }}
+                    style={{ width: isSmall ? 34 : 38, height: isSmall ? 34 : 38, borderRadius: isSmall ? 17 : 19 }}
                   />
                 ) : (
                   <LinearGradient
                     colors={["#3B82F6", "#1E40AF"]}
                     style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}
                   >
-                    <User size={isSmall ? 17 : 19} color="#FFFFFF" strokeWidth={2} />
+                    <User size={isSmall ? 15 : 17} color="#FFFFFF" strokeWidth={2} />
                   </LinearGradient>
                 )}
               </View>
             </Pressable>
           </View>
 
-          {/* ── Hero Brand Banner Image ── */}
-         
+          {/* ── Luxury Glassmorphic Search Bar ── */}
+          <View
+            style={{
+              marginTop: 2,
+              zIndex: 999,
+            }}
+          >
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                backgroundColor: "rgba(255,255,255,0.98)",
+                borderRadius: 18,
+                paddingLeft: 8,
+                paddingRight: 5,
+                height: isTablet ? 50 : 44,
+                borderWidth: 1,
+                borderColor: "rgba(255,255,255,0.9)",
+                ...Platform.select({
+                  ios: {
+                    shadowColor: "#0F172A",
+                    shadowOffset: { width: 0, height: 8 },
+                    shadowOpacity: 0.16,
+                    shadowRadius: 16,
+                  },
+                  android: {
+                    elevation: 10,
+                  },
+                }),
+              }}
+            >
+              {/* Search Icon Badge */}
+              <View style={{
+                width: 30, height: 30, borderRadius: 15,
+                backgroundColor: '#EFF6FF',
+                alignItems: 'center', justifyContent: 'center',
+                marginLeft: 4,
+              }}>
+                <Search size={16} color="#2563EB" strokeWidth={2.5} />
+              </View>
 
-          {/* ── Search Bar ── */}
-          {/* ── Search Bar ── */}
-<View
-  style={{
-    marginTop: 14,
-    zIndex: 999,
-  }}
->
-  <View
-    style={{
-      flexDirection: "row",
-      alignItems: "center",
-      backgroundColor: "rgba(255,255,255,0.95)",
-      borderRadius: 14,
-      paddingLeft: 14,
-      paddingRight: 5,
-      height: isTablet ? 52 : 46,
-      borderWidth: 1,
-      borderColor: "rgba(255,255,255,0.5)",
-      ...Platform.select({
-        ios: {
-          shadowColor: "#000",
-          shadowOffset: { width: 0, height: 6 },
-          shadowOpacity: 0.12,
-          shadowRadius: 16,
-        },
-        android: {
-          elevation: 12,
-        },
-      }),
-    }}
-  >
-    <Search size={17} color="#94A3B8" strokeWidth={2} />
+              <TextInput
+                value={searchQuery}
+                onChangeText={setSearchQuery}
+                placeholder={t("Search") || "Search products, services..."}
+                placeholderTextColor="#94A3B8"
+                style={[
+                  {
+                    flex: 1,
+                    marginLeft: 10,
+                    color: "#0F172A",
+                    fontSize: isSmall ? 13 : 14,
+                    paddingVertical: 0,
+                  },
+                  styleRegular,
+                ]}
+                onSubmitEditing={() => {
+                  if (searchQuery.trim()) {
+                    Keyboard.dismiss();
+                    router.push({
+                      pathname: "/product",
+                      params: { search: searchQuery.trim() },
+                    } as any);
+                  }
+                }}
+              />
 
-    <TextInput
-      value={searchQuery}
-      onChangeText={setSearchQuery}
-      placeholder={t("Search") || "Search products..."}
-      placeholderTextColor="#A0AEC0"
-      style={[
-        {
-          flex: 1,
-          marginLeft: 10,
-          color: "#1E293B",
-          fontSize: isSmall ? 13 : 14,
-          paddingVertical: 0,
-        },
-        styleRegular,
-      ]}
-      onSubmitEditing={() => {
-        if (searchQuery.trim()) {
-          Keyboard.dismiss();
+              {searchQuery.length > 0 && (
+                <Pressable
+                  onPress={() => setSearchQuery("")}
+                  style={{ padding: 6 }}
+                >
+                  <X size={14} color="#94A3B8" />
+                </Pressable>
+              )}
 
-          router.push({
-            pathname: "/product",
-            params: {
-              search: searchQuery.trim(),
-            },
-          } as any);
-        }
-      }}
-    />
-
-    {searchQuery.length > 0 && (
-      <Pressable
-        onPress={() => setSearchQuery("")}
-        style={{ padding: 6 }}
-      >
-        <X size={14} color="#94A3B8" />
-      </Pressable>
-    )}
-
-    <Pressable
-      onPress={() => {
-        if (searchQuery.trim()) {
-          Keyboard.dismiss();
-
-          router.push({
-            pathname: "/product",
-            params: {
-              search: searchQuery.trim(),
-            },
-          } as any);
-        }
-      }}
-      style={({ pressed }) => ({
-        opacity: pressed ? 0.85 : 1,
-      })}
-    >
-      <LinearGradient
-        colors={["#2563EB", "#1D4ED8"]}
-        style={{
-          borderRadius: 10,
-          paddingHorizontal: 16,
-          paddingVertical: 9,
-        }}
-      >
-        <Text
-          style={[
-            {
-              color: "#FFFFFF",
-              fontSize: isSmall ? 12 : 13,
-              letterSpacing: 0.2,
-            },
-            styleBold,
-          ]}
-        >
-          {t("Search") || "Search"}
-        </Text>
-      </LinearGradient>
-    </Pressable>
-  </View>
+              <Pressable
+                onPress={() => {
+                  if (searchQuery.trim()) {
+                    Keyboard.dismiss();
+                    router.push({
+                      pathname: "/product",
+                      params: { search: searchQuery.trim() },
+                    } as any);
+                  }
+                }}
+                style={({ pressed }) => ({
+                  opacity: pressed ? 0.85 : 1,
+                })}
+              >
+                <LinearGradient
+                  colors={["#3B82F6", "#1D4ED8"]}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={{
+                    borderRadius: 14,
+                    paddingHorizontal: 16,
+                    paddingVertical: 9,
+                  }}
+                >
+                  <Text
+                    style={[
+                      {
+                        color: "#FFFFFF",
+                        fontSize: isSmall ? 12 : 13,
+                        letterSpacing: 0.3,
+                      },
+                      styleBold,
+                    ]}
+                  >
+                    {t("Search") || "Search"}
+                  </Text>
+                </LinearGradient>
+              </Pressable>
+            </View>
 
   {/* Search Suggestions */}
-  {searchQuery.trim().length > 0 && products.length > 0 && (
+  {searchQuery.trim().length > 0 && searchSuggestions.length > 0 && (
     <View
       style={{
         position: "absolute",
@@ -532,19 +539,25 @@ export default function Home() {
         }),
       }}
     >
-      {products.slice(0, 8).map((item) => (
+      {searchSuggestions.map((item: any) => (
         <Pressable
-          key={item.id}
+          key={item._id || item.id}
           onPress={() => {
-            setSearchQuery(item.name);
+            setSearchQuery(item.name || item.title || "");
             Keyboard.dismiss();
 
-            router.push({
-              pathname: "/product",
-              params: {
-                search: item.name,
-              },
-            } as any);
+            if (item.itemType === "service") {
+              router.push(`/services/${item._id}`);
+            } else if (item.itemType === "rental") {
+              router.push(`/rentals/${item._id}`);
+            } else {
+              router.push({
+                pathname: "/product",
+                params: {
+                  search: item.name,
+                },
+              } as any);
+            }
           }}
           style={({ pressed }) => ({
             backgroundColor: pressed ? "#F3F4F6" : "#FFFFFF",
@@ -558,21 +571,27 @@ export default function Home() {
             style={{
               flexDirection: "row",
               alignItems: "center",
+              justifyContent: "space-between",
             }}
           >
-            <Search size={16} color="#64748B" />
-
-            <Text
-              style={[
-                {
-                  marginLeft: 10,
-                  fontSize: 15,
-                  color: "#1E293B",
-                },
-                styleMedium,
-              ]}
-            >
-              {item.name}
+            <View style={{ flexDirection: "row", alignItems: "center", flex: 1 }}>
+              <Search size={16} color="#64748B" />
+              <Text
+                style={[
+                  {
+                    marginLeft: 10,
+                    fontSize: 15,
+                    color: "#1E293B",
+                  },
+                  styleMedium,
+                ]}
+                numberOfLines={1}
+              >
+                {item.name || item.title}
+              </Text>
+            </View>
+            <Text style={{ fontSize: 11, color: "#94A3B8", textTransform: "capitalize", marginLeft: 8 }}>
+              {item.itemType}
             </Text>
           </View>
         </Pressable>
@@ -587,14 +606,14 @@ export default function Home() {
           BODY — Curved Content Sheet
       ══════════════════════════════════════════════════════════ */}
       <View style={{
-        flex: 1, backgroundColor: '#F5F6FA',
-        marginTop: -26, borderTopLeftRadius: 28, borderTopRightRadius: 28,
+        flex: 1, backgroundColor: '#F8FAFC',
+        marginTop: -12, borderTopLeftRadius: 24, borderTopRightRadius: 24,
         overflow: 'hidden',
       }}>
         <ScrollView
           showsVerticalScrollIndicator={false}
           style={{ flex: 1 }}
-          contentContainerStyle={{ paddingBottom: contentPaddingBottom, paddingTop: 8 }}
+          contentContainerStyle={{ paddingBottom: contentPaddingBottom, paddingTop: 10 }}
           refreshControl={
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={["#2563EB"]} tintColor="#2563EB" />
           }
@@ -603,27 +622,20 @@ export default function Home() {
           {/* ══════════════════════════════════════════════════════════
               FEATURED CAROUSEL BANNERS (UNDER SEARCH BAR)
           ══════════════════════════════════════════════════════════ */}
-          <View style={{ marginTop: 16 }}>
+          <View style={{ marginTop: 10 }}>
             
-            {/* Carousel Header */}
+            {/* Carousel Section Header */}
             <View style={{
               flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-              paddingHorizontal: horizontalPadding, marginBottom: 12,
+              paddingHorizontal: horizontalPadding, marginBottom: 10,
             }}>
               <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                <Sparkles size={15} color="#2563EB" style={{ marginRight: 6 }} />
-                <Text style={[{ fontSize: isSmall ? 15 : 16, color: '#0F172A', letterSpacing: 0.15 }, styleBold]}>
+                <Text style={[{ fontSize: isSmall ? 14 : 16, color: '#0F172A', letterSpacing: -0.2 }, styleBold]}>
                   Featured Highlights
                 </Text>
               </View>
-              <View style={{
-                backgroundColor: '#EEF2FF', borderRadius: 8,
-                paddingHorizontal: 10, paddingVertical: 4,
-              }}>
-                <Text style={[{ fontSize: 10, color: '#4F46E5', letterSpacing: 0.6 }, styleMedium || styleBold]}>
-                  SPECIAL OFFERS
-                </Text>
-              </View>
+
+             
             </View>
 
             {/* Horizontal Scroll Carousel */}
@@ -638,7 +650,7 @@ export default function Home() {
               {displayCarousel.map((item, index) => (
                 <View key={item.id || index} style={{ width, paddingHorizontal: horizontalPadding }}>
                   <View style={{
-                    borderRadius: 18,
+                    borderRadius: 20,
                     overflow: 'hidden',
                     height: carouselImageHeight,
                     backgroundColor: '#0F172A',
@@ -646,8 +658,8 @@ export default function Home() {
                       ios: {
                         shadowColor: '#0F172A',
                         shadowOffset: { width: 0, height: 8 },
-                        shadowOpacity: 0.18,
-                        shadowRadius: 18,
+                        shadowOpacity: 0.2,
+                        shadowRadius: 16,
                       },
                       android: { elevation: 8 },
                     }),
@@ -659,32 +671,21 @@ export default function Home() {
                       resizeMode="cover"
                     />
 
-                    {/* Premium cinematic gradient overlay */}
+                    {/* Premium cinematic multi-stop gradient overlay */}
                     <LinearGradient
-                      colors={['rgba(0,0,0,0)', 'rgba(0,0,0,0.05)', 'rgba(15,23,42,0.55)', 'rgba(15,23,42,0.88)']}
-                      locations={[0, 0.3, 0.6, 1]}
+                      colors={['transparent', 'rgba(15,23,42,0.15)', 'rgba(15,23,42,0.7)', 'rgba(15,23,42,0.94)']}
+                      locations={[0, 0.35, 0.7, 1]}
                       style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
                     />
 
-                    {/* Top-left light reflection */}
-                    <LinearGradient
-                      colors={['rgba(255,255,255,0.1)', 'transparent']}
-                      start={{ x: 0, y: 0 }}
-                      end={{ x: 0.5, y: 0.5 }}
-                      style={{
-                        position: 'absolute', top: 0, left: 0,
-                        width: '55%', height: '35%',
-                      }}
-                    />
-
-                    {/* Tag Badge Pill (Top-Left) */}
+                    {/* Top-left Glassmorphic Tag Badge Pill */}
                     {item.tag && (
                       <View style={{
                         position: 'absolute', top: isSmall ? 10 : 14, left: isSmall ? 10 : 14,
-                        backgroundColor: 'rgba(255,255,255,0.18)',
+                        backgroundColor: 'rgba(15,23,42,0.65)',
                         borderRadius: 20, paddingHorizontal: isSmall ? 8 : 10, paddingVertical: 4,
                         flexDirection: 'row', alignItems: 'center',
-                        borderWidth: 0.5, borderColor: 'rgba(255,255,255,0.25)',
+                        borderWidth: 1, borderColor: 'rgba(255,255,255,0.25)',
                       }}>
                         <Sparkles size={9} color="#FBBF24" style={{ marginRight: 4 }} />
                         <Text style={[{ fontSize: isSmall ? 8 : 9, color: '#FFFFFF', letterSpacing: 1 }, styleBold]}>
@@ -693,44 +694,50 @@ export default function Home() {
                       </View>
                     )}
 
-                    {/* Title & Subtitle (Bottom) */}
-                    <View style={{
-                      position: 'absolute', bottom: 0, left: 0, right: 0,
-                      paddingHorizontal: isSmall ? 14 : 18,
-                      paddingBottom: isSmall ? 12 : 16,
-                      paddingTop: 8,
-                    }}>
-                      {item.title && (
-                        <Text numberOfLines={1} style={[{
-                          fontSize: isTablet ? 18 : isSmall ? 14 : 16,
-                          color: '#FFFFFF', letterSpacing: 0.2,
-                        }, styleBold]}>
-                          {item.title}
-                        </Text>
-                      )}
-                      {item.subtitle && (
-                        <Text numberOfLines={1} style={[{
-                          fontSize: isTablet ? 13 : isSmall ? 11 : 12,
-                          color: 'rgba(255,255,255,0.7)', marginTop: 3,
-                        }, styleRegular]}>
-                          {item.subtitle}
-                        </Text>
-                      )}
-                    </View>
+                    {/* Title & Subtitle + Action Button (Bottom) */}
+                    {(item.title || item.subtitle) && (
+                      <View style={{
+                        position: 'absolute', bottom: isSmall ? 10 : 14,
+                        left: isSmall ? 12 : 16, right: isSmall ? 12 : 16,
+                        flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+                      }}>
+                        <View style={{ flex: 1, marginRight: 10 }}>
+                          {item.title && (
+                            <Text style={[{ color: '#FFFFFF', fontSize: isSmall ? 14 : 16, textShadowColor: 'rgba(0,0,0,0.6)', textShadowRadius: 6 }, styleBold]} numberOfLines={1}>
+                              {item.title}
+                            </Text>
+                          )}
+                          {item.subtitle && (
+                            <Text style={[{ color: 'rgba(255,255,255,0.85)', fontSize: isSmall ? 10 : 12, marginTop: 2 }, styleRegular]} numberOfLines={1}>
+                              {item.subtitle}
+                            </Text>
+                          )}
+                        </View>
+
+                        <View style={{
+                          width: 32, height: 32, borderRadius: 16,
+                          backgroundColor: 'rgba(255,255,255,0.2)',
+                          alignItems: 'center', justifyContent: 'center',
+                          borderWidth: 1, borderColor: 'rgba(255,255,255,0.3)',
+                        }}>
+                          <ChevronRight size={16} color="#FFFFFF" strokeWidth={2.5} />
+                        </View>
+                      </View>
+                    )}
                   </View>
                 </View>
               ))}
             </ScrollView>
 
-            {/* Pagination Dots */}
-            <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center', marginTop: 14 }}>
+            {/* Pagination Indicators */}
+            <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center', marginTop: 10 }}>
               {displayCarousel.map((_, index) => (
                 <View key={index} style={{
-                  height: 5,
-                  borderRadius: 2.5,
+                  height: 4,
+                  borderRadius: 2,
                   marginHorizontal: 3,
-                  width: activeSlide === index ? 22 : 5,
-                  backgroundColor: activeSlide === index ? "#2563EB" : "#D1D5DB",
+                  width: activeSlide === index ? 20 : 4,
+                  backgroundColor: activeSlide === index ? "#3B82F6" : "#D1D5DB",
                 }} />
               ))}
             </View>
@@ -740,67 +747,47 @@ export default function Home() {
           <Pressable
             onPress={handleCallHappy60}
             style={({ pressed }) => ({
-              marginHorizontal: horizontalPadding, marginTop: 22,
+              marginHorizontal: horizontalPadding, marginTop: 16,
               transform: [{ scale: pressed ? 0.98 : 1 }],
               opacity: pressed ? 0.95 : 1,
             })}
           >
             <View style={{
               borderRadius: 20, overflow: 'hidden',
+              backgroundColor: '#FFFFFF',
+              borderWidth: 1, borderColor: '#E2E8F0',
               ...Platform.select({
                 ios: {
-                  shadowColor: '#1E3A8A', shadowOffset: { width: 0, height: 5 },
-                  shadowOpacity: 0.15, shadowRadius: 14,
+                  shadowColor: '#0F172A', shadowOffset: { width: 0, height: 4 },
+                  shadowOpacity: 0.08, shadowRadius: 12,
                 },
-                android: { elevation: 6 },
+                android: { elevation: 4 },
               }),
             }}>
               <LinearGradient
-                colors={["#1E3A8A", "#1D4ED8"]}
+                colors={["#0B132B", "#1C2541"]}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
-                style={{ padding: isSmall ? 18 : 22, borderRadius: 20 }}
+                style={{ padding: isSmall ? 16 : 20, borderRadius: 20 }}
               >
-                {/* Background decorative orbs */}
-                <View style={{
-                  position: 'absolute', top: -20, right: -20,
-                  width: 100, height: 100, borderRadius: 50,
-                  backgroundColor: 'rgba(255,255,255,0.05)',
-                }} />
-                <View style={{
-                  position: 'absolute', bottom: -15, left: 30,
-                  width: 60, height: 60, borderRadius: 30,
-                  backgroundColor: 'rgba(255,255,255,0.03)',
-                }} />
-
                 <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
                   <View style={{ flex: 1, marginRight: 14 }}>
-                    <View style={{
-                      backgroundColor: 'rgba(251,191,36,0.12)',
-                      borderRadius: 8, paddingHorizontal: 10, paddingVertical: 3,
-                      alignSelf: 'flex-start', marginBottom: 10,
-                    }}>
-                      <Text style={[{ color: '#FBBF24', fontSize: isSmall ? 9 : 10, letterSpacing: 1, textTransform: 'uppercase' }, styleBold]}>
-                        ⭐ EXCLUSIVE CARE
-                      </Text>
-                    </View>
-
-                    <Text style={[{ fontSize: isTablet ? 28 : isSmall ? 22 : 25, color: '#FFFFFF', letterSpacing: 0.2 }, styleBold]}>
+                    <Text style={[{ fontSize: isTablet ? 26 : isSmall ? 20 : 23, color: '#FFFFFF', letterSpacing: -0.3 }, styleBold]}>
                       {t("Happy_60")}
                     </Text>
                     
-                    <Text style={[{ color: 'rgba(255,255,255,0.7)', fontSize: isSmall ? 12 : 13, marginTop: 5, lineHeight: 19 }, styleRegular]}>
+                    <Text style={[{ color: 'rgba(255,255,255,0.65)', fontSize: isSmall ? 11 : 12.5, marginTop: 4, lineHeight: 18 }, styleRegular]}>
                       {t("Exclusive_for_senior_citizens")}
                     </Text>
                   </View>
 
                   <View style={{
-                    width: isSmall ? 48 : 54, height: isSmall ? 48 : 54, borderRadius: 17,
-                    backgroundColor: 'rgba(255,255,255,0.1)',
-                    borderWidth: 1, borderColor: 'rgba(255,255,255,0.2)',
+                    width: isSmall ? 44 : 50, height: isSmall ? 44 : 50, borderRadius: 25,
+                    backgroundColor: 'rgba(255,255,255,0.08)',
+                    borderWidth: 1, borderColor: 'rgba(255,255,255,0.15)',
                     alignItems: 'center', justifyContent: 'center',
                   }}>
-                    <Phone size={isSmall ? 22 : 24} color="#FFFFFF" strokeWidth={2} />
+                    <Phone size={isSmall ? 20 : 22} color="#FFFFFF" strokeWidth={1.8} />
                   </View>
                 </View>
               </LinearGradient>
@@ -810,28 +797,24 @@ export default function Home() {
           {/* ══════════════════════════════════════════════════════════
               CATEGORIES GRID
           ══════════════════════════════════════════════════════════ */}
-          <View style={{ marginTop: 28, paddingHorizontal: horizontalPadding }}>
+          <View style={{ marginTop: 20, paddingHorizontal: horizontalPadding }}>
 
             {/* Section Header */}
-            <View style={{ flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 16 }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
               <View>
-                <Text style={[{ fontSize: isSmall ? 10 : 11, color: '#6366F1', letterSpacing: 1.6, textTransform: 'uppercase', marginBottom: 3 }, styleBold]}>
+                <Text style={[{ fontSize: isSmall ? 10 : 11, color: '#94A3B8', letterSpacing: 1.2, textTransform: 'uppercase', marginBottom: 2 }, styleMedium]}>
                   EXPLORE
                 </Text>
-                <Text style={[{ fontSize: isTablet ? 24 : isSmall ? 20 : 22, color: '#0F172A', letterSpacing: 0.1 }, styleBold]}>
+                <Text style={[{ fontSize: isTablet ? 22 : isSmall ? 18 : 20, color: '#0F172A', letterSpacing: -0.2 }, styleBold]}>
                   {t("Our_Services")}
                 </Text>
               </View>
 
-              <View style={{
-                backgroundColor: '#EEF2FF', borderRadius: 8,
-                paddingHorizontal: 10, paddingVertical: 4,
-                marginBottom: 2,
-              }}>
-                <Text style={[{ color: '#6366F1', fontSize: isSmall ? 10 : 11, letterSpacing: 0.2 }, styleBold]}>
+              <Pressable style={{ paddingVertical: 4, paddingHorizontal: 6 }}>
+                <Text style={[{ color: '#3B82F6', fontSize: isSmall ? 11 : 12, letterSpacing: 0.1 }, styleMedium]}>
                   {t("Discover_Excellence")}
                 </Text>
-              </View>
+              </Pressable>
             </View>
 
             {/* Loading Indicator */}
@@ -863,15 +846,17 @@ export default function Home() {
                       >
                         {/* Category Card */}
                         <View style={{
-                          borderRadius: 16,
+                          borderRadius: 20,
                           overflow: 'hidden',
                           height: cardHeight,
-                          backgroundColor: '#E2E8F0',
+                          backgroundColor: '#0F172A',
+                          borderWidth: 1,
+                          borderColor: 'rgba(255,255,255,0.15)',
                           ...Platform.select({
                             ios: {
                               shadowColor: '#0F172A',
-                              shadowOffset: { width: 0, height: 4 },
-                              shadowOpacity: 0.1,
+                              shadowOffset: { width: 0, height: 6 },
+                              shadowOpacity: 0.16,
                               shadowRadius: 10,
                             },
                             android: { elevation: 5 },
@@ -891,41 +876,36 @@ export default function Home() {
                             }} />
                           )}
 
-                          {/* Gradient Overlay */}
+                          {/* Multi-step Premium Dark Gradient Overlay */}
                           <LinearGradient
-                            colors={['transparent', 'rgba(15,23,42,0.08)', 'rgba(15,23,42,0.78)']}
+                            colors={['transparent', 'rgba(15,23,42,0.2)', 'rgba(15,23,42,0.88)']}
                             locations={[0, 0.45, 1]}
                             style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
                           />
 
-                          {/* Accent dot */}
+                          {/* Accent Indicator Dot */}
                           <View style={{
-                            position: 'absolute', top: 10, left: 10,
-                            width: 7, height: 7, borderRadius: 3.5,
-                            backgroundColor: category.accentColor,
-                            borderWidth: 1.5, borderColor: 'rgba(255,255,255,0.7)',
-                            ...Platform.select({
-                              ios: {
-                                shadowColor: category.accentColor,
-                                shadowOffset: { width: 0, height: 1 },
-                                shadowOpacity: 0.7, shadowRadius: 3,
-                              },
-                              android: { elevation: 3 },
-                            }),
+                            position: 'absolute', top: 10, right: 10,
+                            width: 8, height: 8, borderRadius: 4,
+                            backgroundColor: category.accentColor || '#3B82F6',
+                            borderWidth: 1, borderColor: 'rgba(255,255,255,0.6)',
                           }} />
 
                           {/* Label */}
                           <View style={{
                             position: 'absolute', bottom: 0, left: 0, right: 0,
-                            paddingHorizontal: 10,
-                            paddingVertical: isSmall ? 8 : 10,
+                            paddingHorizontal: 12,
+                            paddingVertical: isSmall ? 10 : 12,
                           }}>
                             <Text
                               numberOfLines={1}
                               style={[{
-                                fontSize: isTablet ? 14 : isSmall ? 12 : 13,
+                                fontSize: isTablet ? 14 : isSmall ? 11.5 : 13,
                                 color: '#FFFFFF',
-                                letterSpacing: 0.15,
+                                letterSpacing: 0.2,
+                                textShadowColor: 'rgba(0,0,0,0.8)',
+                                textShadowOffset: { width: 0, height: 1 },
+                                textShadowRadius: 3,
                               }, styleBold]}
                             >
                               {t("categories." + category.translationKey)}

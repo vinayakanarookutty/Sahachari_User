@@ -1,6 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { useAuthStore } from "@/store/auth.store";
-import { API_BASE_URL } from "@/config/env";
+import { api } from "@/services/api";
 
 export interface ServiceStore {
     _id: string;
@@ -12,28 +11,11 @@ export interface ServiceStore {
 }
 
 export const useServiceStores = () => {
-    const { token } = useAuthStore();
-
     return useQuery({
         queryKey: ["service-stores"],
-
         queryFn: async () => {
-            const response = await fetch(
-                `${API_BASE_URL}/services/service-stores`,
-                {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                }
-            );
-
-            if (!response.ok) {
-                throw new Error(
-                    "Failed to fetch service stores"
-                );
-            }
-
-            return response.json();
+            const res = await api("/services/service-stores");
+            return res.data;
         },
     });
 };

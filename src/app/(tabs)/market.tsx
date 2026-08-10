@@ -14,7 +14,7 @@ export default function MarketplaceScreen() {
         useState<MarketplaceTab>("services");
     const [searchQuery, setSearchQuery] = useState("");
 
-    const { data, isLoading } = useMarketplaceData();
+    const { data, isLoading } = useMarketplaceData(searchQuery);
     const router = useRouter();
 
     const getData = () => {
@@ -24,7 +24,6 @@ export default function MarketplaceScreen() {
             case "services":
             default:
                 return data.services;
-            // return data.products;
         }
     };
 
@@ -33,9 +32,13 @@ export default function MarketplaceScreen() {
         const queryWords = searchQuery.toLowerCase().split(/\s+/).filter(Boolean);
         if (queryWords.length === 0) return rawData;
         return rawData.filter((item: any) => {
-            const name = item.name?.toLowerCase() || "";
-            const description = item.description?.toLowerCase() || "";
-            return queryWords.every((word) => name.includes(word) || description.includes(word));
+            const name = (item.name || item.title || "").toLowerCase();
+            const description = (item.description || "").toLowerCase();
+            const category = (item.category || "").toLowerCase();
+            const unit = (item.unit || "").toLowerCase();
+            return queryWords.every((word) =>
+                name.includes(word) || description.includes(word) || category.includes(word) || unit.includes(word)
+            );
         });
     };
 

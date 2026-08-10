@@ -16,6 +16,12 @@ import {
   PlayfairDisplay_700Bold,
 } from '@expo-google-fonts/playfair-display';
 import {
+  Poppins_400Regular,
+  Poppins_500Medium,
+  Poppins_600SemiBold,
+  Poppins_700Bold,
+} from '@expo-google-fonts/poppins';
+import {
   NotoSansMalayalam_400Regular,
   NotoSansMalayalam_700Bold,
 } from '@expo-google-fonts/noto-sans-malayalam';
@@ -30,6 +36,10 @@ export default function RootLayout() {
     Montserrat_400Regular,
     Montserrat_600SemiBold,
     PlayfairDisplay_700Bold,
+    Poppins_400Regular,
+    Poppins_500Medium,
+    Poppins_600SemiBold,
+    Poppins_700Bold,
     NotoSansMalayalam_400Regular,
     NotoSansMalayalam_700Bold,
   });
