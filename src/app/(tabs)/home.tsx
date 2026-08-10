@@ -45,6 +45,7 @@ import { useProducts } from "../../hooks/useProducts";
 import { useProfile } from "../../hooks/useProfile";
 import { useRentals } from "../../hooks/useRentals";
 import { useServices } from "../../hooks/useServices";
+import { useHappy60 } from "../../hooks/useHappy60";
 
 import { useTranslation } from "react-i18next";
 import { useAppFonts } from "../../hooks/useAppFonts";
@@ -54,17 +55,17 @@ import { resolveCategoryRoute } from "../market/utils/marketplaceRouter";
 
 // Category styles with local images
 const CATEGORY_IMAGES: Record<string, any> = {
-  food:                    require("../../../assets/categories/food.png"),
-  "vegetables and fruits": require("../../../assets/categories/vegetables.png"),
-  groceries:               require("../../../assets/categories/groceries.png"),
-  "home made":             require("../../../assets/categories/homemade.png"),
-  service:                 require("../../../assets/categories/service.png"),
-  "fish & meat":           require("../../../assets/categories/fish.png"),
-  rent:                    require("../../../assets/categories/rent.png"),
-  electronics:             require("../../../assets/categories/electronics.png"),
-  snacks:                  require("../../../assets/categories/snacks.png"),
-  "fast food":             require("../../../assets/categories/fastfood.png"),
-  beverages:               require("../../../assets/categories/beverages.png"),
+  food:                    { uri: "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=1000&q=90" },
+  "vegetables and fruits": { uri: "https://images.unsplash.com/photo-1610832958506-aa56368176cf?auto=format&fit=crop&w=1000&q=90" },
+  groceries:               { uri: "https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=1000&q=90" },
+  "home made":             { uri: "https://images.unsplash.com/photo-1556910103-1c02745aae4d?auto=format&fit=crop&w=1000&q=90" },
+  service:                 { uri: "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?auto=format&fit=crop&w=1000&q=90" },
+  "fish & meat":           { uri: "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?auto=format&fit=crop&w=1000&q=90" },
+  rent:                    { uri: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1000&q=90" },
+  electronics:             { uri: "https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=1000&q=90" },
+  snacks:                  { uri: "https://images.unsplash.com/photo-1599490659213-e2b9527bd087?auto=format&fit=crop&w=1000&q=90" },
+  "fast food":             { uri: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=1000&q=90" },
+  beverages:               { uri: "https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?auto=format&fit=crop&w=1000&q=90" },
 };
 
 const CATEGORY_ACCENTS: Record<string, string> = {
@@ -137,6 +138,31 @@ export default function Home() {
 
   const { data: carouselData = [] } = useCarousel();
   const { profile, refetch: refetchProfile } = useProfile();
+
+  const userPincode = useMemo(() => {
+    if (!profile) return "";
+    if ((profile as any).pincode && String((profile as any).pincode).trim()) {
+      return String((profile as any).pincode).trim();
+    }
+    if (Array.isArray(profile.serviceablePincodes) && profile.serviceablePincodes.length > 0) {
+      const validPin = profile.serviceablePincodes.find((p: string) => p && p.trim().length > 0);
+      if (validPin) return validPin.trim();
+    }
+    if (profile.address) {
+      const match = String(profile.address).match(/\b\d{6}\b/);
+      if (match) return match[0];
+    }
+    if ((profile as any).address2) {
+      const match = String((profile as any).address2).match(/\b\d{6}\b/);
+      if (match) return match[0];
+    }
+    return "";
+  }, [profile]);
+
+  const { data: happy60Data } = useHappy60(userPincode);
+  const isHappy60Enabled = happy60Data?.isEnabled !== false;
+  const happy60PhoneNumber = happy60Data?.phoneNumber || "7025548470";
+
   const [activeSlide, setActiveSlide] = useState(0);
   const scrollViewRef = useRef<ScrollView>(null);
 
@@ -275,7 +301,7 @@ export default function Home() {
   };
 
   const handleCallHappy60 = () => {
-    Linking.openURL("tel:7025548470");
+    Linking.openURL("tel:" + happy60PhoneNumber);
   };
 
   const handleCategoryPress = (categoryName: string) => {
@@ -295,17 +321,11 @@ export default function Home() {
           HERO HEADER — Premium Gradient
       ══════════════════════════════════════════════════════════ */}
       <LinearGradient
-        colors={["#0B132B", "#1C2541", "#2563EB"]}
+        colors={["#2563EB", "#1D4ED8"]}
         start={{ x: 0, y: 0 }}
-        end={{ x: 0.6, y: 1 }}
+        end={{ x: 1, y: 1 }}
         style={{ paddingTop: insets.top + 8, paddingBottom: 18, zIndex: 10 }}
       >
-        {/* Ambient decorative background glows */}
-        <View style={{
-          position: 'absolute', top: -50, right: -40,
-          width: 160, height: 160, borderRadius: 80,
-          backgroundColor: 'rgba(99,102,241,0.10)',
-        }} />
 
         <View style={{ paddingHorizontal: horizontalPadding }}>
 
@@ -370,7 +390,7 @@ export default function Home() {
                 width: isSmall ? 34 : 38, height: isSmall ? 34 : 38,
                 borderRadius: isSmall ? 17 : 19,
                 borderWidth: 2, borderColor: 'rgba(255,255,255,0.45)',
-                overflow: 'hidden', backgroundColor: '#1E1B4B',
+                overflow: 'hidden', backgroundColor: '#1D4ED8',
                 ...Platform.select({
                   ios: {
                     shadowColor: '#000', shadowOffset: { width: 0, height: 4 },
@@ -653,10 +673,10 @@ export default function Home() {
                     borderRadius: 20,
                     overflow: 'hidden',
                     height: carouselImageHeight,
-                    backgroundColor: '#0F172A',
+                    backgroundColor: '#EFF6FF',
                     ...Platform.select({
                       ios: {
-                        shadowColor: '#0F172A',
+                        shadowColor: '#1D4ED8',
                         shadowOffset: { width: 0, height: 8 },
                         shadowOpacity: 0.2,
                         shadowRadius: 16,
@@ -671,9 +691,9 @@ export default function Home() {
                       resizeMode="cover"
                     />
 
-                    {/* Premium cinematic multi-stop gradient overlay */}
+                    {/* Premium blue gradient overlay */}
                     <LinearGradient
-                      colors={['transparent', 'rgba(15,23,42,0.15)', 'rgba(15,23,42,0.7)', 'rgba(15,23,42,0.94)']}
+                      colors={['transparent', 'rgba(29,78,216,0.10)', 'rgba(29,78,216,0.55)', 'rgba(30,64,175,0.90)']}
                       locations={[0, 0.35, 0.7, 1]}
                       style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
                     />
@@ -682,10 +702,10 @@ export default function Home() {
                     {item.tag && (
                       <View style={{
                         position: 'absolute', top: isSmall ? 10 : 14, left: isSmall ? 10 : 14,
-                        backgroundColor: 'rgba(15,23,42,0.65)',
+                        backgroundColor: 'rgba(37,99,235,0.75)',
                         borderRadius: 20, paddingHorizontal: isSmall ? 8 : 10, paddingVertical: 4,
                         flexDirection: 'row', alignItems: 'center',
-                        borderWidth: 1, borderColor: 'rgba(255,255,255,0.25)',
+                        borderWidth: 1, borderColor: 'rgba(255,255,255,0.35)',
                       }}>
                         <Sparkles size={9} color="#FBBF24" style={{ marginRight: 4 }} />
                         <Text style={[{ fontSize: isSmall ? 8 : 9, color: '#FFFFFF', letterSpacing: 1 }, styleBold]}>
@@ -701,18 +721,7 @@ export default function Home() {
                         left: isSmall ? 12 : 16, right: isSmall ? 12 : 16,
                         flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
                       }}>
-                        <View style={{ flex: 1, marginRight: 10 }}>
-                          {item.title && (
-                            <Text style={[{ color: '#FFFFFF', fontSize: isSmall ? 14 : 16, textShadowColor: 'rgba(0,0,0,0.6)', textShadowRadius: 6 }, styleBold]} numberOfLines={1}>
-                              {item.title}
-                            </Text>
-                          )}
-                          {item.subtitle && (
-                            <Text style={[{ color: 'rgba(255,255,255,0.85)', fontSize: isSmall ? 10 : 12, marginTop: 2 }, styleRegular]} numberOfLines={1}>
-                              {item.subtitle}
-                            </Text>
-                          )}
-                        </View>
+                       
 
                         <View style={{
                           width: 32, height: 32, borderRadius: 16,
@@ -744,55 +753,57 @@ export default function Home() {
           </View>
 
           {/* ── Exclusive Plan Banner: Happy 60 ── */}
-          <Pressable
-            onPress={handleCallHappy60}
-            style={({ pressed }) => ({
-              marginHorizontal: horizontalPadding, marginTop: 16,
-              transform: [{ scale: pressed ? 0.98 : 1 }],
-              opacity: pressed ? 0.95 : 1,
-            })}
-          >
-            <View style={{
-              borderRadius: 20, overflow: 'hidden',
-              backgroundColor: '#FFFFFF',
-              borderWidth: 1, borderColor: '#E2E8F0',
-              ...Platform.select({
-                ios: {
-                  shadowColor: '#0F172A', shadowOffset: { width: 0, height: 4 },
-                  shadowOpacity: 0.08, shadowRadius: 12,
-                },
-                android: { elevation: 4 },
-              }),
-            }}>
-              <LinearGradient
-                colors={["#0B132B", "#1C2541"]}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={{ padding: isSmall ? 16 : 20, borderRadius: 20 }}
-              >
-                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <View style={{ flex: 1, marginRight: 14 }}>
-                    <Text style={[{ fontSize: isTablet ? 26 : isSmall ? 20 : 23, color: '#FFFFFF', letterSpacing: -0.3 }, styleBold]}>
-                      {t("Happy_60")}
-                    </Text>
-                    
-                    <Text style={[{ color: 'rgba(255,255,255,0.65)', fontSize: isSmall ? 11 : 12.5, marginTop: 4, lineHeight: 18 }, styleRegular]}>
-                      {t("Exclusive_for_senior_citizens")}
-                    </Text>
-                  </View>
+          {isHappy60Enabled && (
+            <Pressable
+              onPress={handleCallHappy60}
+              style={({ pressed }) => ({
+                marginHorizontal: horizontalPadding, marginTop: 16,
+                transform: [{ scale: pressed ? 0.98 : 1 }],
+                opacity: pressed ? 0.95 : 1,
+              })}
+            >
+              <View style={{
+                borderRadius: 20, overflow: 'hidden',
+                backgroundColor: '#FFFFFF',
+                borderWidth: 1, borderColor: '#E2E8F0',
+                ...Platform.select({
+                  ios: {
+                    shadowColor: '#0F172A', shadowOffset: { width: 0, height: 4 },
+                    shadowOpacity: 0.08, shadowRadius: 12,
+                  },
+                  android: { elevation: 4 },
+                }),
+              }}>
+                <LinearGradient
+                  colors={["#2563EB", "#1D4ED8"]}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={{ padding: isSmall ? 16 : 20, borderRadius: 20 }}
+                >
+                  <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <View style={{ flex: 1, marginRight: 14 }}>
+                      <Text style={[{ fontSize: isTablet ? 26 : isSmall ? 20 : 23, color: '#FFFFFF', letterSpacing: -0.3 }, styleBold]}>
+                        {t("Happy_60")}
+                      </Text>
+                      
+                      <Text style={[{ color: 'rgba(255,255,255,0.75)', fontSize: isSmall ? 11 : 12.5, marginTop: 4, lineHeight: 18 }, styleRegular]}>
+                        {t("Exclusive_for_senior_citizens")} 
+                      </Text>
+                    </View>
 
-                  <View style={{
-                    width: isSmall ? 44 : 50, height: isSmall ? 44 : 50, borderRadius: 25,
-                    backgroundColor: 'rgba(255,255,255,0.08)',
-                    borderWidth: 1, borderColor: 'rgba(255,255,255,0.15)',
-                    alignItems: 'center', justifyContent: 'center',
-                  }}>
-                    <Phone size={isSmall ? 20 : 22} color="#FFFFFF" strokeWidth={1.8} />
+                    <View style={{
+                      width: isSmall ? 44 : 50, height: isSmall ? 44 : 50, borderRadius: 25,
+                      backgroundColor: 'rgba(255,255,255,0.08)',
+                      borderWidth: 1, borderColor: 'rgba(255,255,255,0.15)',
+                      alignItems: 'center', justifyContent: 'center',
+                    }}>
+                      <Phone size={isSmall ? 20 : 22} color="#FFFFFF" strokeWidth={1.8} />
+                    </View>
                   </View>
-                </View>
-              </LinearGradient>
-            </View>
-          </Pressable>
+                </LinearGradient>
+              </View>
+            </Pressable>
+          )}
 
           {/* ══════════════════════════════════════════════════════════
               CATEGORIES GRID
@@ -849,17 +860,17 @@ export default function Home() {
                           borderRadius: 20,
                           overflow: 'hidden',
                           height: cardHeight,
-                          backgroundColor: '#0F172A',
+                          backgroundColor: '#EFF6FF',
                           borderWidth: 1,
-                          borderColor: 'rgba(255,255,255,0.15)',
+                          borderColor: 'rgba(37,99,235,0.12)',
                           ...Platform.select({
                             ios: {
-                              shadowColor: '#0F172A',
-                              shadowOffset: { width: 0, height: 6 },
-                              shadowOpacity: 0.16,
-                              shadowRadius: 10,
+                              shadowColor: '#1D4ED8',
+                              shadowOffset: { width: 0, height: 4 },
+                              shadowOpacity: 0.10,
+                              shadowRadius: 8,
                             },
-                            android: { elevation: 5 },
+                            android: { elevation: 4 },
                           }),
                         }}>
                           {/* Category Image */}
@@ -872,24 +883,18 @@ export default function Home() {
                           ) : (
                             <View style={{
                               width: '100%', height: '100%', position: 'absolute',
-                              backgroundColor: '#1E293B',
+                              backgroundColor: '#DBEAFE',
                             }} />
                           )}
 
-                          {/* Multi-step Premium Dark Gradient Overlay */}
+                          {/* Clean blue gradient overlay */}
                           <LinearGradient
-                            colors={['transparent', 'rgba(15,23,42,0.2)', 'rgba(15,23,42,0.88)']}
+                            colors={['transparent', 'rgba(29,78,216,0.15)', 'rgba(30,64,175,0.85)']}
                             locations={[0, 0.45, 1]}
                             style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
                           />
 
-                          {/* Accent Indicator Dot */}
-                          <View style={{
-                            position: 'absolute', top: 10, right: 10,
-                            width: 8, height: 8, borderRadius: 4,
-                            backgroundColor: category.accentColor || '#3B82F6',
-                            borderWidth: 1, borderColor: 'rgba(255,255,255,0.6)',
-                          }} />
+
 
                           {/* Label */}
                           <View style={{
@@ -903,9 +908,6 @@ export default function Home() {
                                 fontSize: isTablet ? 14 : isSmall ? 11.5 : 13,
                                 color: '#FFFFFF',
                                 letterSpacing: 0.2,
-                                textShadowColor: 'rgba(0,0,0,0.8)',
-                                textShadowOffset: { width: 0, height: 1 },
-                                textShadowRadius: 3,
                               }, styleBold]}
                             >
                               {t("categories." + category.translationKey)}
