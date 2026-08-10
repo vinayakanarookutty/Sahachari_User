@@ -393,66 +393,196 @@ export default function Home() {
          
 
           {/* ── Search Bar ── */}
-          <View style={{
-            flexDirection: 'row', alignItems: 'center',
-            backgroundColor: 'rgba(255,255,255,0.95)',
-            borderRadius: 14, paddingLeft: 14, paddingRight: 5,
-            height: isTablet ? 52 : 46, marginTop: 14,
-            borderWidth: 1, borderColor: 'rgba(255,255,255,0.5)',
-            ...Platform.select({
-              ios: {
-                shadowColor: '#000', shadowOffset: { width: 0, height: 6 },
-                shadowOpacity: 0.12, shadowRadius: 16,
-              },
-              android: { elevation: 12 },
-            }),
-          }}>
-            <Search size={17} color="#94A3B8" strokeWidth={2} />
-            <TextInput
-              value={searchQuery}
-              onChangeText={setSearchQuery}
-              placeholder={t("Search") || "Search products, services..."}
-              placeholderTextColor="#A0AEC0"
-              style={[{
-                flex: 1, marginLeft: 10, color: '#1E293B',
-                fontSize: isSmall ? 13 : 14, paddingVertical: 0,
-              }, styleRegular]}
-              onSubmitEditing={() => {
-                if (searchQuery.trim()) {
-                  Keyboard.dismiss();
-                  router.push({ pathname: "/product", params: { search: searchQuery.trim() } } as any);
-                }
-              }}
-            />
-            {searchQuery.length > 0 && (
-              <Pressable onPress={() => setSearchQuery("")} style={{ padding: 6 }}>
-                <X size={14} color="#94A3B8" />
-              </Pressable>
-            )}
-            <Pressable
-              onPress={() => {
-                if (searchQuery.trim()) {
-                  Keyboard.dismiss();
-                  router.push({ pathname: "/product", params: { search: searchQuery.trim() } } as any);
-                }
-              }}
-              style={({ pressed }) => ({ opacity: pressed ? 0.85 : 1 })}
-            >
-              <LinearGradient
-                colors={["#2563EB", "#1D4ED8"]}
-                style={{
-                  borderRadius: 10, paddingHorizontal: 16, paddingVertical: 9,
-                }}
-              >
-                <Text style={[{ color: '#FFFFFF', fontSize: isSmall ? 12 : 13, letterSpacing: 0.2 }, styleBold]}>
-                  {t("Search") || "Search"}
-                </Text>
-              </LinearGradient>
-            </Pressable>
-          </View>
-        </View>
-      </LinearGradient>
+          {/* ── Search Bar ── */}
+<View
+  style={{
+    marginTop: 14,
+    zIndex: 999,
+  }}
+>
+  <View
+    style={{
+      flexDirection: "row",
+      alignItems: "center",
+      backgroundColor: "rgba(255,255,255,0.95)",
+      borderRadius: 14,
+      paddingLeft: 14,
+      paddingRight: 5,
+      height: isTablet ? 52 : 46,
+      borderWidth: 1,
+      borderColor: "rgba(255,255,255,0.5)",
+      ...Platform.select({
+        ios: {
+          shadowColor: "#000",
+          shadowOffset: { width: 0, height: 6 },
+          shadowOpacity: 0.12,
+          shadowRadius: 16,
+        },
+        android: {
+          elevation: 12,
+        },
+      }),
+    }}
+  >
+    <Search size={17} color="#94A3B8" strokeWidth={2} />
 
+    <TextInput
+      value={searchQuery}
+      onChangeText={setSearchQuery}
+      placeholder={t("Search") || "Search products..."}
+      placeholderTextColor="#A0AEC0"
+      style={[
+        {
+          flex: 1,
+          marginLeft: 10,
+          color: "#1E293B",
+          fontSize: isSmall ? 13 : 14,
+          paddingVertical: 0,
+        },
+        styleRegular,
+      ]}
+      onSubmitEditing={() => {
+        if (searchQuery.trim()) {
+          Keyboard.dismiss();
+
+          router.push({
+            pathname: "/product",
+            params: {
+              search: searchQuery.trim(),
+            },
+          } as any);
+        }
+      }}
+    />
+
+    {searchQuery.length > 0 && (
+      <Pressable
+        onPress={() => setSearchQuery("")}
+        style={{ padding: 6 }}
+      >
+        <X size={14} color="#94A3B8" />
+      </Pressable>
+    )}
+
+    <Pressable
+      onPress={() => {
+        if (searchQuery.trim()) {
+          Keyboard.dismiss();
+
+          router.push({
+            pathname: "/product",
+            params: {
+              search: searchQuery.trim(),
+            },
+          } as any);
+        }
+      }}
+      style={({ pressed }) => ({
+        opacity: pressed ? 0.85 : 1,
+      })}
+    >
+      <LinearGradient
+        colors={["#2563EB", "#1D4ED8"]}
+        style={{
+          borderRadius: 10,
+          paddingHorizontal: 16,
+          paddingVertical: 9,
+        }}
+      >
+        <Text
+          style={[
+            {
+              color: "#FFFFFF",
+              fontSize: isSmall ? 12 : 13,
+              letterSpacing: 0.2,
+            },
+            styleBold,
+          ]}
+        >
+          {t("Search") || "Search"}
+        </Text>
+      </LinearGradient>
+    </Pressable>
+  </View>
+
+  {/* Search Suggestions */}
+  {searchQuery.trim().length > 0 && products.length > 0 && (
+    <View
+      style={{
+        position: "absolute",
+        top: isTablet ? 58 : 52,
+        left: 0,
+        right: 0,
+        backgroundColor: "#FFFFFF",
+        borderRadius: 12,
+        marginTop: 6,
+        maxHeight: 280,
+        overflow: "hidden",
+        zIndex: 9999,
+        ...Platform.select({
+          ios: {
+            shadowColor: "#000",
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.15,
+            shadowRadius: 10,
+          },
+          android: {
+            elevation: 15,
+          },
+        }),
+      }}
+    >
+      {products.slice(0, 8).map((item) => (
+        <Pressable
+          key={item.id}
+          onPress={() => {
+            setSearchQuery(item.name);
+            Keyboard.dismiss();
+
+            router.push({
+              pathname: "/product",
+              params: {
+                search: item.name,
+              },
+            } as any);
+          }}
+          style={({ pressed }) => ({
+            backgroundColor: pressed ? "#F3F4F6" : "#FFFFFF",
+            paddingHorizontal: 16,
+            paddingVertical: 14,
+            borderBottomWidth: 1,
+            borderBottomColor: "#F1F5F9",
+          })}
+        >
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+            }}
+          >
+            <Search size={16} color="#64748B" />
+
+            <Text
+              style={[
+                {
+                  marginLeft: 10,
+                  fontSize: 15,
+                  color: "#1E293B",
+                },
+                styleMedium,
+              ]}
+            >
+              {item.name}
+            </Text>
+          </View>
+        </Pressable>
+      ))}
+    </View>
+  )}
+</View>
+</View> 
+      </LinearGradient>
+   
       {/* ══════════════════════════════════════════════════════════
           BODY — Curved Content Sheet
       ══════════════════════════════════════════════════════════ */}
