@@ -483,7 +483,13 @@ export default function Settings() {
             <SettingItem
               icon={MapPin}
               label={t("primary_address")}
-              value={profile?.address}
+              value={
+                profile?.address &&
+                profile.address !== "NOT_SET" &&
+                profile.address !== "DUMMY_ADDRESS"
+                  ? profile.address
+                  : ""
+              }
               field="address"
             />
             <SettingItem

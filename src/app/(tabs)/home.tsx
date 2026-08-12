@@ -22,6 +22,8 @@ import {
   Utensils,
   Wrench,
   X,
+  MapPin,
+  AlertCircle,
 } from "lucide-react-native";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
@@ -38,6 +40,8 @@ import {
   TextInput,
   View,
   useWindowDimensions,
+  Modal,
+  TouchableOpacity,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useCarousel } from "../../hooks/useCarousel";
@@ -138,6 +142,34 @@ export default function Home() {
 
   const { data: carouselData = [] } = useCarousel();
   const { profile, refetch: refetchProfile } = useProfile();
+
+  // Check if profile phone or address is missing/dummy after login
+  const [profileModalVisible, setProfileModalVisible] = useState(false);
+  const [hasPromptedProfile, setHasPromptedProfile] = useState(false);
+
+  const missingInfo = useMemo(() => {
+    if (!profile) return { address: false, phone: false, any: false };
+    const isAddressMissing =
+      !profile.address ||
+      profile.address === "NOT_SET" ||
+      profile.address === "DUMMY_ADDRESS" ||
+      profile.address.trim() === "";
+    const isPhoneMissing =
+      !profile.mobileNumber || profile.mobileNumber.trim() === "";
+
+    return {
+      address: isAddressMissing,
+      phone: isPhoneMissing,
+      any: isAddressMissing || isPhoneMissing,
+    };
+  }, [profile]);
+
+  useEffect(() => {
+    if (profile && missingInfo.any && !hasPromptedProfile) {
+      setProfileModalVisible(true);
+      setHasPromptedProfile(true);
+    }
+  }, [profile, missingInfo.any, hasPromptedProfile]);
 
   const userPincode = useMemo(() => {
     if (!profile) return "";
@@ -925,6 +957,55 @@ export default function Home() {
 
         </ScrollView>
       </View>
+
+      {/* Complete Profile Reminder Modal */}
+      <Modal
+        visible={profileModalVisible}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setProfileModalVisible(false)}
+      >
+        <View className="flex-1 justify-center items-center bg-black/60 px-6">
+          <View className="bg-white rounded-3xl p-6 w-full max-w-sm items-center shadow-2xl">
+            <View className="w-16 h-16 rounded-full bg-amber-50 items-center justify-center mb-4 border border-amber-100">
+              <MapPin size={32} color="#D97706" strokeWidth={2.5} />
+            </View>
+
+            <Text className="text-xl font-bold text-gray-900 text-center mb-2" style={styleBold}>
+              {t("Kindly Complete Your Profile") || "Complete Your Profile"}
+            </Text>
+
+            <Text className="text-sm text-gray-600 text-center mb-6 leading-relaxed" style={styleRegular}>
+              {missingInfo.address && missingInfo.phone
+                ? (t("Please add your mobile number and delivery address to complete your account setup.") || "Please add your mobile number and delivery address to complete your account setup.")
+                : missingInfo.address
+                ? (t("please_add_address") || "Please add your delivery address to complete your profile.")
+                : (t("please_add_phone") || "Please add your mobile number to complete your profile.")}
+            </Text>
+
+            <TouchableOpacity
+              onPress={() => {
+                setProfileModalVisible(false);
+                router.push("/settings/settings");
+              }}
+              className="w-full bg-blue-600 rounded-xl py-3.5 items-center justify-center mb-3 shadow-md active:bg-blue-700"
+            >
+              <Text className="text-white font-semibold text-base" style={styleBold}>
+                {t("Update Profile Now") || "Update Profile Now"}
+              </Text>
+            </TouchableOpacity>
+
+            <Pressable
+              onPress={() => setProfileModalVisible(false)}
+              className="py-2 px-4 active:opacity-70"
+            >
+              <Text className="text-gray-400 font-medium text-sm">
+                {t("Maybe Later") || "Maybe Later"}
+              </Text>
+            </Pressable>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }

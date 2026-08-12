@@ -10,7 +10,7 @@ export const registerApi = (data: RegisterRequest) =>
 
 export const getProfile = (token?: string) =>
   api
-    .get<User>(token ? "/users/me" : "/auth/me", {
+    .get<User>("/users/me", {
       ...(token && { headers: { Authorization: `Bearer ${token}` } }),
     })
     .then(r => r.data);

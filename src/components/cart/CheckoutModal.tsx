@@ -141,7 +141,9 @@ export function CheckoutModal({
 
   useEffect(() => {
     if (profile && visible) {
-      const fullAddress = profile.address || '';
+      const rawAddress = profile.address || '';
+      const isDummy = rawAddress === 'NOT_SET' || rawAddress === 'DUMMY_ADDRESS';
+      const fullAddress = isDummy ? '' : rawAddress;
       const parsed = splitAddress(fullAddress);
       const extractedZip = profile.serviceablePincodes?.[0] || extractPincode(fullAddress) || '';
 

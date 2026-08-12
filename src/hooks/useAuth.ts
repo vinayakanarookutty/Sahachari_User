@@ -18,8 +18,11 @@ export const useLogin = () => {
   >({
     mutationFn: loginApi,
     onSuccess: async ({ accessToken: token, user }) => {
+      if (!token) {
+        throw new Error("No access token received from server");
+      }
+
       if (user) {
-        // ensure persistence completes
         await setAuth(token, user);
         return;
       }
@@ -31,31 +34,96 @@ export const useLogin = () => {
       } catch (err: any) {
         console.error("Profile fetch failed:", err?.response ?? err);
 
-        const d: any = jwtDecode(token);
-        const id = d.userId ?? d.sub;
-        if (!id || d.role !== Role.USER) {
-          throw new Error(
-            err?.response?.status
-              ? `Login ok, profile failed (${err.response.status})`
-              : "Login ok, profile failed"
-          );
+        if (typeof token === "string") {
+          try {
+            const d: any = jwtDecode(token);
+            const id = d.userId ?? d.sub;
+            if (id && d.role === Role.USER) {
+              await setAuth(token, {
+                id,
+                role: d.role,
+                email: d.email ?? "",
+                name: d.name,
+              });
+              return;
+            }
+          } catch (decodeErr) {
+            console.error("JWT decode error:", decodeErr);
+          }
         }
 
-        await setAuth(token, {
-          id,
-          role: d.role,
-          email: d.email ?? "",
-          name: d.name,
-        });
-        return;
+        throw new Error(
+          err?.response?.status
+            ? `Login ok, profile failed (${err.response.status})`
+            : "Login ok, profile failed"
+        );
       }
     },
   });
 };
 
-export const useRegister = () =>
-  useMutation<
+export const useRegister = () => {
+  const setAuth = useAuthStore((s) => s.setAuth);
+
+  return useMutation<
     AuthResponse,
     AxiosError<ApiError>,
     Parameters<typeof registerApi>[0]
-  >({ mutationFn: registerApi });
+  >({
+    mutationFn: registerApi,
+    onSuccess: async (res, variables) => {
+      const token = res?.accessToken;
+      const user = res?.user;
+
+      if (token && user) {
+        await setAuth(token, user);
+        return;
+      }
+
+      if (token) {
+        try {
+          const profile = await getProfile(token);
+          await setAuth(token, profile);
+          return;
+        } catch (err: any) {
+          console.error("Profile fetch after register failed:", err?.response ?? err);
+          if (typeof token === "string") {
+            try {
+              const d: any = jwtDecode(token);
+              const id = d.userId ?? d.sub;
+              if (id && d.role === Role.USER) {
+                await setAuth(token, {
+                  id,
+                  role: d.role,
+                  email: d.email ?? "",
+                  name: d.name,
+                });
+                return;
+              }
+            } catch (decodeErr) {
+              console.error("JWT decode error after register:", decodeErr);
+            }
+          }
+        }
+      }
+
+      // Fallback: If registration succeeded but backend didn't return accessToken, auto-login with credentials
+      try {
+        const loginRes = await loginApi({
+          email: variables.email,
+          password: variables.password,
+        });
+        if (loginRes?.accessToken) {
+          if (loginRes.user) {
+            await setAuth(loginRes.accessToken, loginRes.user);
+          } else {
+            const profile = await getProfile(loginRes.accessToken);
+            await setAuth(loginRes.accessToken, profile);
+          }
+        }
+      } catch (loginErr) {
+        console.error("Auto-login after registration failed:", loginErr);
+      }
+    },
+  });
+};

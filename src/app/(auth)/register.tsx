@@ -1,12 +1,9 @@
 import { router } from "expo-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Pressable,
   Text,
   View,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
   TextInput,
   ActivityIndicator,
   TouchableOpacity,
@@ -16,26 +13,50 @@ import {
 } from "react-native";
 
 import { useRegister } from "../../hooks/useAuth";
+import { useGoogleAuth } from "../../hooks/useGoogleAuth";
+import { useFacebookAuth } from "../../hooks/useFacebookAuth";
 import { Role } from "../../types/user";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { Eye, EyeOff, ChevronDown, Check, Search, X } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-
-const AVAILABLE_PINCODES = [
-  "670562","670563","670567","682022","688532"
-];
+import { API_BASE_URL } from "@/config/env";
 
 export default function Register() {
   const insets = useSafeAreaInsets();
   const register = useRegister();
   const [showPassword, setShowPassword] = useState(false);
-  const {t} = useTranslation();
+  const { t } = useTranslation();
 
+  // Pincode modal
   const [modalVisible, setModalVisible] = useState(false);
   const [pincodeSearch, setPincodeSearch] = useState("");
   const [selectedPincodes, setSelectedPincodes] = useState<string[]>([]);
+  const [availablePincodes, setAvailablePincodes] = useState<string[]>([
+    "670562", "670563", "670567", "682022", "688532"
+  ]);
 
+  useEffect(() => {
+    fetch(`${API_BASE_URL}/super-admin/auth/public/pincodes`)
+      .then((res) => {
+        if (!res.ok) throw new Error("Failed to load pincodes");
+        return res.json();
+      })
+      .then((pins: string[]) => {
+        if (Array.isArray(pins) && pins.length > 0) {
+          setAvailablePincodes(pins);
+        }
+      })
+      .catch((err) => {
+        console.log("Could not fetch SuperAdmin pincodes:", err?.message);
+      });
+  }, []);
+
+  // Social auth hooks
+  const googleAuth = useGoogleAuth();
+  const facebookAuth = useFacebookAuth();
+
+  // Form state
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -45,15 +66,57 @@ export default function Register() {
 
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
+  // When Google/Facebook returns user info, pre-fill name & email
+  useEffect(() => {
+    if (googleAuth.userInfo) {
+      setForm((prev) => ({
+        ...prev,
+        name: googleAuth.userInfo!.name || prev.name,
+        email: googleAuth.userInfo!.email || prev.email,
+      }));
+      setErrorMsg(null);
+    }
+  }, [googleAuth.userInfo]);
+
+  useEffect(() => {
+    if (facebookAuth.userInfo) {
+      setForm((prev) => ({
+        ...prev,
+        name: facebookAuth.userInfo!.name || prev.name,
+        email: facebookAuth.userInfo!.email || prev.email,
+      }));
+      setErrorMsg(null);
+    }
+  }, [facebookAuth.userInfo]);
+
+  // Show social auth errors
+  useEffect(() => {
+    if (googleAuth.error) setErrorMsg(googleAuth.error);
+  }, [googleAuth.error]);
+
+  useEffect(() => {
+    if (facebookAuth.error) setErrorMsg(facebookAuth.error);
+  }, [facebookAuth.error]);
+
   const submit = () => {
     if (
       !form.name ||
       !form.email ||
-      !form.address ||
       !form.password ||
       selectedPincodes.length === 0
     ) {
-      setErrorMsg("Please fill all fields");
+      setErrorMsg(t("please_fill_all_fields") || "Please fill all fields");
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(form.email)) {
+      setErrorMsg(t("invalid_email") || "Please enter a valid email address");
+      return;
+    }
+
+    if (form.password.length < 6) {
+      setErrorMsg(t("password_min_length") || "Password must be at least 6 characters");
       return;
     }
 
@@ -61,32 +124,34 @@ export default function Register() {
       {
         name: form.name,
         email: form.email,
-        address: form.address,
+        address: "NOT_SET",
         serviceablePincodes: selectedPincodes,
         password: form.password,
         role: Role.USER,
       },
       {
-        onSuccess: () => router.replace("/(auth)/login"),
-        onError: (err: any) =>
-          setErrorMsg(
-            err?.response?.data?.message || "Registration failed. Try again.",
-          ),
+        onSuccess: () => router.replace("/(tabs)/home"),
+        onError: (err: any) => {
+          console.error("[Register Error]:", err?.response?.data || err);
+          const backendMsg = err?.response?.data?.message;
+          if (Array.isArray(backendMsg)) {
+            setErrorMsg(backendMsg.join(", "));
+          } else if (typeof backendMsg === "string") {
+            setErrorMsg(backendMsg);
+          } else if (err?.message) {
+            setErrorMsg(err.message);
+          } else {
+            setErrorMsg("Registration failed. Try again.");
+          }
+        },
       },
     );
   };
 
+  const socialLoading = googleAuth.loading || facebookAuth.loading;
+
   return (
     <View className="flex-1 bg-white">
-      {/* <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        className="flex-1"
-      >
-        <ScrollView
-          contentContainerStyle={{ flexGrow: 1 }}
-          showsVerticalScrollIndicator={false}
-          keyboardShouldPersistTaps="handled"
-        > */}
       <KeyboardAwareScrollView
         enableOnAndroid
         extraScrollHeight={100}
@@ -100,33 +165,42 @@ export default function Register() {
         }}
       >
         <View className="flex-1 justify-center px-6 py-8">
-          {/* Compact Header */}
-          <View className="items-center mb-8">
-            {/* logo */}
+          {/* Header */}
+          <View className="items-center mb-6">
             <Image
               source={require("../../../assets/sahachari.jpeg")}
-              style={{ width: 100, height: 100 }}
+              style={{ width: 80, height: 80 }}
               resizeMode="contain"
             />
-            <View className="w-12 h-1 bg-blue-600 mb-6 rounded-full" />
+            <View className="w-12 h-1 bg-blue-600 mb-4 rounded-full" />
             <Text className="text-3xl font-bold text-gray-900 mb-2 tracking-tight">
-              {t("create_account")}
+              {t("create_account") || "Create Account"}
             </Text>
             <Text className="text-sm text-gray-500 text-center">
-              {t("sign_up_to_get_started")}
+              {t("fill_details_to_get_started") || "Fill in details to get started"}
             </Text>
           </View>
+
+          {/* Social Signed In Alert */}
+          {(googleAuth.userInfo || facebookAuth.userInfo) && (
+            <View className="bg-blue-50 border border-blue-100 rounded-xl px-4 py-3 mb-4">
+              <Text className="text-blue-800 text-xs font-medium">
+                {t("signed_in_as") || "Signed in with social account:"}{" "}
+                <Text className="font-bold">{form.email}</Text>
+              </Text>
+            </View>
+          )}
 
           {/* Form Fields */}
           <View className="mb-6 space-y-4">
             {/* Full Name */}
             <View>
               <Text className="text-xs font-semibold text-gray-700 mb-1.5 ml-1">
-                {t("full_name")}
+                {t("full_name") || "Full Name"}
               </Text>
               <TextInput
                 className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-3.5 text-base text-gray-900"
-                placeholder={t("enter_your_full_name")}
+                placeholder={t("enter_your_full_name") || "Enter your full name"}
                 placeholderTextColor="#9CA3AF"
                 value={form.name}
                 onChangeText={(v) => {
@@ -139,11 +213,11 @@ export default function Register() {
             {/* Email */}
             <View>
               <Text className="text-xs font-semibold text-gray-700 mb-1.5 ml-1">
-                {t("email")}
+                {t("email") || "Email"}
               </Text>
               <TextInput
                 className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-3.5 text-base text-gray-900"
-                placeholder={t("enter_your_email")}
+                placeholder={t("enter_your_email") || "Enter your email"}
                 placeholderTextColor="#9CA3AF"
                 autoCapitalize="none"
                 keyboardType="email-address"
@@ -155,29 +229,14 @@ export default function Register() {
               />
             </View>
 
-            {/* Address */}
-            <View>
-              <Text className="text-xs font-semibold text-gray-700 mb-1.5 ml-1">
-                {t("delivery_address")}
-              </Text>
-              <TextInput
-                className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-3.5 text-base text-gray-900"
-                placeholder={t("enter_your_delivery_address")}
-                placeholderTextColor="#9CA3AF"
-                value={form.address}
-                onChangeText={(v) => {
-                  setForm({ ...form, address: v });
-                  setErrorMsg(null);
-                }}
-              />
-            </View>
 
-            {/* Pincodes */}
+
+            {/* Serviceable Pincodes */}
             <View>
               <Text className="text-xs font-semibold text-gray-700 mb-1.5 ml-1">
-                {t("serviceable_pincodes")}
+                {t("serviceable_pincodes") || "Serviceable Pincodes"}
               </Text>
-              
+
               <Pressable
                 onPress={() => setModalVisible(true)}
                 className="flex-row items-center justify-between bg-gray-50 border border-gray-200 rounded-xl px-4 py-3.5 min-h-[54px]"
@@ -207,16 +266,16 @@ export default function Register() {
               </Pressable>
             </View>
 
-
+            {/* Password */}
             <View>
               <Text className="text-xs font-semibold text-gray-700 mb-1.5 ml-1">
-                {t("password")}
+                {t("password") || "Password"}
               </Text>
 
               <View className="relative">
                 <TextInput
                   className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-3.5 pr-12 text-base text-gray-900"
-                  placeholder={t("create_a_password")}
+                  placeholder={t("create_a_password") || "Create a password"}
                   placeholderTextColor="#9CA3AF"
                   secureTextEntry={!showPassword}
                   value={form.password}
@@ -238,16 +297,17 @@ export default function Register() {
                 </Pressable>
               </View>
             </View>
+
             {/* Error Message */}
             {errorMsg && (
-              <View className="mb-5 bg-red-50 border border-red-200 rounded-xl px-4 py-3">
+              <View className="bg-red-50 border border-red-200 rounded-xl px-4 py-3">
                 <Text className="text-red-600 text-sm font-medium">
                   {errorMsg}
                 </Text>
               </View>
             )}
 
-            {/* Register Button */}
+            {/* Submit Register Button */}
             <TouchableOpacity
               className={`rounded-xl py-4 items-center justify-center ${register.isPending ? "bg-blue-400" : "bg-blue-600"
                 }`}
@@ -259,37 +319,93 @@ export default function Register() {
                 <ActivityIndicator color="#ffffff" />
               ) : (
                 <Text className="text-white text-base font-semibold">
-                  {t("create_account")}
+                  {t("create_account") || "Create Account"}
                 </Text>
               )}
             </TouchableOpacity>
 
             {/* Divider */}
-            <View className="flex-row items-center my-6">
+            <View className="flex-row items-center my-4">
               <View className="flex-1 h-px bg-gray-200" />
               <Text className="px-4 text-xs text-gray-400 font-medium">
-                {t("or")}
+                {t("or") || "or"}
               </Text>
               <View className="flex-1 h-px bg-gray-200" />
             </View>
 
+            {/* Separate Google & Facebook Sign-In Buttons */}
+            <View className="space-y-3">
+              {/* Google Sign-In Button */}
+              <TouchableOpacity
+                className="flex-row items-center justify-center bg-white border border-gray-200 rounded-xl py-3.5 px-4 mb-3"
+                style={{
+                  shadowColor: "#000",
+                  shadowOffset: { width: 0, height: 1 },
+                  shadowOpacity: 0.08,
+                  shadowRadius: 4,
+                  elevation: 2,
+                }}
+                onPress={googleAuth.signInWithGoogle}
+                disabled={socialLoading || !googleAuth.isReady || register.isPending}
+                activeOpacity={0.7}
+              >
+                {googleAuth.loading ? (
+                  <ActivityIndicator size="small" color="#4285F4" />
+                ) : (
+                  <>
+                    <Image
+                      source={{ uri: "https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" }}
+                      style={{ width: 20, height: 20, marginRight: 12 }}
+                    />
+                    <Text className="text-base font-semibold text-gray-700">
+                      {t("Google") || "Continue with Google"}
+                    </Text>
+                  </>
+                )}
+              </TouchableOpacity>
+
+              {/* Facebook Sign-In Button */}
+              <TouchableOpacity
+                className="flex-row items-center justify-center bg-[#1877F2] rounded-xl py-3.5 px-4"
+                style={{
+                  shadowColor: "#1877F2",
+                  shadowOffset: { width: 0, height: 2 },
+                  shadowOpacity: 0.3,
+                  shadowRadius: 4,
+                  elevation: 3,
+                }}
+                onPress={facebookAuth.signInWithFacebook}
+                disabled={socialLoading || !facebookAuth.isReady || register.isPending}
+                activeOpacity={0.7}
+              >
+                {facebookAuth.loading ? (
+                  <ActivityIndicator size="small" color="#ffffff" />
+                ) : (
+                  <>
+                    <Text className="text-white text-lg font-bold mr-3">f</Text>
+                    <Text className="text-base font-semibold text-white">
+                      {t("Facebook") || "Continue with Facebook"}
+                    </Text>
+                  </>
+                )}
+              </TouchableOpacity>
+            </View>
+
             {/* Login Link */}
-            <View className="items-center">
+            <View className="items-center mt-6">
               <Pressable
                 onPress={() => router.push("/(auth)/login")}
                 className="active:opacity-70"
               >
                 <Text className="text-gray-600 text-sm">
-                  {t("already_have_account")}{" "}
+                  {t("already_have_account") || "Already have an account?"}{" "}
                   <Text className="text-blue-600 font-semibold">
-                    {t("log_in")}
+                    {t("log_in") || "Log In"}
                   </Text>
                 </Text>
               </Pressable>
             </View>
           </View>
-          {/* </ScrollView>
-    </KeyboardAvoidingView> */}
         </View>
       </KeyboardAwareScrollView>
 
@@ -308,7 +424,7 @@ export default function Register() {
             {/* Header */}
             <View className="flex-row justify-between items-center mb-4">
               <Text className="text-lg font-bold text-gray-900">
-                {t("select_pincodes") || "Select Pincodes"}
+                {t("Select Pincodes") || "Select Pincodes"}
               </Text>
               <Pressable
                 onPress={() => setModalVisible(false)}
@@ -338,7 +454,7 @@ export default function Register() {
 
             {/* Pincode List */}
             <FlatList
-              data={AVAILABLE_PINCODES.filter((pin) =>
+              data={availablePincodes.filter((pin) =>
                 pin.includes(pincodeSearch)
               )}
               keyExtractor={(item) => item}
@@ -389,6 +505,6 @@ export default function Register() {
           </View>
         </View>
       </Modal>
-    </View >
+    </View>
   );
 }
