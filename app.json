@@ -2,7 +2,7 @@
   "expo": {
     "name": "Sahachari",
     "slug": "customers",
-    "version": "1.0.30",
+    "version": "1.0.32",
     "orientation": "portrait",
     "icon": "./assets/sahachari.jpeg",
     "scheme": "customers",
@@ -11,7 +11,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.corestoneinnovation.sahachariuser",
-      "buildNumber": "30"
+      "buildNumber": "32"
     },
     "android": {
       "package": "com.corestoneinnovation.sahachariuser",
@@ -50,7 +50,7 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "eced3c97-6f96-49de-abef-866148e11db2"
+        "projectId": "77756b3c-c127-412b-a5aa-03472f872186"
       }
     }
   }
