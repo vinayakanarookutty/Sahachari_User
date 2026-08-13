@@ -10,14 +10,30 @@ import {
   Image,
   Modal,
   FlatList,
+  ScrollView,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
 
 import { useRegister } from "../../hooks/useAuth";
 import { useGoogleAuth } from "../../hooks/useGoogleAuth";
 import { useFacebookAuth } from "../../hooks/useFacebookAuth";
 import { Role } from "../../types/user";
-import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
-import { Eye, EyeOff, ChevronDown, Check, Search, X } from "lucide-react-native";
+import {
+  Eye,
+  EyeOff,
+  ChevronDown,
+  Check,
+  Search,
+  X,
+  User,
+  Mail,
+  Lock,
+  MapPin,
+  Sparkles,
+  AlertCircle,
+  ArrowLeft,
+} from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { API_BASE_URL } from "@/config/env";
@@ -33,7 +49,11 @@ export default function Register() {
   const [pincodeSearch, setPincodeSearch] = useState("");
   const [selectedPincodes, setSelectedPincodes] = useState<string[]>([]);
   const [availablePincodes, setAvailablePincodes] = useState<string[]>([
-    "670562", "670563", "670567", "682022", "688532"
+    "670562",
+    "670563",
+    "670567",
+    "682022",
+    "688532",
   ]);
 
   useEffect(() => {
@@ -105,7 +125,7 @@ export default function Register() {
       !form.password ||
       selectedPincodes.length === 0
     ) {
-      setErrorMsg(t("please_fill_all_fields") || "Please fill all fields");
+      setErrorMsg(t("please_fill_all_fields") || "Please fill all required fields");
       return;
     }
 
@@ -144,270 +164,367 @@ export default function Register() {
             setErrorMsg("Registration failed. Try again.");
           }
         },
-      },
+      }
     );
   };
 
   const socialLoading = googleAuth.loading || facebookAuth.loading;
 
+  // Password strength logic
+  const getPasswordStrength = () => {
+    if (!form.password) return null;
+    if (form.password.length < 6) return { label: "Weak", color: "bg-red-500", width: "w-1/3" };
+    if (form.password.length < 10) return { label: "Good", color: "bg-amber-500", width: "w-2/3" };
+    return { label: "Strong", color: "bg-emerald-500", width: "w-full" };
+  };
+
+  const pwdStrength = getPasswordStrength();
+
   return (
-    <View className="flex-1 bg-white">
-      <KeyboardAwareScrollView
-        enableOnAndroid
-        extraScrollHeight={100}
-        keyboardShouldPersistTaps="handled"
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{
-          flexGrow: 1,
-          justifyContent: "center",
-          paddingHorizontal: 24,
-          paddingVertical: 32,
-        }}
+    <View className="flex-1 bg-slate-50">
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        className="flex-1"
       >
-        <View className="flex-1 justify-center px-6 py-8">
-          {/* Header */}
-          <View className="items-center mb-6">
-            <Image
-              source={require("../../../assets/sahachari.jpeg")}
-              style={{ width: 80, height: 80 }}
-              resizeMode="contain"
-            />
-            <View className="w-12 h-1 bg-blue-600 mb-4 rounded-full" />
-            <Text className="text-3xl font-bold text-gray-900 mb-2 tracking-tight">
-              {t("create_account") || "Create Account"}
-            </Text>
-            <Text className="text-sm text-gray-500 text-center">
-              {t("fill_details_to_get_started") || "Fill in details to get started"}
-            </Text>
+        <ScrollView
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{
+            flexGrow: 1,
+            paddingBottom: Math.max(insets.bottom, 16) + 24,
+          }}
+        >
+          {/* Top Decorative Background Header */}
+          <View
+            className="bg-blue-600 pb-16 px-6 rounded-b-[36px] shadow-lg relative overflow-hidden"
+            style={{
+              paddingTop: Math.max(insets.top, 16) + 16,
+            }}
+          >
+            {/* Decorative soft circles */}
+            <View className="absolute -top-10 -right-10 w-40 h-40 rounded-full bg-white/10" />
+            <View className="absolute top-20 -left-12 w-32 h-32 rounded-full bg-white/10" />
+
+            {/* Top Bar Navigation */}
+            <View className="flex-row items-center justify-between mb-4">
+              <Pressable
+                onPress={() => router.replace("/(auth)/login")}
+                className="w-10 h-10 rounded-full bg-white/20 items-center justify-center backdrop-blur-md active:bg-white/30"
+              >
+                <ArrowLeft size={20} color="#FFFFFF" />
+              </Pressable>
+              <View className="flex-row items-center bg-white/20 px-3 py-1 rounded-full">
+                <Sparkles size={14} color="#FDE047" />
+                <Text className="text-xs font-semibold text-white ml-1.5">
+                  Join Sahachari
+                </Text>
+              </View>
+            </View>
+
+            {/* Header Content */}
+            <View className="items-center mt-2">
+              <View className="w-20 h-20 bg-white rounded-2xl p-2 shadow-md mb-3 items-center justify-center">
+                <Image
+                  source={require("../../../assets/sahachari.jpeg")}
+                  style={{ width: "100%", height: "100%" }}
+                  resizeMode="contain"
+                />
+              </View>
+              <Text className="text-2xl sm:text-3xl font-bold text-white tracking-tight text-center">
+                {t("create_account") || "Create Account"}
+              </Text>
+              <Text className="text-xs sm:text-sm text-blue-100 text-center mt-1 max-w-[280px]">
+                {t("Sign up to explore local services") || "Sign up to explore local services & rentals"}
+              </Text>
+            </View>
           </View>
 
-          {/* Social Signed In Alert */}
-          {(googleAuth.userInfo || facebookAuth.userInfo) && (
-            <View className="bg-blue-50 border border-blue-100 rounded-xl px-4 py-3 mb-4">
-              <Text className="text-blue-800 text-xs font-medium">
-                {t("signed_in_as") || "Signed in with social account:"}{" "}
-                <Text className="font-bold">{form.email}</Text>
-              </Text>
-            </View>
-          )}
-
-          {/* Form Fields */}
-          <View className="mb-6 space-y-4">
-            {/* Full Name */}
-            <View>
-              <Text className="text-xs font-semibold text-gray-700 mb-1.5 ml-1">
-                {t("full_name") || "Full Name"}
-              </Text>
-              <TextInput
-                className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-3.5 text-base text-gray-900"
-                placeholder={t("enter_your_full_name") || "Enter your full name"}
-                placeholderTextColor="#9CA3AF"
-                value={form.name}
-                onChangeText={(v) => {
-                  setForm({ ...form, name: v });
-                  setErrorMsg(null);
-                }}
-              />
-            </View>
-
-            {/* Email */}
-            <View>
-              <Text className="text-xs font-semibold text-gray-700 mb-1.5 ml-1">
-                {t("email") || "Email"}
-              </Text>
-              <TextInput
-                className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-3.5 text-base text-gray-900"
-                placeholder={t("enter_your_email") || "Enter your email"}
-                placeholderTextColor="#9CA3AF"
-                autoCapitalize="none"
-                keyboardType="email-address"
-                value={form.email}
-                onChangeText={(v) => {
-                  setForm({ ...form, email: v });
-                  setErrorMsg(null);
-                }}
-              />
-            </View>
-
-
-
-            {/* Serviceable Pincodes */}
-            <View>
-              <Text className="text-xs font-semibold text-gray-700 mb-1.5 ml-1">
-                {t("serviceable_pincodes") || "Serviceable Pincodes"}
-              </Text>
-
-              <Pressable
-                onPress={() => setModalVisible(true)}
-                className="flex-row items-center justify-between bg-gray-50 border border-gray-200 rounded-xl px-4 py-3.5 min-h-[54px]"
-              >
-                {selectedPincodes.length === 0 ? (
-                  <Text className="text-base text-gray-400">
-                    {t("Select Pincodes") || "Select serviceable pincodes"}
+          {/* Form Card Overlay - Responsive Width Wrapper */}
+          <View className="w-full max-w-md self-center px-4 sm:px-6 -mt-8">
+            <View
+              className="bg-white rounded-3xl p-6 shadow-xl border border-gray-100"
+              style={{
+                shadowColor: "#1E3A8A",
+                shadowOffset: { width: 0, height: 8 },
+                shadowOpacity: 0.08,
+                shadowRadius: 16,
+                elevation: 4,
+              }}
+            >
+              {/* Social Signed In Notification */}
+              {(googleAuth.userInfo || facebookAuth.userInfo) && (
+                <View className="bg-blue-50 border border-blue-200 rounded-2xl p-3 mb-5 flex-row items-center">
+                  <Sparkles size={18} color="#2563EB" />
+                  <Text className="text-blue-900 text-xs font-medium ml-2 flex-1">
+                    {t("signed_in_as") || "Pre-filled from social account:"}{" "}
+                    <Text className="font-bold">{form.email}</Text>
                   </Text>
-                ) : (
-                  <View className="flex-row flex-wrap gap-1.5 flex-1 mr-2">
-                    {selectedPincodes.map((pin) => (
-                      <View key={pin} className="flex-row items-center bg-blue-50 border border-blue-100 rounded-full px-2.5 py-1">
-                        <Text className="text-xs font-semibold text-blue-700 mr-1.5">{pin}</Text>
-                        <Pressable
-                          onPress={() => {
-                            setSelectedPincodes(selectedPincodes.filter((p) => p !== pin));
-                          }}
-                          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-                        >
-                          <X size={12} color="#1D4ED8" strokeWidth={2.5} />
-                        </Pressable>
+                </View>
+              )}
+
+              {/* Form Fields */}
+              <View className="space-y-4">
+                {/* Full Name */}
+                <View className="mb-3">
+                  <Text className="text-xs font-semibold text-gray-700 mb-1.5 ml-1">
+                    {t("full_name") || "Full Name"} <Text className="text-red-500">*</Text>
+                  </Text>
+                  <View className="flex-row items-center bg-gray-50 border border-gray-200 rounded-2xl px-4 py-3">
+                    <User size={18} color="#6B7280" />
+                    <TextInput
+                      className="flex-1 text-base text-gray-900 ml-2.5 py-0.5"
+                      placeholder={t("enter_your_full_name") || "Enter your full name"}
+                      placeholderTextColor="#9CA3AF"
+                      value={form.name}
+                      onChangeText={(v) => {
+                        setForm({ ...form, name: v });
+                        setErrorMsg(null);
+                      }}
+                    />
+                  </View>
+                </View>
+
+                {/* Email Address */}
+                <View className="mb-3">
+                  <Text className="text-xs font-semibold text-gray-700 mb-1.5 ml-1">
+                    {t("email") || "Email Address"} <Text className="text-red-500">*</Text>
+                  </Text>
+                  <View className="flex-row items-center bg-gray-50 border border-gray-200 rounded-2xl px-4 py-3">
+                    <Mail size={18} color="#6B7280" />
+                    <TextInput
+                      className="flex-1 text-base text-gray-900 ml-2.5 py-0.5"
+                      placeholder={t("enter_your_email") || "Enter your email"}
+                      placeholderTextColor="#9CA3AF"
+                      autoCapitalize="none"
+                      keyboardType="email-address"
+                      value={form.email}
+                      onChangeText={(v) => {
+                        setForm({ ...form, email: v });
+                        setErrorMsg(null);
+                      }}
+                    />
+                  </View>
+                </View>
+
+                {/* Serviceable Pincodes */}
+                <View className="mb-3">
+                  <View className="flex-row justify-between items-center mb-1.5 ml-1">
+                    <Text className="text-xs font-semibold text-gray-700">
+                      {t("serviceable_pincodes") || "Serviceable Pincodes"} <Text className="text-red-500">*</Text>
+                    </Text>
+                    {selectedPincodes.length > 0 && (
+                      <Text className="text-xs font-semibold text-blue-600">
+                        {selectedPincodes.length} selected
+                      </Text>
+                    )}
+                  </View>
+
+                  <Pressable
+                    onPress={() => setModalVisible(true)}
+                    className="flex-row items-center justify-between bg-gray-50 border border-gray-200 rounded-2xl px-4 py-3 min-h-[54px]"
+                  >
+                    <View className="flex-row items-center flex-1 mr-2">
+                      <MapPin size={18} color="#6B7280" />
+                      {selectedPincodes.length === 0 ? (
+                        <Text className="text-base text-gray-400 ml-2.5">
+                          {t("Select Pincodes") || "Select serviceable pincodes"}
+                        </Text>
+                      ) : (
+                        <View className="flex-row flex-wrap gap-1.5 flex-1 ml-2.5">
+                          {selectedPincodes.map((pin) => (
+                            <View
+                              key={pin}
+                              className="flex-row items-center bg-blue-50 border border-blue-200 rounded-full px-2.5 py-1"
+                            >
+                              <Text className="text-xs font-semibold text-blue-700 mr-1.5">
+                                {pin}
+                              </Text>
+                              <Pressable
+                                onPress={(e) => {
+                                  e.stopPropagation();
+                                  setSelectedPincodes(
+                                    selectedPincodes.filter((p) => p !== pin)
+                                  );
+                                }}
+                                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                              >
+                                <X size={12} color="#1D4ED8" strokeWidth={2.5} />
+                              </Pressable>
+                            </View>
+                          ))}
+                        </View>
+                      )}
+                    </View>
+                    <ChevronDown size={18} color="#6B7280" />
+                  </Pressable>
+                </View>
+
+                {/* Password */}
+                <View className="mb-4">
+                  <Text className="text-xs font-semibold text-gray-700 mb-1.5 ml-1">
+                    {t("password") || "Password"} <Text className="text-red-500">*</Text>
+                  </Text>
+
+                  <View className="flex-row items-center bg-gray-50 border border-gray-200 rounded-2xl px-4 py-3">
+                    <Lock size={18} color="#6B7280" />
+                    <TextInput
+                      className="flex-1 text-base text-gray-900 ml-2.5 py-0.5 pr-2"
+                      placeholder={t("create_a_password") || "Create a password"}
+                      placeholderTextColor="#9CA3AF"
+                      secureTextEntry={!showPassword}
+                      value={form.password}
+                      onChangeText={(v) => {
+                        setForm({ ...form, password: v });
+                        setErrorMsg(null);
+                      }}
+                    />
+                    <Pressable
+                      onPress={() => setShowPassword(!showPassword)}
+                      hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                    >
+                      {showPassword ? (
+                        <EyeOff size={18} color="#6B7280" />
+                      ) : (
+                        <Eye size={18} color="#6B7280" />
+                      )}
+                    </Pressable>
+                  </View>
+
+                  {/* Password Strength Indicator */}
+                  {pwdStrength && (
+                    <View className="mt-2 ml-1">
+                      <View className="h-1.5 bg-gray-200 rounded-full overflow-hidden mb-1">
+                        <View className={`h-full ${pwdStrength.color} ${pwdStrength.width}`} />
                       </View>
-                    ))}
+                      <Text className="text-[11px] font-medium text-gray-500">
+                        Password Strength:{" "}
+                        <Text className="font-bold text-gray-800">{pwdStrength.label}</Text>
+                      </Text>
+                    </View>
+                  )}
+                </View>
+
+                {/* Error Message */}
+                {errorMsg && (
+                  <View className="bg-red-50 border border-red-200 rounded-2xl p-3.5 flex-row items-center mb-3">
+                    <AlertCircle size={18} color="#EF4444" />
+                    <Text className="text-red-600 text-xs font-semibold ml-2.5 flex-1">
+                      {errorMsg}
+                    </Text>
                   </View>
                 )}
-                <ChevronDown size={20} color="#6B7280" />
-              </Pressable>
-            </View>
 
-            {/* Password */}
-            <View>
-              <Text className="text-xs font-semibold text-gray-700 mb-1.5 ml-1">
-                {t("password") || "Password"}
-              </Text>
-
-              <View className="relative">
-                <TextInput
-                  className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-3.5 pr-12 text-base text-gray-900"
-                  placeholder={t("create_a_password") || "Create a password"}
-                  placeholderTextColor="#9CA3AF"
-                  secureTextEntry={!showPassword}
-                  value={form.password}
-                  onChangeText={(v) => {
-                    setForm({ ...form, password: v });
-                    setErrorMsg(null);
+                {/* Submit Register Button */}
+                <TouchableOpacity
+                  className={`rounded-2xl py-4 items-center justify-center shadow-md ${
+                    register.isPending ? "bg-blue-400" : "bg-blue-600 active:bg-blue-700"
+                  }`}
+                  style={{
+                    shadowColor: "#2563EB",
+                    shadowOffset: { width: 0, height: 4 },
+                    shadowOpacity: 0.25,
+                    shadowRadius: 8,
+                    elevation: 3,
                   }}
-                />
-
-                <Pressable
-                  onPress={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-4"
+                  onPress={submit}
+                  disabled={register.isPending}
+                  activeOpacity={0.85}
                 >
-                  {showPassword ? (
-                    <EyeOff size={20} color="#6B7280" />
+                  {register.isPending ? (
+                    <ActivityIndicator color="#ffffff" />
                   ) : (
-                    <Eye size={20} color="#6B7280" />
+                    <Text className="text-white text-base font-bold tracking-wide">
+                      {t("create_account") || "Create Account"}
+                    </Text>
                   )}
-                </Pressable>
-              </View>
-            </View>
+                </TouchableOpacity>
 
-            {/* Error Message */}
-            {errorMsg && (
-              <View className="bg-red-50 border border-red-200 rounded-xl px-4 py-3">
-                <Text className="text-red-600 text-sm font-medium">
-                  {errorMsg}
-                </Text>
-              </View>
-            )}
-
-            {/* Submit Register Button */}
-            <TouchableOpacity
-              className={`rounded-xl py-4 items-center justify-center ${register.isPending ? "bg-blue-400" : "bg-blue-600"
-                }`}
-              onPress={submit}
-              disabled={register.isPending}
-              activeOpacity={0.8}
-            >
-              {register.isPending ? (
-                <ActivityIndicator color="#ffffff" />
-              ) : (
-                <Text className="text-white text-base font-semibold">
-                  {t("create_account") || "Create Account"}
-                </Text>
-              )}
-            </TouchableOpacity>
-
-            {/* Divider */}
-            <View className="flex-row items-center my-4">
-              <View className="flex-1 h-px bg-gray-200" />
-              <Text className="px-4 text-xs text-gray-400 font-medium">
-                {t("or") || "or"}
-              </Text>
-              <View className="flex-1 h-px bg-gray-200" />
-            </View>
-
-            {/* Separate Google & Facebook Sign-In Buttons */}
-            <View className="space-y-3">
-              {/* Google Sign-In Button */}
-              <TouchableOpacity
-                className="flex-row items-center justify-center bg-white border border-gray-200 rounded-xl py-3.5 px-4 mb-3"
-                style={{
-                  shadowColor: "#000",
-                  shadowOffset: { width: 0, height: 1 },
-                  shadowOpacity: 0.08,
-                  shadowRadius: 4,
-                  elevation: 2,
-                }}
-                onPress={googleAuth.signInWithGoogle}
-                disabled={socialLoading || !googleAuth.isReady || register.isPending}
-                activeOpacity={0.7}
-              >
-                {googleAuth.loading ? (
-                  <ActivityIndicator size="small" color="#4285F4" />
-                ) : (
-                  <>
-                    <Image
-                      source={{ uri: "https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" }}
-                      style={{ width: 20, height: 20, marginRight: 12 }}
-                    />
-                    <Text className="text-base font-semibold text-gray-700">
-                      {t("Google") || "Continue with Google"}
-                    </Text>
-                  </>
-                )}
-              </TouchableOpacity>
-
-              {/* Facebook Sign-In Button */}
-              <TouchableOpacity
-                className="flex-row items-center justify-center bg-[#1877F2] rounded-xl py-3.5 px-4"
-                style={{
-                  shadowColor: "#1877F2",
-                  shadowOffset: { width: 0, height: 2 },
-                  shadowOpacity: 0.3,
-                  shadowRadius: 4,
-                  elevation: 3,
-                }}
-                onPress={facebookAuth.signInWithFacebook}
-                disabled={socialLoading || !facebookAuth.isReady || register.isPending}
-                activeOpacity={0.7}
-              >
-                {facebookAuth.loading ? (
-                  <ActivityIndicator size="small" color="#ffffff" />
-                ) : (
-                  <>
-                    <Text className="text-white text-lg font-bold mr-3">f</Text>
-                    <Text className="text-base font-semibold text-white">
-                      {t("Facebook") || "Continue with Facebook"}
-                    </Text>
-                  </>
-                )}
-              </TouchableOpacity>
-            </View>
-
-            {/* Login Link */}
-            <View className="items-center mt-6">
-              <Pressable
-                onPress={() => router.push("/(auth)/login")}
-                className="active:opacity-70"
-              >
-                <Text className="text-gray-600 text-sm">
-                  {t("already_have_account") || "Already have an account?"}{" "}
-                  <Text className="text-blue-600 font-semibold">
-                    {t("log_in") || "Log In"}
+                {/* Divider */}
+                <View className="flex-row items-center my-4">
+                  <View className="flex-1 h-px bg-gray-200" />
+                  <Text className="px-3 text-xs text-gray-400 font-semibold uppercase">
+                    {t("or") || "or continue with"}
                   </Text>
-                </Text>
-              </Pressable>
+                  <View className="flex-1 h-px bg-gray-200" />
+                </View>
+
+                {/* Social Sign-In Buttons */}
+                <View className="space-y-3">
+                  {/* Google Sign-In Button */}
+                  <TouchableOpacity
+                    className="flex-row items-center justify-center bg-white border border-gray-200 rounded-2xl py-3.5 px-4 mb-3"
+                    style={{
+                      shadowColor: "#000",
+                      shadowOffset: { width: 0, height: 2 },
+                      shadowOpacity: 0.05,
+                      shadowRadius: 4,
+                      elevation: 1,
+                    }}
+                    onPress={googleAuth.signInWithGoogle}
+                    disabled={socialLoading || !googleAuth.isReady || register.isPending}
+                    activeOpacity={0.75}
+                  >
+                    {googleAuth.loading ? (
+                      <ActivityIndicator size="small" color="#4285F4" />
+                    ) : (
+                      <>
+                        <Image
+                          source={{ uri: "https://cdn-icons-png.flaticon.com/512/300/300221.png" }}
+                          style={{ width: 20, height: 20, marginRight: 10 }}
+                        />
+                        <Text className="text-sm font-semibold text-gray-700">
+                          {t("Google") || "Continue with Google"}
+                        </Text>
+                      </>
+                    )}
+                  </TouchableOpacity>
+
+                  {/* Facebook Sign-In Button */}
+                  <TouchableOpacity
+                    className="flex-row items-center justify-center bg-[#1877F2] rounded-2xl py-3.5 px-4"
+                    style={{
+                      shadowColor: "#1877F2",
+                      shadowOffset: { width: 0, height: 3 },
+                      shadowOpacity: 0.2,
+                      shadowRadius: 6,
+                      elevation: 2,
+                    }}
+                    onPress={facebookAuth.signInWithFacebook}
+                    disabled={socialLoading || !facebookAuth.isReady || register.isPending}
+                    activeOpacity={0.75}
+                  >
+                    {facebookAuth.loading ? (
+                      <ActivityIndicator size="small" color="#ffffff" />
+                    ) : (
+                      <>
+                        <Text className="text-white text-lg font-bold mr-2.5 leading-none">f</Text>
+                        <Text className="text-sm font-semibold text-white">
+                          {t("Facebook") || "Continue with Facebook"}
+                        </Text>
+                      </>
+                    )}
+                  </TouchableOpacity>
+                </View>
+
+                {/* Login Link */}
+                <View className="items-center mt-5">
+                  <Pressable
+                    onPress={() => router.replace("/(auth)/login")}
+                    className="active:opacity-70 py-1"
+                  >
+                    <Text className="text-gray-600 text-sm">
+                      {t("already_have_account") || "Already have an account?"}{" "}
+                      <Text className="text-blue-600 font-bold">
+                        {t("log_in") || "Log In"}
+                      </Text>
+                    </Text>
+                  </Pressable>
+                </View>
+              </View>
             </View>
           </View>
-        </View>
-      </KeyboardAwareScrollView>
+        </ScrollView>
+      </KeyboardAvoidingView>
 
       {/* Pincode Multi-Select Modal */}
       <Modal
@@ -416,16 +533,26 @@ export default function Register() {
         transparent={true}
         onRequestClose={() => setModalVisible(false)}
       >
-        <View className="flex-1 justify-end bg-black/50">
+        <View className="flex-1 justify-end bg-black/60">
           <View
-            className="bg-white rounded-t-3xl h-[65%] px-6 pt-5 shadow-2xl"
-            style={{ paddingBottom: insets.bottom > 0 ? insets.bottom + 16 : 32 }}
+            className="bg-white rounded-t-[32px] h-[70%] px-6 pt-4 shadow-2xl"
+            style={{ paddingBottom: insets.bottom > 0 ? insets.bottom + 16 : 28 }}
           >
-            {/* Header */}
+            {/* Modal Handle */}
+            <View className="items-center mb-3">
+              <View className="w-12 h-1.5 bg-gray-300 rounded-full" />
+            </View>
+
+            {/* Modal Header */}
             <View className="flex-row justify-between items-center mb-4">
-              <Text className="text-lg font-bold text-gray-900">
-                {t("Select Pincodes") || "Select Pincodes"}
-              </Text>
+              <View>
+                <Text className="text-lg font-bold text-gray-900">
+                  {t("Select Pincodes") || "Select Serviceable Areas"}
+                </Text>
+                <Text className="text-xs text-gray-500">
+                  Choose pincodes where you want service
+                </Text>
+              </View>
               <Pressable
                 onPress={() => setModalVisible(false)}
                 className="bg-gray-100 p-2 rounded-full active:bg-gray-200"
@@ -435,14 +562,14 @@ export default function Register() {
             </View>
 
             {/* Modal Search Bar */}
-            <View className="flex-row items-center bg-gray-50 border border-gray-200 rounded-xl px-3 py-1 mb-4">
+            <View className="flex-row items-center bg-gray-50 border border-gray-200 rounded-2xl px-3 py-1 mb-4">
               <Search size={18} color="#9CA3AF" />
               <TextInput
                 value={pincodeSearch}
                 onChangeText={setPincodeSearch}
                 placeholder={t("search_pincode") || "Search pincode..."}
                 placeholderTextColor="#9CA3AF"
-                className="flex-1 ml-2 text-gray-800 text-base py-1.5"
+                className="flex-1 ml-2 text-gray-800 text-base py-2"
                 keyboardType="numeric"
               />
               {pincodeSearch.length > 0 && (
@@ -471,21 +598,40 @@ export default function Register() {
                       }
                       setErrorMsg(null);
                     }}
-                    className={`flex-row justify-between items-center py-3.5 px-4 rounded-xl mb-2 border ${
+                    className={`flex-row justify-between items-center py-3.5 px-4 rounded-2xl mb-2.5 border ${
                       isSelected
-                        ? "bg-blue-50/50 border-blue-200"
-                        : "bg-white border-gray-100"
+                        ? "bg-blue-50 border-blue-500"
+                        : "bg-white border-gray-200"
                     }`}
                   >
-                    <Text className={`text-base font-medium ${isSelected ? "text-blue-700" : "text-gray-800"}`}>
-                      {item}
-                    </Text>
-                    {isSelected && <Check size={18} color="#2563EB" strokeWidth={3} />}
+                    <View className="flex-row items-center">
+                      <MapPin
+                        size={18}
+                        color={isSelected ? "#2563EB" : "#9CA3AF"}
+                        className="mr-3"
+                      />
+                      <Text
+                        className={`text-base font-semibold ${
+                          isSelected ? "text-blue-700" : "text-gray-800"
+                        }`}
+                      >
+                        {item}
+                      </Text>
+                    </View>
+                    <View
+                      className={`w-6 h-6 rounded-full items-center justify-center border ${
+                        isSelected
+                          ? "bg-blue-600 border-blue-600"
+                          : "border-gray-300 bg-white"
+                      }`}
+                    >
+                      {isSelected && <Check size={14} color="#FFFFFF" strokeWidth={3} />}
+                    </View>
                   </Pressable>
                 );
               }}
               ListEmptyComponent={
-                <View className="items-center justify-center py-10">
+                <View className="items-center justify-center py-12">
                   <Text className="text-gray-400 text-sm">
                     {t("no_matching_pincodes") || "No matching pincodes found"}
                   </Text>
@@ -496,10 +642,10 @@ export default function Register() {
             {/* Done Button */}
             <TouchableOpacity
               onPress={() => setModalVisible(false)}
-              className="bg-blue-600 rounded-xl py-3.5 items-center justify-center mt-4 active:bg-blue-700"
+              className="bg-blue-600 rounded-2xl py-3.5 items-center justify-center mt-3 active:bg-blue-700 shadow-md"
             >
-              <Text className="text-white text-base font-semibold">
-                {t("done") || "Done"}
+              <Text className="text-white text-base font-bold">
+                {t("done") || "Done"} ({selectedPincodes.length} Selected)
               </Text>
             </TouchableOpacity>
           </View>
