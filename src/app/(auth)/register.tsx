@@ -48,9 +48,10 @@ export default function Register() {
   // Wizard Step (1: Name & Email, 2: Pincode & Password)
   const [step, setStep] = useState<1 | 2>(1);
 
-  // Pincode modal
+  // Pincode modal & manual input
   const [modalVisible, setModalVisible] = useState(false);
   const [pincodeSearch, setPincodeSearch] = useState("");
+  const [manualPincode, setManualPincode] = useState("");
   const [selectedPincodes, setSelectedPincodes] = useState<string[]>([]);
   const [availablePincodes, setAvailablePincodes] = useState<string[]>([
     "670562",
@@ -89,7 +90,7 @@ export default function Register() {
 
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  // When Google returns user info, pre-fill name & email and go to step 2
+  // When Google returns user info, pre-fill name & email into step 1 fields
   useEffect(() => {
     if (googleAuth.userInfo) {
       setForm((prev) => ({
@@ -98,7 +99,6 @@ export default function Register() {
         email: googleAuth.userInfo!.email || prev.email,
       }));
       setErrorMsg(null);
-      setStep(2);
     }
   }, [googleAuth.userInfo]);
 
@@ -124,13 +124,19 @@ export default function Register() {
   };
 
   const submit = () => {
+    let finalPincodes = [...selectedPincodes];
+    const cleanManual = manualPincode.trim();
+    if (cleanManual.length === 6 && !finalPincodes.includes(cleanManual)) {
+      finalPincodes.push(cleanManual);
+    }
+
     if (
       !form.name ||
       !form.email ||
       !form.password ||
-      selectedPincodes.length === 0
+      finalPincodes.length === 0
     ) {
-      setErrorMsg(t("please_fill_all_fields") || "Please fill all required fields");
+      setErrorMsg(t("please_fill_all_fields") || "Please fill all required fields including Pincode");
       return;
     }
 
@@ -150,7 +156,7 @@ export default function Register() {
         name: form.name,
         email: form.email,
         address: "NOT_SET",
-        serviceablePincodes: selectedPincodes,
+        serviceablePincodes: finalPincodes,
         password: form.password,
         role: Role.USER,
       },
@@ -427,11 +433,11 @@ export default function Register() {
                   </View>
 
 
-                  {/* Field 1: Serviceable Pincodes */}
+                  {/* Field 1: Serviceable Pincode(s) */}
                   <View className="mb-3">
                     <View className="flex-row justify-between items-center mb-1.5 ml-1">
                       <Text className="text-xs font-semibold text-gray-700">
-                        {t("serviceable_pincodes") || "Serviceable Pincodes"} <Text className="text-red-500">*</Text>
+                        {t("pincode") || "Pincode"} <Text className="text-red-500">*</Text>
                       </Text>
                       {selectedPincodes.length > 0 && (
                         <Text className="text-xs font-semibold text-blue-600">
@@ -440,44 +446,83 @@ export default function Register() {
                       )}
                     </View>
 
+                    {/* Direct Pincode Input Box */}
+                    <View className="flex-row items-center bg-gray-50 border border-gray-200 rounded-2xl px-4 py-3 mb-2">
+                      <MapPin size={18} color="#6B7280" />
+                      <TextInput
+                        className="flex-1 text-base text-gray-900 ml-2.5 py-0.5"
+                        placeholder={t("enter_pincode") || "Enter 6-digit Pincode"}
+                        placeholderTextColor="#9CA3AF"
+                        keyboardType="numeric"
+                        maxLength={6}
+                        value={manualPincode}
+                        onChangeText={(v) => {
+                          setManualPincode(v);
+                          setErrorMsg(null);
+                          if (v.trim().length === 6 && !selectedPincodes.includes(v.trim())) {
+                            setSelectedPincodes((prev) => [...prev, v.trim()]);
+                          }
+                        }}
+                      />
+                      {manualPincode.trim().length > 0 && (
+                        <TouchableOpacity
+                          onPress={() => {
+                            const cleanPin = manualPincode.trim();
+                            if (cleanPin.length === 6) {
+                              if (!selectedPincodes.includes(cleanPin)) {
+                                setSelectedPincodes([...selectedPincodes, cleanPin]);
+                              }
+                              setManualPincode("");
+                            } else {
+                              setErrorMsg("Pincode must be 6 digits");
+                            }
+                          }}
+                          className="bg-blue-600 px-3 py-1.5 rounded-xl ml-2 active:bg-blue-700"
+                        >
+                          <Text className="text-white text-xs font-bold">{t("add") || "Add"}</Text>
+                        </TouchableOpacity>
+                      )}
+                    </View>
+
+                    {/* Quick Pincode Selector Modal Trigger */}
                     <Pressable
                       onPress={() => setModalVisible(true)}
-                      className="flex-row items-center justify-between bg-gray-50 border border-gray-200 rounded-2xl px-4 py-3 min-h-[54px]"
+                      className="flex-row items-center justify-between bg-slate-100 border border-slate-200 rounded-2xl px-4 py-2.5"
                     >
                       <View className="flex-row items-center flex-1 mr-2">
-                        <MapPin size={18} color="#6B7280" />
-                        {selectedPincodes.length === 0 ? (
-                          <Text className="text-base text-gray-400 ml-2.5">
-                            {t("Select Pincodes") || "Select serviceable pincodes"}
-                          </Text>
-                        ) : (
-                          <View className="flex-row flex-wrap gap-1.5 flex-1 ml-2.5">
-                            {selectedPincodes.map((pin) => (
-                              <View
-                                key={pin}
-                                className="flex-row items-center bg-blue-50 border border-blue-200 rounded-full px-2.5 py-1"
-                              >
-                                <Text className="text-xs font-semibold text-blue-700 mr-1.5">
-                                  {pin}
-                                </Text>
-                                <Pressable
-                                  onPress={(e) => {
-                                    e.stopPropagation();
-                                    setSelectedPincodes(
-                                      selectedPincodes.filter((p) => p !== pin)
-                                    );
-                                  }}
-                                  hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-                                >
-                                  <X size={12} color="#1D4ED8" strokeWidth={2.5} />
-                                </Pressable>
-                              </View>
-                            ))}
-                          </View>
-                        )}
+                        <Search size={15} color="#64748B" />
+                        <Text className="text-xs font-semibold text-slate-600 ml-2">
+                          {t("browse_serviceable_areas") || "Browse available service areas"}
+                        </Text>
                       </View>
-                      <ChevronDown size={18} color="#6B7280" />
+                      <ChevronDown size={16} color="#64748B" />
                     </Pressable>
+
+                    {/* Selected Pincode Chips */}
+                    {selectedPincodes.length > 0 && (
+                      <View className="flex-row flex-wrap gap-1.5 mt-2.5 ml-1">
+                        {selectedPincodes.map((pin) => (
+                          <View
+                            key={pin}
+                            className="flex-row items-center bg-blue-50 border border-blue-200 rounded-full px-3 py-1"
+                          >
+                            <Text className="text-xs font-semibold text-blue-700 mr-1.5">
+                              {pin}
+                            </Text>
+                            <Pressable
+                              onPress={() => {
+                                setSelectedPincodes(
+                                  selectedPincodes.filter((p) => p !== pin)
+                                );
+                              }}
+                              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                            >
+                              <X size={12} color="#1D4ED8" strokeWidth={2.5} />
+                            </Pressable>
+                          </View>
+                        ))}
+                      </View>
+                    )}
                   </View>
 
                   {/* Field 2: Password */}
