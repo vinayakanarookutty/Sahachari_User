@@ -109,7 +109,7 @@ export default function Register() {
 
   const goToStep2 = () => {
     if (!form.name || !form.email) {
-      setErrorMsg(t("please_fill_all_fields") || "Please fill all required fields");
+      setErrorMsg(t("Please fill in all required fields") || "Please fill all required fields");
       return;
     }
 
@@ -136,7 +136,7 @@ export default function Register() {
       !form.password ||
       finalPincodes.length === 0
     ) {
-      setErrorMsg(t("please_fill_all_fields") || "Please fill all required fields including Pincode");
+      setErrorMsg(t("Please fill in all required fields") || "Please fill all required fields including Pincode");
       return;
     }
 
@@ -351,7 +351,7 @@ export default function Register() {
                     activeOpacity={0.85}
                   >
                     <Text className="text-white text-base font-bold tracking-wide mr-2">
-                      {t("next") || "Next Step"}
+                      {t("Next") || "Next Step"}
                     </Text>
                     <ArrowRight size={18} color="#FFFFFF" />
                   </TouchableOpacity>

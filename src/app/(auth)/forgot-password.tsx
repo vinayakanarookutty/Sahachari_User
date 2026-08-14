@@ -84,7 +84,7 @@ export default function ForgotPassword() {
   const handleResetPassword = () => {
     setErrorMsg(null);
     if (!otp.trim() || !newPassword.trim() || !confirmPassword.trim()) {
-      setErrorMsg(t("please_fill_all_fields") || "Please fill in all required fields");
+      setErrorMsg(t("Please fill in all required fields") || "Please fill in all required fields");
       return;
     }
     if (newPassword !== confirmPassword) {

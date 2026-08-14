@@ -39,7 +39,7 @@ export default function Login() {
 
   const submit = () => {
     if (!email || !password) {
-      setErrorMsg(t("please_fill_all_fields") || "Please fill all required fields");
+      setErrorMsg(t("Please fill in all required fields") || "Please fill all required fields");
       return;
     }
     setErrorMsg(null);

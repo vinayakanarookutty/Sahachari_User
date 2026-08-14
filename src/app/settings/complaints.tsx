@@ -44,6 +44,8 @@ export default function ComplaintsScreen() {
   const [category, setCategory] = useState("OTHER");
   const [subject, setSubject] = useState("");
   const [description, setDescription] = useState("");
+  const [pincodeInput, setPincodeInput] = useState("");
+  const [userPincodes, setUserPincodes] = useState<string[]>([]);
 
   const [loading, setLoading] = useState(false);
   const [complaints, setComplaints] = useState<any[]>([]);
@@ -125,6 +127,38 @@ export default function ComplaintsScreen() {
   };
 
   useEffect(() => {
+    const fetchUserProfile = async () => {
+      try {
+        const token = useAuthStore.getState().token;
+        if (!token) return;
+        const res = await fetch(`${API_BASE_URL}/users/me`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (res.ok) {
+          const profile = await res.json();
+          let pins: string[] = [];
+          if (Array.isArray(profile.serviceablePincodes) && profile.serviceablePincodes.length > 0) {
+            pins = profile.serviceablePincodes;
+          } else if (Array.isArray(profile.pincodes) && profile.pincodes.length > 0) {
+            pins = profile.pincodes;
+          } else if (Array.isArray(profile.pincode) && profile.pincode.length > 0) {
+            pins = profile.pincode;
+          } else if (typeof profile.pincode === "string" && profile.pincode.trim()) {
+            pins = [profile.pincode.trim()];
+          }
+          if (pins.length > 0) {
+            setUserPincodes(pins);
+            setPincodeInput(pins.join(", "));
+          }
+        }
+      } catch (err) {
+        console.error("Failed to load user profile pincodes:", err);
+      }
+    };
+    fetchUserProfile();
+  }, []);
+
+  useEffect(() => {
     loadComplaints();
   }, []);
 
@@ -151,6 +185,13 @@ export default function ComplaintsScreen() {
       const token =
         useAuthStore.getState().token;
 
+      const parsedInput = pincodeInput
+        .split(",")
+        .map((p) => p.trim())
+        .filter((p) => p.length > 0);
+
+      const finalPincodes = parsedInput.length > 0 ? parsedInput : userPincodes;
+
       const response = await fetch(
         `${API_BASE_URL}/complaints`,
         {
@@ -167,6 +208,8 @@ export default function ComplaintsScreen() {
             orderId: isOrderCancellation
               ? orderId
               : undefined,
+            pincodes: finalPincodes,
+            pincode: finalPincodes,
           }),
         }
       );
@@ -322,6 +365,17 @@ export default function ComplaintsScreen() {
             className="border border-gray-300 rounded-xl p-4 min-h-[140px] mb-4"
           />
 
+          <Text className="font-semibold mb-2">
+            {t("pincode") || "Pincode(s)"}
+          </Text>
+
+          <TextInput
+            value={pincodeInput}
+            onChangeText={setPincodeInput}
+            placeholder={t("enter_pincode") || "e.g. 682001, 682002"}
+            className="border border-gray-300 rounded-xl p-4 mb-4"
+          />
+
           <Pressable
             onPress={submitComplaint}
             disabled={loading}
@@ -351,40 +405,58 @@ export default function ComplaintsScreen() {
               {t("no_complaints_found")}
             </Text>
           ) : (
-            complaints.map((item) => (
-              <View
-                key={item._id}
-                className="border border-gray-200 rounded-xl p-4 mb-3"
-              >
-                <Text className="font-bold">
-                  {item.subject}
-                </Text>
+            complaints.map((item) => {
+              const pins = Array.isArray(item.pincodes) && item.pincodes.length > 0
+                ? item.pincodes
+                : (Array.isArray(item.pincode) && item.pincode.length > 0
+                  ? item.pincode
+                  : (item.pincode ? [item.pincode] : []));
 
-                <Text className="text-sm text-gray-500 mt-1">
-                  {item.category}
-                </Text>
+              return (
+                <View
+                  key={item._id}
+                  className="border border-gray-200 rounded-xl p-4 mb-3"
+                >
+                  <Text className="font-bold">
+                    {item.subject}
+                  </Text>
 
-                <Text className="mt-2">
-                  {item.description}
-                </Text>
-
-                <Text className="mt-3 font-semibold text-blue-600">
-                  {t("status")}: {item.status}
-                </Text>
-
-                {item.adminReply ? (
-                  <View className="mt-3 bg-green-50 p-3 rounded-lg">
-                    <Text className="font-semibold text-green-700">
-                      {t("admin_reply")}
+                  <View className="flex-row items-center flex-wrap gap-2 mt-1">
+                    <Text className="text-sm text-gray-500">
+                      {item.category}
                     </Text>
 
-                    <Text className="text-green-700 mt-1">
-                      {item.adminReply}
-                    </Text>
+                    {pins.length > 0 && (
+                      <View className="bg-blue-50 px-2 py-0.5 rounded-md">
+                        <Text className="text-xs text-blue-700 font-medium">
+                          📍 {pins.join(", ")}
+                        </Text>
+                      </View>
+                    )}
                   </View>
-                ) : null}
-              </View>
-            ))
+
+                  <Text className="mt-2">
+                    {item.description}
+                  </Text>
+
+                  <Text className="mt-3 font-semibold text-blue-600">
+                    {t("status")}: {item.status}
+                  </Text>
+
+                  {item.adminReply ? (
+                    <View className="mt-3 bg-green-50 p-3 rounded-lg">
+                      <Text className="font-semibold text-green-700">
+                        {t("admin_reply")}
+                      </Text>
+
+                      <Text className="text-green-700 mt-1">
+                        {item.adminReply}
+                      </Text>
+                    </View>
+                  ) : null}
+                </View>
+              );
+            })
           )}
         </View>
       </ScrollView>
