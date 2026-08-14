@@ -18,6 +18,7 @@ import {
 import { useRegister } from "../../hooks/useAuth";
 import { useGoogleAuth } from "../../hooks/useGoogleAuth";
 import { Role } from "../../types/user";
+
 import {
   Eye,
   EyeOff,
@@ -35,6 +36,7 @@ import {
   ArrowRight,
   ShieldCheck,
 } from "lucide-react-native";
+
 import { useTranslation } from "react-i18next";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { API_BASE_URL } from "@/config/env";
@@ -42,17 +44,25 @@ import { API_BASE_URL } from "@/config/env";
 export default function Register() {
   const insets = useSafeAreaInsets();
   const register = useRegister();
-  const [showPassword, setShowPassword] = useState(false);
   const { t } = useTranslation();
 
-  // Wizard Step (1: Name & Email, 2: Pincode & Password)
+  const [showPassword, setShowPassword] = useState(false);
+
+  // ---------------------------------------------------------
+  // WIZARD
+  // ---------------------------------------------------------
   const [step, setStep] = useState<1 | 2>(1);
 
-  // Pincode modal & manual input
+  // ---------------------------------------------------------
+  // PINCODE
+  // ---------------------------------------------------------
   const [modalVisible, setModalVisible] = useState(false);
   const [pincodeSearch, setPincodeSearch] = useState("");
   const [manualPincode, setManualPincode] = useState("");
-  const [selectedPincodes, setSelectedPincodes] = useState<string[]>([]);
+  const [selectedPincodes, setSelectedPincodes] = useState<string[]>(
+    []
+  );
+
   const [availablePincodes, setAvailablePincodes] = useState<string[]>([
     "670562",
     "670563",
@@ -61,26 +71,9 @@ export default function Register() {
     "688532",
   ]);
 
-  useEffect(() => {
-    fetch(`${API_BASE_URL}/super-admin/auth/public/pincodes`)
-      .then((res) => {
-        if (!res.ok) throw new Error("Failed to load pincodes");
-        return res.json();
-      })
-      .then((pins: string[]) => {
-        if (Array.isArray(pins) && pins.length > 0) {
-          setAvailablePincodes(pins);
-        }
-      })
-      .catch((err) => {
-        console.log("Could not fetch SuperAdmin pincodes:", err?.message);
-      });
-  }, []);
-
-  // Social auth hook (Google only)
-  const googleAuth = useGoogleAuth();
-
-  // Form state
+  // ---------------------------------------------------------
+  // FORM
+  // ---------------------------------------------------------
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -90,23 +83,86 @@ export default function Register() {
 
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  // When Google returns user info, pre-fill name & email into step 1 fields
+  // ---------------------------------------------------------
+  // GOOGLE AUTH
+  // ---------------------------------------------------------
+  const googleAuth = useGoogleAuth();
+
+  // ---------------------------------------------------------
+  // LOAD PINCODES
+  // ---------------------------------------------------------
   useEffect(() => {
-    if (googleAuth.userInfo) {
-      setForm((prev) => ({
-        ...prev,
-        name: googleAuth.userInfo!.name || prev.name,
-        email: googleAuth.userInfo!.email || prev.email,
-      }));
-      setErrorMsg(null);
+    fetch(`${API_BASE_URL}/super-admin/auth/public/pincodes`)
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error("Failed to load pincodes");
+        }
+
+        return res.json();
+      })
+      .then((pins: string[]) => {
+        if (Array.isArray(pins) && pins.length > 0) {
+          setAvailablePincodes(pins);
+        }
+      })
+      .catch((err) => {
+        console.log(
+          "Could not fetch SuperAdmin pincodes:",
+          err?.message
+        );
+      });
+  }, []);
+
+  // ---------------------------------------------------------
+  // GOOGLE USER INFO
+  //
+  // IMPORTANT:
+  // When Google authentication succeeds:
+  //
+  // 1. Fill name
+  // 2. Fill email
+  // 3. Automatically move to STEP 2
+  // ---------------------------------------------------------
+  useEffect(() => {
+    if (!googleAuth.userInfo) {
+      return;
+    }
+
+    const googleName = googleAuth.userInfo.name || "";
+    const googleEmail = googleAuth.userInfo.email || "";
+
+    console.log(
+      "[Register] Google user:",
+      googleName,
+      googleEmail
+    );
+
+    setForm((prev) => ({
+      ...prev,
+      name: googleName || prev.name,
+      email: googleEmail || prev.email,
+    }));
+
+    setErrorMsg(null);
+
+    // Automatically go to Step 2
+    if (googleName && googleEmail) {
+      setStep(2);
     }
   }, [googleAuth.userInfo]);
 
-  // Show social auth errors
+  // ---------------------------------------------------------
+  // GOOGLE ERROR
+  // ---------------------------------------------------------
   useEffect(() => {
-    if (googleAuth.error) setErrorMsg(googleAuth.error);
+    if (googleAuth.error) {
+      setErrorMsg(googleAuth.error);
+    }
   }, [googleAuth.error]);
 
+  // ---------------------------------------------------------
+  // STEP 1 -> STEP 2
+  // ---------------------------------------------------------
   const goToStep2 = () => {
     if (!form.name || !form.email) {
       setErrorMsg(t("Please fill in all required fields") || "Please fill all required fields");
@@ -114,8 +170,12 @@ export default function Register() {
     }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(form.email)) {
-      setErrorMsg(t("invalid_email") || "Please enter a valid email address");
+
+    if (!emailRegex.test(form.email.trim())) {
+      setErrorMsg(
+        t("invalid_email") ||
+          "Please enter a valid email address"
+      );
       return;
     }
 
@@ -123,16 +183,25 @@ export default function Register() {
     setStep(2);
   };
 
+  // ---------------------------------------------------------
+  // SUBMIT REGISTRATION
+  // ---------------------------------------------------------
   const submit = () => {
     let finalPincodes = [...selectedPincodes];
+
     const cleanManual = manualPincode.trim();
-    if (cleanManual.length === 6 && !finalPincodes.includes(cleanManual)) {
+
+    if (
+      cleanManual.length === 6 &&
+      !finalPincodes.includes(cleanManual)
+    ) {
       finalPincodes.push(cleanManual);
     }
 
+    // Validation
     if (
-      !form.name ||
-      !form.email ||
+      !form.name.trim() ||
+      !form.email.trim() ||
       !form.password ||
       finalPincodes.length === 0
     ) {
@@ -141,30 +210,60 @@ export default function Register() {
     }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(form.email)) {
-      setErrorMsg(t("invalid_email") || "Please enter a valid email address");
+
+    if (!emailRegex.test(form.email.trim())) {
+      setErrorMsg(
+        t("invalid_email") ||
+          "Please enter a valid email address"
+      );
+
       return;
     }
 
     if (form.password.length < 6) {
-      setErrorMsg(t("password_min_length") || "Password must be at least 6 characters");
+      setErrorMsg(
+        t("password_min_length") ||
+          "Password must be at least 6 characters"
+      );
+
       return;
     }
 
+    setErrorMsg(null);
+
+    console.log("[Register] Submitting:", {
+      name: form.name,
+      email: form.email,
+      pincodes: finalPincodes,
+    });
+
     register.mutate(
       {
-        name: form.name,
-        email: form.email,
+        name: form.name.trim(),
+        email: form.email.trim(),
         address: "NOT_SET",
         serviceablePincodes: finalPincodes,
         password: form.password,
         role: Role.USER,
       },
       {
-        onSuccess: () => router.replace("/(tabs)/home"),
+        onSuccess: () => {
+          console.log(
+            "[Register] Registration successful"
+          );
+
+          router.replace("/(tabs)/home");
+        },
+
         onError: (err: any) => {
-          console.error("[Register Error]:", err?.response?.data || err);
-          const backendMsg = err?.response?.data?.message;
+          console.error(
+            "[Register Error]:",
+            err?.response?.data || err
+          );
+
+          const backendMsg =
+            err?.response?.data?.message;
+
           if (Array.isArray(backendMsg)) {
             setErrorMsg(backendMsg.join(", "));
           } else if (typeof backendMsg === "string") {
@@ -172,29 +271,72 @@ export default function Register() {
           } else if (err?.message) {
             setErrorMsg(err.message);
           } else {
-            setErrorMsg("Registration failed. Try again.");
+            setErrorMsg(
+              "Registration failed. Try again."
+            );
           }
         },
       }
     );
   };
 
+  // ---------------------------------------------------------
+  // LOADING
+  // ---------------------------------------------------------
   const socialLoading = googleAuth.loading;
 
-  // Password strength logic
+  // ---------------------------------------------------------
+  // PASSWORD STRENGTH
+  // ---------------------------------------------------------
   const getPasswordStrength = () => {
-    if (!form.password) return null;
-    if (form.password.length < 6) return { label: "Weak", color: "bg-red-500", width: "w-1/3" };
-    if (form.password.length < 10) return { label: "Good", color: "bg-amber-500", width: "w-2/3" };
-    return { label: "Strong", color: "bg-emerald-500", width: "w-full" };
+    if (!form.password) {
+      return null;
+    }
+
+    if (form.password.length < 6) {
+      return {
+        label: "Weak",
+        color: "bg-red-500",
+        width: "w-1/3",
+      };
+    }
+
+    if (form.password.length < 10) {
+      return {
+        label: "Good",
+        color: "bg-amber-500",
+        width: "w-2/3",
+      };
+    }
+
+    return {
+      label: "Strong",
+      color: "bg-emerald-500",
+      width: "w-full",
+    };
   };
 
   const pwdStrength = getPasswordStrength();
 
+  // ---------------------------------------------------------
+  // FILTER PINCODES
+  // ---------------------------------------------------------
+  const filteredPincodes =
+    availablePincodes.filter((pin) =>
+      pin.includes(pincodeSearch)
+    );
+
+  // ---------------------------------------------------------
+  // RENDER
+  // ---------------------------------------------------------
   return (
     <View className="flex-1 bg-slate-50">
       <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        behavior={
+          Platform.OS === "ios"
+            ? "padding"
+            : "height"
+        }
         className="flex-1"
       >
         <ScrollView
@@ -202,21 +344,26 @@ export default function Register() {
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{
             flexGrow: 1,
-            paddingBottom: Math.max(insets.bottom, 16) + 24,
+            paddingBottom:
+              Math.max(insets.bottom, 16) + 24,
           }}
         >
-          {/* Top Decorative Background Header */}
+          {/* =====================================================
+              HEADER
+          ====================================================== */}
           <View
             className="bg-blue-600 pb-16 px-6 rounded-b-[36px] shadow-lg relative overflow-hidden"
             style={{
-              paddingTop: Math.max(insets.top, 16) + 16,
+              paddingTop:
+                Math.max(insets.top, 16) + 16,
             }}
           >
-            {/* Decorative soft circles */}
+            {/* Decorative circles */}
             <View className="absolute -top-10 -right-10 w-40 h-40 rounded-full bg-white/10" />
+
             <View className="absolute top-20 -left-12 w-32 h-32 rounded-full bg-white/10" />
 
-            {/* Top Bar Navigation */}
+            {/* Top navigation */}
             <View className="flex-row items-center justify-between mb-4">
               <Pressable
                 onPress={() => {
@@ -224,125 +371,202 @@ export default function Register() {
                     setStep(1);
                     setErrorMsg(null);
                   } else {
-                    router.replace("/(auth)/login");
+                    router.replace(
+                      "/(auth)/login"
+                    );
                   }
                 }}
                 className="w-10 h-10 rounded-full bg-white/20 items-center justify-center backdrop-blur-md active:bg-white/30"
               >
-                <ArrowLeft size={20} color="#FFFFFF" />
+                <ArrowLeft
+                  size={20}
+                  color="#FFFFFF"
+                />
               </Pressable>
+
               <View className="flex-row items-center bg-white/20 px-3 py-1 rounded-full">
-                <Sparkles size={14} color="#FDE047" />
+                <Sparkles
+                  size={14}
+                  color="#FDE047"
+                />
+
                 <Text className="text-xs font-semibold text-white ml-1.5">
-                  {step === 1 ? "Step 1 of 2" : "Step 2 of 2"}
+                  {step === 1
+                    ? "Step 1 of 2"
+                    : "Step 2 of 2"}
                 </Text>
               </View>
             </View>
 
-            {/* Header Content */}
+            {/* Header */}
             <View className="items-center mt-2">
               <View className="w-20 h-20 bg-white rounded-2xl p-2 shadow-md mb-3 items-center justify-center">
                 <Image
                   source={require("../../../assets/sahachari.jpeg")}
-                  style={{ width: "100%", height: "100%" }}
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                  }}
                   resizeMode="contain"
                 />
               </View>
+
               <Text className="text-2xl sm:text-3xl font-bold text-white tracking-tight text-center">
                 {step === 1
-                  ? t("create_account") || "Create Account"
-                  : t("Complete Setup") || "Complete Setup"}
-              </Text>
-              <Text className="text-xs sm:text-sm text-blue-100 text-center mt-1 max-w-[280px]">
-                {step === 1
-                  ? t("Sign up to explore local services") || "Sign up to explore local services & rentals"
-                  : t("Enter your area pincodes and password") || "Enter your pincode and set a password"}
+                  ? t("create_account") ||
+                    "Create Account"
+                  : t("Complete Setup") ||
+                    "Complete Setup"}
               </Text>
 
-              {/* Progress Bar */}
+              <Text className="text-xs sm:text-sm text-blue-100 text-center mt-1 max-w-[280px]">
+                {step === 1
+                  ? t(
+                      "Sign up to explore local services"
+                    ) ||
+                    "Sign up to explore local services & rentals"
+                  : t(
+                      "Enter your area pincodes and password"
+                    ) ||
+                    "Enter your pincode and set a password"}
+              </Text>
+
+              {/* Progress */}
               <View className="w-48 h-1.5 bg-white/20 rounded-full mt-4 overflow-hidden">
                 <View
-                  className={`h-full bg-yellow-400 rounded-full transition-all ${
-                    step === 1 ? "w-1/2" : "w-full"
+                  className={`h-full bg-yellow-400 rounded-full ${
+                    step === 1
+                      ? "w-1/2"
+                      : "w-full"
                   }`}
                 />
               </View>
             </View>
           </View>
 
-          {/* Form Card Overlay - Responsive Width Wrapper */}
+          {/* =====================================================
+              FORM CARD
+          ====================================================== */}
           <View className="w-full max-w-md self-center px-4 sm:px-6 -mt-8">
             <View
               className="bg-white rounded-3xl p-6 shadow-xl border border-gray-100"
               style={{
                 shadowColor: "#1E3A8A",
-                shadowOffset: { width: 0, height: 8 },
+                shadowOffset: {
+                  width: 0,
+                  height: 8,
+                },
                 shadowOpacity: 0.08,
                 shadowRadius: 16,
                 elevation: 4,
               }}
             >
-              {/* STEP 1: Name and Email */}
+              {/* =================================================
+                  STEP 1
+              ================================================== */}
               {step === 1 && (
-                <View className="space-y-4">
-                  {/* Full Name */}
+                <View>
+                  {/* Name */}
                   <View className="mb-3">
                     <Text className="text-xs font-semibold text-gray-700 mb-1.5 ml-1">
-                      {t("full_name") || "Full Name"} <Text className="text-red-500">*</Text>
+                      {t("full_name") ||
+                        "Full Name"}{" "}
+                      <Text className="text-red-500">
+                        *
+                      </Text>
                     </Text>
+
                     <View className="flex-row items-center bg-gray-50 border border-gray-200 rounded-2xl px-4 py-3">
-                      <User size={18} color="#6B7280" />
+                      <User
+                        size={18}
+                        color="#6B7280"
+                      />
+
                       <TextInput
                         className="flex-1 text-base text-gray-900 ml-2.5 py-0.5"
-                        placeholder={t("enter_your_full_name") || "Enter your full name"}
+                        placeholder={
+                          t(
+                            "enter_your_full_name"
+                          ) ||
+                          "Enter your full name"
+                        }
                         placeholderTextColor="#9CA3AF"
                         value={form.name}
                         onChangeText={(v) => {
-                          setForm({ ...form, name: v });
+                          setForm({
+                            ...form,
+                            name: v,
+                          });
+
                           setErrorMsg(null);
                         }}
                       />
                     </View>
                   </View>
 
-                  {/* Email Address */}
+                  {/* Email */}
                   <View className="mb-4">
                     <Text className="text-xs font-semibold text-gray-700 mb-1.5 ml-1">
-                      {t("email") || "Email Address"} <Text className="text-red-500">*</Text>
+                      {t("email") ||
+                        "Email Address"}{" "}
+                      <Text className="text-red-500">
+                        *
+                      </Text>
                     </Text>
+
                     <View className="flex-row items-center bg-gray-50 border border-gray-200 rounded-2xl px-4 py-3">
-                      <Mail size={18} color="#6B7280" />
+                      <Mail
+                        size={18}
+                        color="#6B7280"
+                      />
+
                       <TextInput
                         className="flex-1 text-base text-gray-900 ml-2.5 py-0.5"
-                        placeholder={t("enter_your_email") || "Enter your email"}
+                        placeholder={
+                          t(
+                            "enter_your_email"
+                          ) ||
+                          "Enter your email"
+                        }
                         placeholderTextColor="#9CA3AF"
                         autoCapitalize="none"
                         keyboardType="email-address"
                         value={form.email}
                         onChangeText={(v) => {
-                          setForm({ ...form, email: v });
+                          setForm({
+                            ...form,
+                            email: v,
+                          });
+
                           setErrorMsg(null);
                         }}
                       />
                     </View>
                   </View>
 
-                  {/* Error Message */}
+                  {/* Error */}
                   {errorMsg && (
                     <View className="bg-red-50 border border-red-200 rounded-2xl p-3.5 flex-row items-center mb-3">
-                      <AlertCircle size={18} color="#EF4444" />
+                      <AlertCircle
+                        size={18}
+                        color="#EF4444"
+                      />
+
                       <Text className="text-red-600 text-xs font-semibold ml-2.5 flex-1">
                         {errorMsg}
                       </Text>
                     </View>
                   )}
 
-                  {/* Next Step Button */}
+                  {/* Next */}
                   <TouchableOpacity
                     className="rounded-2xl py-4 items-center justify-center flex-row bg-blue-600 active:bg-blue-700 shadow-md"
                     style={{
                       shadowColor: "#2563EB",
-                      shadowOffset: { width: 0, height: 4 },
+                      shadowOffset: {
+                        width: 0,
+                        height: 4,
+                      },
                       shadowOpacity: 0.25,
                       shadowRadius: 8,
                       elevation: 3,
@@ -353,60 +577,94 @@ export default function Register() {
                     <Text className="text-white text-base font-bold tracking-wide mr-2">
                       {t("Next") || "Next Step"}
                     </Text>
-                    <ArrowRight size={18} color="#FFFFFF" />
+
+                    <ArrowRight
+                      size={18}
+                      color="#FFFFFF"
+                    />
                   </TouchableOpacity>
 
                   {/* Divider */}
                   <View className="flex-row items-center my-4">
                     <View className="flex-1 h-px bg-gray-200" />
+
                     <Text className="px-3 text-xs text-gray-400 font-semibold uppercase">
-                      {t("or") || "or continue with"}
+                      {t("or") ||
+                        "or continue with"}
                     </Text>
+
                     <View className="flex-1 h-px bg-gray-200" />
                   </View>
 
-                  {/* Social Sign-In Buttons */}
-                  <View className="space-y-3">
-                    {/* Google Sign-In Button */}
+                  {/* Google */}
+                  <View>
                     <TouchableOpacity
                       className="flex-row items-center justify-center bg-white border border-gray-200 rounded-2xl py-3.5 px-4 mb-3"
                       style={{
                         shadowColor: "#000",
-                        shadowOffset: { width: 0, height: 2 },
+                        shadowOffset: {
+                          width: 0,
+                          height: 2,
+                        },
                         shadowOpacity: 0.05,
                         shadowRadius: 4,
                         elevation: 1,
                       }}
-                      onPress={googleAuth.signInWithGoogle}
-                      disabled={socialLoading || !googleAuth.isReady || register.isPending}
+                      onPress={
+                        googleAuth.signInWithGoogle
+                      }
+                      disabled={
+                        socialLoading ||
+                        !googleAuth.isReady ||
+                        register.isPending
+                      }
                       activeOpacity={0.75}
                     >
                       {googleAuth.loading ? (
-                        <ActivityIndicator size="small" color="#4285F4" />
+                        <ActivityIndicator
+                          size="small"
+                          color="#4285F4"
+                        />
                       ) : (
                         <>
                           <Image
-                            source={{ uri: "https://cdn-icons-png.flaticon.com/512/300/300221.png" }}
-                            style={{ width: 20, height: 20, marginRight: 10 }}
+                            source={{
+                              uri: "https://cdn-icons-png.flaticon.com/512/300/300221.png",
+                            }}
+                            style={{
+                              width: 20,
+                              height: 20,
+                              marginRight: 10,
+                            }}
                           />
+
                           <Text className="text-sm font-semibold text-gray-700">
-                            {t("Google") || "Continue with Google"}
+                            {t("Google") ||
+                              "Continue with Google"}
                           </Text>
                         </>
                       )}
                     </TouchableOpacity>
                   </View>
 
-                  {/* Login Link */}
+                  {/* Login */}
                   <View className="items-center mt-5">
                     <Pressable
-                      onPress={() => router.replace("/(auth)/login")}
+                      onPress={() =>
+                        router.replace(
+                          "/(auth)/login"
+                        )
+                      }
                       className="active:opacity-70 py-1"
                     >
                       <Text className="text-gray-600 text-sm">
-                        {t("already_have_account") || "Already have an account?"}{" "}
+                        {t(
+                          "already_have_account"
+                        ) ||
+                          "Already have an account?"}{" "}
                         <Text className="text-blue-600 font-bold">
-                          {t("log_in") || "Log In"}
+                          {t("log_in") ||
+                            "Log In"}
                         </Text>
                       </Text>
                     </Pressable>
@@ -414,44 +672,68 @@ export default function Register() {
                 </View>
               )}
 
-              {/* STEP 2: Pincode and Password */}
+              {/* =================================================
+                  STEP 2
+              ================================================== */}
               {step === 2 && (
-                <View className="space-y-4">
-                  {/* Account Badge Notification */}
-                  <View className="bg-blue-50 border border-blue-200 rounded-2xl p-3.5 mb-2 flex-row items-center">
-                    <ShieldCheck size={20} color="#2563EB" />
+                <View>
+                  {/* Google badge */}
+                  <View className="bg-blue-50 border border-blue-200 rounded-2xl p-3.5 mb-4 flex-row items-center">
+                    <ShieldCheck
+                      size={20}
+                      color="#2563EB"
+                    />
+
                     <View className="ml-2.5 flex-1">
                       <Text className="text-blue-900 text-xs font-medium">
                         {googleAuth.userInfo
                           ? "Authenticated via Google"
                           : "Registering Account"}
                       </Text>
-                      <Text className="text-blue-950 text-sm font-bold truncate">
+
+                      <Text className="text-blue-950 text-sm font-bold">
                         {form.name} ({form.email})
                       </Text>
                     </View>
                   </View>
 
-
-                  {/* Field 1: Serviceable Pincode(s) */}
+                  {/* Pincode */}
                   <View className="mb-3">
                     <View className="flex-row justify-between items-center mb-1.5 ml-1">
                       <Text className="text-xs font-semibold text-gray-700">
-                        {t("pincode") || "Pincode"} <Text className="text-red-500">*</Text>
+                        {t("pincode") ||
+                          "Pincode"}{" "}
+                        <Text className="text-red-500">
+                          *
+                        </Text>
                       </Text>
-                      {selectedPincodes.length > 0 && (
+
+                      {selectedPincodes.length >
+                        0 && (
                         <Text className="text-xs font-semibold text-blue-600">
-                          {selectedPincodes.length} selected
+                          {
+                            selectedPincodes.length
+                          }{" "}
+                          selected
                         </Text>
                       )}
                     </View>
 
-                    {/* Direct Pincode Input Box */}
+                    {/* Manual pincode */}
                     <View className="flex-row items-center bg-gray-50 border border-gray-200 rounded-2xl px-4 py-3 mb-2">
-                      <MapPin size={18} color="#6B7280" />
+                      <MapPin
+                        size={18}
+                        color="#6B7280"
+                      />
+
                       <TextInput
                         className="flex-1 text-base text-gray-900 ml-2.5 py-0.5"
-                        placeholder={t("enter_pincode") || "Enter 6-digit Pincode"}
+                        placeholder={
+                          t(
+                            "enter_pincode"
+                          ) ||
+                          "Enter 6-digit Pincode"
+                        }
                         placeholderTextColor="#9CA3AF"
                         keyboardType="numeric"
                         maxLength={6}
@@ -459,153 +741,263 @@ export default function Register() {
                         onChangeText={(v) => {
                           setManualPincode(v);
                           setErrorMsg(null);
-                          if (v.trim().length === 6 && !selectedPincodes.includes(v.trim())) {
-                            setSelectedPincodes((prev) => [...prev, v.trim()]);
-                          }
                         }}
                       />
-                      {manualPincode.trim().length > 0 && (
+
+                      {manualPincode.trim()
+                        .length > 0 && (
                         <TouchableOpacity
                           onPress={() => {
-                            const cleanPin = manualPincode.trim();
-                            if (cleanPin.length === 6) {
-                              if (!selectedPincodes.includes(cleanPin)) {
-                                setSelectedPincodes([...selectedPincodes, cleanPin]);
-                              }
-                              setManualPincode("");
-                            } else {
-                              setErrorMsg("Pincode must be 6 digits");
+                            const cleanPin =
+                              manualPincode.trim();
+
+                            if (
+                              cleanPin.length !== 6
+                            ) {
+                              setErrorMsg(
+                                "Pincode must be 6 digits"
+                              );
+                              return;
                             }
+
+                            if (
+                              !selectedPincodes.includes(
+                                cleanPin
+                              )
+                            ) {
+                              setSelectedPincodes(
+                                (prev) => [
+                                  ...prev,
+                                  cleanPin,
+                                ]
+                              );
+                            }
+
+                            setManualPincode(
+                              ""
+                            );
+                            setErrorMsg(null);
                           }}
                           className="bg-blue-600 px-3 py-1.5 rounded-xl ml-2 active:bg-blue-700"
                         >
-                          <Text className="text-white text-xs font-bold">{t("add") || "Add"}</Text>
+                          <Text className="text-white text-xs font-bold">
+                            {t("add") ||
+                              "Add"}
+                          </Text>
                         </TouchableOpacity>
                       )}
                     </View>
 
-                    {/* Quick Pincode Selector Modal Trigger */}
+                    {/* Browse pincodes */}
                     <Pressable
-                      onPress={() => setModalVisible(true)}
+                      onPress={() =>
+                        setModalVisible(true)
+                      }
                       className="flex-row items-center justify-between bg-slate-100 border border-slate-200 rounded-2xl px-4 py-2.5"
                     >
                       <View className="flex-row items-center flex-1 mr-2">
-                        <Search size={15} color="#64748B" />
+                        <Search
+                          size={15}
+                          color="#64748B"
+                        />
+
                         <Text className="text-xs font-semibold text-slate-600 ml-2">
-                          {t("browse_serviceable_areas") || "Browse available service areas"}
+                          {t(
+                            "browse_serviceable_areas"
+                          ) ||
+                            "Browse available service areas"}
                         </Text>
                       </View>
-                      <ChevronDown size={16} color="#64748B" />
+
+                      <ChevronDown
+                        size={16}
+                        color="#64748B"
+                      />
                     </Pressable>
 
-                    {/* Selected Pincode Chips */}
-                    {selectedPincodes.length > 0 && (
+                    {/* Selected pincodes */}
+                    {selectedPincodes.length >
+                      0 && (
                       <View className="flex-row flex-wrap gap-1.5 mt-2.5 ml-1">
-                        {selectedPincodes.map((pin) => (
-                          <View
-                            key={pin}
-                            className="flex-row items-center bg-blue-50 border border-blue-200 rounded-full px-3 py-1"
-                          >
-                            <Text className="text-xs font-semibold text-blue-700 mr-1.5">
-                              {pin}
-                            </Text>
-                            <Pressable
-                              onPress={() => {
-                                setSelectedPincodes(
-                                  selectedPincodes.filter((p) => p !== pin)
-                                );
-                              }}
-                              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                        {selectedPincodes.map(
+                          (pin) => (
+                            <View
+                              key={pin}
+                              className="flex-row items-center bg-blue-50 border border-blue-200 rounded-full px-3 py-1"
                             >
-                              <X size={12} color="#1D4ED8" strokeWidth={2.5} />
-                            </Pressable>
-                          </View>
-                        ))}
+                              <Text className="text-xs font-semibold text-blue-700 mr-1.5">
+                                {pin}
+                              </Text>
+
+                              <Pressable
+                                onPress={() => {
+                                  setSelectedPincodes(
+                                    selectedPincodes.filter(
+                                      (p) =>
+                                        p !==
+                                        pin
+                                    )
+                                  );
+                                }}
+                                hitSlop={{
+                                  top: 8,
+                                  bottom: 8,
+                                  left: 8,
+                                  right: 8,
+                                }}
+                              >
+                                <X
+                                  size={12}
+                                  color="#1D4ED8"
+                                  strokeWidth={
+                                    2.5
+                                  }
+                                />
+                              </Pressable>
+                            </View>
+                          )
+                        )}
                       </View>
                     )}
                   </View>
 
-                  {/* Field 2: Password */}
+                  {/* Password */}
                   <View className="mb-4">
                     <Text className="text-xs font-semibold text-gray-700 mb-1.5 ml-1">
-                      {t("password") || "Password"} <Text className="text-red-500">*</Text>
+                      {t("password") ||
+                        "Password"}{" "}
+                      <Text className="text-red-500">
+                        *
+                      </Text>
                     </Text>
 
                     <View className="flex-row items-center bg-gray-50 border border-gray-200 rounded-2xl px-4 py-3">
-                      <Lock size={18} color="#6B7280" />
+                      <Lock
+                        size={18}
+                        color="#6B7280"
+                      />
+
                       <TextInput
                         className="flex-1 text-base text-gray-900 ml-2.5 py-0.5 pr-2"
-                        placeholder={t("create_a_password") || "Create a password"}
+                        placeholder={
+                          t(
+                            "create_a_password"
+                          ) ||
+                          "Create a password"
+                        }
                         placeholderTextColor="#9CA3AF"
-                        secureTextEntry={!showPassword}
+                        secureTextEntry={
+                          !showPassword
+                        }
                         value={form.password}
                         onChangeText={(v) => {
-                          setForm({ ...form, password: v });
+                          setForm({
+                            ...form,
+                            password: v,
+                          });
+
                           setErrorMsg(null);
                         }}
                       />
+
                       <Pressable
-                        onPress={() => setShowPassword(!showPassword)}
-                        hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                        onPress={() =>
+                          setShowPassword(
+                            !showPassword
+                          )
+                        }
+                        hitSlop={{
+                          top: 8,
+                          bottom: 8,
+                          left: 8,
+                          right: 8,
+                        }}
                       >
                         {showPassword ? (
-                          <EyeOff size={18} color="#6B7280" />
+                          <EyeOff
+                            size={18}
+                            color="#6B7280"
+                          />
                         ) : (
-                          <Eye size={18} color="#6B7280" />
+                          <Eye
+                            size={18}
+                            color="#6B7280"
+                          />
                         )}
                       </Pressable>
                     </View>
 
-                    {/* Password Strength Indicator */}
+                    {/* Password strength */}
                     {pwdStrength && (
                       <View className="mt-2 ml-1">
                         <View className="h-1.5 bg-gray-200 rounded-full overflow-hidden mb-1">
-                          <View className={`h-full ${pwdStrength.color} ${pwdStrength.width}`} />
+                          <View
+                            className={`h-full ${pwdStrength.color} ${pwdStrength.width}`}
+                          />
                         </View>
+
                         <Text className="text-[11px] font-medium text-gray-500">
                           Password Strength:{" "}
-                          <Text className="font-bold text-gray-800">{pwdStrength.label}</Text>
+                          <Text className="font-bold text-gray-800">
+                            {
+                              pwdStrength.label
+                            }
+                          </Text>
                         </Text>
                       </View>
                     )}
                   </View>
 
-                  {/* Error Message */}
+                  {/* Error */}
                   {errorMsg && (
                     <View className="bg-red-50 border border-red-200 rounded-2xl p-3.5 flex-row items-center mb-3">
-                      <AlertCircle size={18} color="#EF4444" />
+                      <AlertCircle
+                        size={18}
+                        color="#EF4444"
+                      />
+
                       <Text className="text-red-600 text-xs font-semibold ml-2.5 flex-1">
                         {errorMsg}
                       </Text>
                     </View>
                   )}
 
-                  {/* Complete Registration Button */}
+                  {/* Submit */}
                   <TouchableOpacity
                     className={`rounded-2xl py-4 items-center justify-center shadow-md ${
-                      register.isPending ? "bg-blue-400" : "bg-blue-600 active:bg-blue-700"
+                      register.isPending
+                        ? "bg-blue-400"
+                        : "bg-blue-600 active:bg-blue-700"
                     }`}
                     style={{
                       shadowColor: "#2563EB",
-                      shadowOffset: { width: 0, height: 4 },
+                      shadowOffset: {
+                        width: 0,
+                        height: 4,
+                      },
                       shadowOpacity: 0.25,
                       shadowRadius: 8,
                       elevation: 3,
                     }}
                     onPress={submit}
-                    disabled={register.isPending}
+                    disabled={
+                      register.isPending
+                    }
                     activeOpacity={0.85}
                   >
                     {register.isPending ? (
                       <ActivityIndicator color="#ffffff" />
                     ) : (
                       <Text className="text-white text-base font-bold tracking-wide">
-                        {t("complete_registration") || "Complete Registration"}
+                        {t(
+                          "complete_registration"
+                        ) ||
+                          "Complete Registration"}
                       </Text>
                     )}
                   </TouchableOpacity>
 
-                  {/* Back to Step 1 */}
+                  {/* Back */}
                   <View className="items-center mt-3">
                     <Pressable
                       onPress={() => {
@@ -615,7 +1007,11 @@ export default function Register() {
                       className="active:opacity-70 py-1"
                     >
                       <Text className="text-blue-600 font-semibold text-xs">
-                        ← {t("change_email_or_name") || "Edit Name or Email"}
+                        ←{" "}
+                        {t(
+                          "change_email_or_name"
+                        ) ||
+                          "Edit Name or Email"}
                       </Text>
                     </Pressable>
                   </View>
@@ -626,76 +1022,116 @@ export default function Register() {
         </ScrollView>
       </KeyboardAvoidingView>
 
-      {/* Pincode Multi-Select Modal */}
+      {/* =======================================================
+          PINCODE MODAL
+      ======================================================== */}
       <Modal
         visible={modalVisible}
         animationType="slide"
         transparent={true}
-        onRequestClose={() => setModalVisible(false)}
+        onRequestClose={() =>
+          setModalVisible(false)
+        }
       >
         <View className="flex-1 justify-end bg-black/60">
           <View
             className="bg-white rounded-t-[32px] h-[70%] px-6 pt-4 shadow-2xl"
-            style={{ paddingBottom: insets.bottom > 0 ? insets.bottom + 16 : 28 }}
+            style={{
+              paddingBottom:
+                insets.bottom > 0
+                  ? insets.bottom + 16
+                  : 28,
+            }}
           >
-            {/* Modal Handle */}
+            {/* Handle */}
             <View className="items-center mb-3">
               <View className="w-12 h-1.5 bg-gray-300 rounded-full" />
             </View>
 
-            {/* Modal Header */}
+            {/* Header */}
             <View className="flex-row justify-between items-center mb-4">
               <View>
                 <Text className="text-lg font-bold text-gray-900">
-                  {t("Select Pincodes") || "Select Serviceable Areas"}
+                  {t("Select Pincodes") ||
+                    "Select Serviceable Areas"}
                 </Text>
+
                 <Text className="text-xs text-gray-500">
                   Choose pincodes where you want service
                 </Text>
               </View>
+
               <Pressable
-                onPress={() => setModalVisible(false)}
+                onPress={() =>
+                  setModalVisible(false)
+                }
                 className="bg-gray-100 p-2 rounded-full active:bg-gray-200"
               >
-                <X size={18} color="#4B5563" />
+                <X
+                  size={18}
+                  color="#4B5563"
+                />
               </Pressable>
             </View>
 
-            {/* Modal Search Bar */}
+            {/* Search */}
             <View className="flex-row items-center bg-gray-50 border border-gray-200 rounded-2xl px-3 py-1 mb-4">
-              <Search size={18} color="#9CA3AF" />
+              <Search
+                size={18}
+                color="#9CA3AF"
+              />
+
               <TextInput
                 value={pincodeSearch}
                 onChangeText={setPincodeSearch}
-                placeholder={t("search_pincode") || "Search pincode..."}
+                placeholder={
+                  t("search_pincode") ||
+                  "Search pincode..."
+                }
                 placeholderTextColor="#9CA3AF"
                 className="flex-1 ml-2 text-gray-800 text-base py-2"
                 keyboardType="numeric"
               />
+
               {pincodeSearch.length > 0 && (
-                <Pressable onPress={() => setPincodeSearch("")}>
-                  <X size={16} color="#9CA3AF" />
+                <Pressable
+                  onPress={() =>
+                    setPincodeSearch("")
+                  }
+                >
+                  <X
+                    size={16}
+                    color="#9CA3AF"
+                  />
                 </Pressable>
               )}
             </View>
 
-            {/* Pincode List */}
+            {/* List */}
             <FlatList
-              data={availablePincodes.filter((pin) =>
-                pin.includes(pincodeSearch)
-              )}
+              data={filteredPincodes}
               keyExtractor={(item) => item}
               showsVerticalScrollIndicator={false}
               renderItem={({ item }) => {
-                const isSelected = selectedPincodes.includes(item);
+                const isSelected =
+                  selectedPincodes.includes(item);
+
                 return (
                   <Pressable
                     onPress={() => {
                       if (isSelected) {
-                        setSelectedPincodes(selectedPincodes.filter((p) => p !== item));
+                        setSelectedPincodes(
+                          selectedPincodes.filter(
+                            (p) => p !== item
+                          )
+                        );
                       } else {
-                        setSelectedPincodes([...selectedPincodes, item]);
+                        setSelectedPincodes([
+                          ...selectedPincodes,
+                          item,
+                        ]);
                       }
+
                       setErrorMsg(null);
                     }}
                     className={`flex-row justify-between items-center py-3.5 px-4 rounded-2xl mb-2.5 border ${
@@ -707,17 +1143,24 @@ export default function Register() {
                     <View className="flex-row items-center">
                       <MapPin
                         size={18}
-                        color={isSelected ? "#2563EB" : "#9CA3AF"}
-                        className="mr-3"
+                        color={
+                          isSelected
+                            ? "#2563EB"
+                            : "#9CA3AF"
+                        }
                       />
+
                       <Text
-                        className={`text-base font-semibold ${
-                          isSelected ? "text-blue-700" : "text-gray-800"
+                        className={`text-base font-semibold ml-3 ${
+                          isSelected
+                            ? "text-blue-700"
+                            : "text-gray-800"
                         }`}
                       >
                         {item}
                       </Text>
                     </View>
+
                     <View
                       className={`w-6 h-6 rounded-full items-center justify-center border ${
                         isSelected
@@ -725,7 +1168,13 @@ export default function Register() {
                           : "border-gray-300 bg-white"
                       }`}
                     >
-                      {isSelected && <Check size={14} color="#FFFFFF" strokeWidth={3} />}
+                      {isSelected && (
+                        <Check
+                          size={14}
+                          color="#FFFFFF"
+                          strokeWidth={3}
+                        />
+                      )}
                     </View>
                   </Pressable>
                 );
@@ -733,19 +1182,26 @@ export default function Register() {
               ListEmptyComponent={
                 <View className="items-center justify-center py-12">
                   <Text className="text-gray-400 text-sm">
-                    {t("no_matching_pincodes") || "No matching pincodes found"}
+                    {t(
+                      "no_matching_pincodes"
+                    ) ||
+                      "No matching pincodes found"}
                   </Text>
                 </View>
               }
             />
 
-            {/* Done Button */}
+            {/* Done */}
             <TouchableOpacity
-              onPress={() => setModalVisible(false)}
+              onPress={() =>
+                setModalVisible(false)
+              }
               className="bg-blue-600 rounded-2xl py-3.5 items-center justify-center mt-3 active:bg-blue-700 shadow-md"
             >
               <Text className="text-white text-base font-bold">
-                {t("done") || "Done"} ({selectedPincodes.length} Selected)
+                {t("done") || "Done"} (
+                {selectedPincodes.length}{" "}
+                Selected)
               </Text>
             </TouchableOpacity>
           </View>

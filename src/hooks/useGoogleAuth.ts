@@ -1,3 +1,4 @@
+import { makeRedirectUri } from "expo-auth-session";
 import * as Google from "expo-auth-session/providers/google";
 import * as WebBrowser from "expo-web-browser";
 import { useEffect, useState } from "react";
@@ -18,165 +19,242 @@ export interface GoogleUserInfo {
 }
 
 export function useGoogleAuth() {
-  const [userInfo, setUserInfo] =
-    useState<GoogleUserInfo | null>(null);
+  const [userInfo, setUserInfo] = useState<GoogleUserInfo | null>(null);
 
-  const [loading, setLoading] =
-    useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const [error, setError] =
-    useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
-  const [request, response, promptAsync] =
-    Google.useAuthRequest({
-      webClientId: GOOGLE_WEB_CLIENT_ID,
-      androidClientId: GOOGLE_ANDROID_CLIENT_ID,
-    });
+  // ---------------------------------------------------------
+  // REDIRECT URI
+  // ---------------------------------------------------------
 
-  console.log(
-    "[GoogleAuth] Platform:",
-    Platform.OS
-  );
+  const redirectUri = makeRedirectUri({
+    scheme: "customers",
+    path: "redirect",
+  });
 
-  console.log(
-    "[GoogleAuth] Android Client:",
-    GOOGLE_ANDROID_CLIENT_ID
-  );
+  console.log("[GoogleAuth] Platform:", Platform.OS);
 
-  console.log(
-    "[GoogleAuth] Request:",
-    request
-  );
+  console.log("[GoogleAuth] Redirect URI:", redirectUri);
+
+  // ---------------------------------------------------------
+  // GOOGLE AUTH REQUEST
+  // ---------------------------------------------------------
+
+  const [request, response, promptAsync] = Google.useAuthRequest({
+    webClientId: GOOGLE_WEB_CLIENT_ID,
+    androidClientId: GOOGLE_ANDROID_CLIENT_ID,
+    redirectUri,
+  });
+
+  console.log("[GoogleAuth] Request:", request);
+
+  // ---------------------------------------------------------
+  // HANDLE GOOGLE RESPONSE
+  // ---------------------------------------------------------
 
   useEffect(() => {
-    if (!response) return;
+    if (!response) {
+      return;
+    }
 
-    console.log(
-      "[GoogleAuth] Response:",
-      response
-    );
+    console.log("[GoogleAuth] Response:", response);
+
+    // -------------------------------------------------------
+    // SUCCESS
+    // -------------------------------------------------------
 
     if (response.type === "success") {
-      const accessToken =
-        response.authentication?.accessToken;
+      const accessToken = response.authentication?.accessToken;
 
-      if (accessToken) {
-        fetchGoogleProfile(accessToken);
-      } else {
+      console.log("[GoogleAuth] Authentication success");
+
+      console.log(
+        "[GoogleAuth] Access token:",
+        accessToken ? "RECEIVED" : "MISSING",
+      );
+
+      if (!accessToken) {
         setError(
-          "Google authentication succeeded but no access token was received."
+          "Google authentication succeeded but no access token was received.",
         );
+
         setLoading(false);
+
+        return;
       }
+
+      fetchGoogleProfile(accessToken);
 
       return;
     }
 
+    // -------------------------------------------------------
+    // ERROR
+    // -------------------------------------------------------
+
     if (response.type === "error") {
-      console.error(
-        "[GoogleAuth] OAuth error:",
-        response.error
-      );
+      console.error("[GoogleAuth] OAuth error:", response.error);
 
-      console.error(
-        "[GoogleAuth] OAuth params:",
-        response.params
-      );
+      console.error("[GoogleAuth] OAuth params:", response.params);
 
-      setError(
-        response.error?.message ||
-          "Google sign-in failed."
-      );
+      setError(response.error?.message || "Google sign-in failed.");
 
       setLoading(false);
 
       return;
     }
 
-    if (
-      response.type === "dismiss" ||
-      response.type === "cancel"
-    ) {
+    // -------------------------------------------------------
+    // CANCEL / DISMISS
+    // -------------------------------------------------------
+
+    if (response.type === "dismiss" || response.type === "cancel") {
+      console.log("[GoogleAuth] Google login cancelled");
+
       setLoading(false);
     }
   }, [response]);
 
-  const fetchGoogleProfile =
-    async (accessToken: string) => {
-      try {
-        setLoading(true);
+  // ---------------------------------------------------------
+  // FETCH GOOGLE PROFILE
+  // ---------------------------------------------------------
 
-        const res = await fetch(
-          "https://www.googleapis.com/userinfo/v2/me",
-          {
-            headers: {
-              Authorization:
-                `Bearer ${accessToken}`,
-            },
-          }
-        );
+  const fetchGoogleProfile = async (accessToken: string) => {
+    try {
+      setLoading(true);
+      setError(null);
 
-        if (!res.ok) {
-          throw new Error(
-            `Google profile request failed: ${res.status}`
-          );
-        }
+      console.log("[GoogleAuth] Fetching Google profile...");
 
-        const data = await res.json();
+      const res = await fetch("https://www.googleapis.com/userinfo/v2/me", {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
 
-        setUserInfo({
-          name: data.name || "",
-          email: data.email || "",
-          picture: data.picture,
-        });
+      console.log("[GoogleAuth] Profile response:", res.status);
 
-        setError(null);
-      } catch (err) {
-        console.error(
-          "[GoogleAuth] Profile error:",
-          err
-        );
-
-        setError(
-          "Failed to fetch Google profile."
-        );
-      } finally {
-        setLoading(false);
+      if (!res.ok) {
+        throw new Error(`Google profile request failed: ${res.status}`);
       }
-    };
 
-  const signInWithGoogle =
-    async () => {
-      try {
-        setError(null);
-        setLoading(true);
+      const data = await res.json();
 
-        if (!request) {
-          throw new Error(
-            "Google authentication is not ready."
-          );
-        }
+      console.log("[GoogleAuth] Google user:", data);
 
-        await promptAsync();
-      } catch (err) {
-        console.error(
-          "[GoogleAuth] Sign-in error:",
-          err
-        );
+      // -----------------------------------------------------
+      // GET NAME
+      // -----------------------------------------------------
 
-        setError(
-          "Google sign-in failed."
-        );
+      const name = typeof data.name === "string" ? data.name : "";
+
+      // -----------------------------------------------------
+      // GET EMAIL
+      // -----------------------------------------------------
+
+      const email = typeof data.email === "string" ? data.email : "";
+
+      // -----------------------------------------------------
+      // EMAIL REQUIRED
+      // -----------------------------------------------------
+
+      if (!email) {
+        throw new Error("Google account email was not received.");
+      }
+
+      // -----------------------------------------------------
+      // SAVE USER INFO
+      // -----------------------------------------------------
+
+      const googleUser: GoogleUserInfo = {
+        name,
+        email,
+        picture: typeof data.picture === "string" ? data.picture : undefined,
+      };
+
+      console.log("[GoogleAuth] User info:", googleUser);
+
+      setUserInfo(googleUser);
+
+      setError(null);
+    } catch (err) {
+      console.error("[GoogleAuth] Profile error:", err);
+
+      setUserInfo(null);
+
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("Failed to fetch Google profile.");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // ---------------------------------------------------------
+  // SIGN IN WITH GOOGLE
+  // ---------------------------------------------------------
+
+  const signInWithGoogle = async () => {
+    try {
+      setError(null);
+      setLoading(true);
+
+      console.log("[GoogleAuth] Starting Google login...");
+
+      console.log("[GoogleAuth] Redirect URI:", redirectUri);
+
+      // -----------------------------------------------------
+      // CHECK REQUEST
+      // -----------------------------------------------------
+
+      if (!request) {
+        console.log("[GoogleAuth] Request is not ready");
 
         setLoading(false);
+
+        setError("Google authentication is not ready. Please wait a moment.");
+
+        return;
       }
-    };
+
+      // -----------------------------------------------------
+      // OPEN GOOGLE LOGIN
+      // -----------------------------------------------------
+
+      const result = await promptAsync();
+
+      console.log("[GoogleAuth] Prompt result:", result);
+    } catch (err) {
+      console.error("[GoogleAuth] Sign-in error:", err);
+
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("Google sign-in failed.");
+      }
+
+      setLoading(false);
+    }
+  };
+
+  // ---------------------------------------------------------
+  // RESET
+  // ---------------------------------------------------------
 
   const reset = () => {
     setUserInfo(null);
     setError(null);
     setLoading(false);
   };
+
+  // ---------------------------------------------------------
+  // RETURN
+  // ---------------------------------------------------------
 
   return {
     signInWithGoogle,
@@ -185,5 +263,6 @@ export function useGoogleAuth() {
     error,
     reset,
     isReady: !!request,
+    redirectUri,
   };
 }
