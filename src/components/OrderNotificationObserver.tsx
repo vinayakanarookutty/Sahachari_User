@@ -89,11 +89,8 @@ export function OrderNotificationObserver() {
           const currentStatus = order.status;
 
           if (!prevStatus) {
-            // New order found!
-            await scheduleOrderNotification(
-              "New Order Placed 📦",
-              `Order #${order.checkoutId || orderId.slice(-6)} has been placed successfully.`
-            );
+            // Record status silently for newly observed orders
+            // (Placement notification is handled at checkout time)
             updatedStatuses[orderId] = currentStatus;
             hasChanges = true;
           } else if (prevStatus !== currentStatus) {
