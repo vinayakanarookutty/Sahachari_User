@@ -16,7 +16,6 @@ import {
 } from "react-native";
 
 import { useRegister } from "../../hooks/useAuth";
-import { useGoogleAuth } from "../../hooks/useGoogleAuth";
 import { Role } from "../../types/user";
 
 import {
@@ -34,7 +33,6 @@ import {
   AlertCircle,
   ArrowLeft,
   ArrowRight,
-  ShieldCheck,
 } from "lucide-react-native";
 
 import { useTranslation } from "react-i18next";
@@ -59,11 +57,14 @@ export default function Register() {
   const [modalVisible, setModalVisible] = useState(false);
   const [pincodeSearch, setPincodeSearch] = useState("");
   const [manualPincode, setManualPincode] = useState("");
-  const [selectedPincodes, setSelectedPincodes] = useState<string[]>(
-    []
-  );
 
-  const [availablePincodes, setAvailablePincodes] = useState<string[]>([
+  const [selectedPincodes, setSelectedPincodes] = useState<
+    string[]
+  >([]);
+
+  const [availablePincodes, setAvailablePincodes] = useState<
+    string[]
+  >([
     "670562",
     "670563",
     "670567",
@@ -81,18 +82,17 @@ export default function Register() {
     password: "",
   });
 
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
-
-  // ---------------------------------------------------------
-  // GOOGLE AUTH
-  // ---------------------------------------------------------
-  const googleAuth = useGoogleAuth();
+  const [errorMsg, setErrorMsg] = useState<string | null>(
+    null
+  );
 
   // ---------------------------------------------------------
   // LOAD PINCODES
   // ---------------------------------------------------------
   useEffect(() => {
-    fetch(`${API_BASE_URL}/super-admin/auth/public/pincodes`)
+    fetch(
+      `${API_BASE_URL}/super-admin/auth/public/pincodes`
+    )
       .then((res) => {
         if (!res.ok) {
           throw new Error("Failed to load pincodes");
@@ -114,62 +114,19 @@ export default function Register() {
   }, []);
 
   // ---------------------------------------------------------
-  // GOOGLE USER INFO
-  //
-  // IMPORTANT:
-  // When Google authentication succeeds:
-  //
-  // 1. Fill name
-  // 2. Fill email
-  // 3. Automatically move to STEP 2
-  // ---------------------------------------------------------
-  useEffect(() => {
-    if (!googleAuth.userInfo) {
-      return;
-    }
-
-    const googleName = googleAuth.userInfo.name || "";
-    const googleEmail = googleAuth.userInfo.email || "";
-
-    console.log(
-      "[Register] Google user:",
-      googleName,
-      googleEmail
-    );
-
-    setForm((prev) => ({
-      ...prev,
-      name: googleName || prev.name,
-      email: googleEmail || prev.email,
-    }));
-
-    setErrorMsg(null);
-
-    // Automatically go to Step 2
-    if (googleName && googleEmail) {
-      setStep(2);
-    }
-  }, [googleAuth.userInfo]);
-
-  // ---------------------------------------------------------
-  // GOOGLE ERROR
-  // ---------------------------------------------------------
-  useEffect(() => {
-    if (googleAuth.error) {
-      setErrorMsg(googleAuth.error);
-    }
-  }, [googleAuth.error]);
-
-  // ---------------------------------------------------------
   // STEP 1 -> STEP 2
   // ---------------------------------------------------------
   const goToStep2 = () => {
-    if (!form.name || !form.email) {
-      setErrorMsg(t("Please fill in all required fields") || "Please fill all required fields");
+    if (!form.name.trim() || !form.email.trim()) {
+      setErrorMsg(
+        t("Please fill in all required fields") ||
+          "Please fill all required fields"
+      );
       return;
     }
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const emailRegex =
+      /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
     if (!emailRegex.test(form.email.trim())) {
       setErrorMsg(
@@ -198,18 +155,24 @@ export default function Register() {
       finalPincodes.push(cleanManual);
     }
 
-    // Validation
+    // -------------------------------------------------------
+    // VALIDATION
+    // -------------------------------------------------------
     if (
       !form.name.trim() ||
       !form.email.trim() ||
       !form.password ||
       finalPincodes.length === 0
     ) {
-      setErrorMsg(t("Please fill in all required fields") || "Please fill all required fields including Pincode");
+      setErrorMsg(
+        t("Please fill in all required fields") ||
+          "Please fill all required fields including Pincode"
+      );
       return;
     }
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const emailRegex =
+      /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
     if (!emailRegex.test(form.email.trim())) {
       setErrorMsg(
@@ -265,8 +228,12 @@ export default function Register() {
             err?.response?.data?.message;
 
           if (Array.isArray(backendMsg)) {
-            setErrorMsg(backendMsg.join(", "));
-          } else if (typeof backendMsg === "string") {
+            setErrorMsg(
+              backendMsg.join(", ")
+            );
+          } else if (
+            typeof backendMsg === "string"
+          ) {
             setErrorMsg(backendMsg);
           } else if (err?.message) {
             setErrorMsg(err.message);
@@ -279,11 +246,6 @@ export default function Register() {
       }
     );
   };
-
-  // ---------------------------------------------------------
-  // LOADING
-  // ---------------------------------------------------------
-  const socialLoading = googleAuth.loading;
 
   // ---------------------------------------------------------
   // PASSWORD STRENGTH
@@ -402,7 +364,9 @@ export default function Register() {
             <View className="items-center mt-2">
               <View className="w-20 h-20 bg-white rounded-2xl p-2 shadow-md mb-3 items-center justify-center">
                 <Image
-                  source={require("../../../assets/sahachari.jpeg")}
+                  source={require(
+                    "../../../assets/sahachari.jpeg"
+                  )}
                   style={{
                     width: "100%",
                     height: "100%",
@@ -575,7 +539,8 @@ export default function Register() {
                     activeOpacity={0.85}
                   >
                     <Text className="text-white text-base font-bold tracking-wide mr-2">
-                      {t("Next") || "Next Step"}
+                      {t("Next") ||
+                        "Next Step"}
                     </Text>
 
                     <ArrowRight
@@ -583,69 +548,6 @@ export default function Register() {
                       color="#FFFFFF"
                     />
                   </TouchableOpacity>
-
-                  {/* Divider */}
-                  <View className="flex-row items-center my-4">
-                    <View className="flex-1 h-px bg-gray-200" />
-
-                    <Text className="px-3 text-xs text-gray-400 font-semibold uppercase">
-                      {t("or") ||
-                        "or continue with"}
-                    </Text>
-
-                    <View className="flex-1 h-px bg-gray-200" />
-                  </View>
-
-                  {/* Google */}
-                  <View>
-                    <TouchableOpacity
-                      className="flex-row items-center justify-center bg-white border border-gray-200 rounded-2xl py-3.5 px-4 mb-3"
-                      style={{
-                        shadowColor: "#000",
-                        shadowOffset: {
-                          width: 0,
-                          height: 2,
-                        },
-                        shadowOpacity: 0.05,
-                        shadowRadius: 4,
-                        elevation: 1,
-                      }}
-                      onPress={
-                        googleAuth.signInWithGoogle
-                      }
-                      disabled={
-                        socialLoading ||
-                        !googleAuth.isReady ||
-                        register.isPending
-                      }
-                      activeOpacity={0.75}
-                    >
-                      {googleAuth.loading ? (
-                        <ActivityIndicator
-                          size="small"
-                          color="#4285F4"
-                        />
-                      ) : (
-                        <>
-                          <Image
-                            source={{
-                              uri: "https://cdn-icons-png.flaticon.com/512/300/300221.png",
-                            }}
-                            style={{
-                              width: 20,
-                              height: 20,
-                              marginRight: 10,
-                            }}
-                          />
-
-                          <Text className="text-sm font-semibold text-gray-700">
-                            {t("Google") ||
-                              "Continue with Google"}
-                          </Text>
-                        </>
-                      )}
-                    </TouchableOpacity>
-                  </View>
 
                   {/* Login */}
                   <View className="items-center mt-5">
@@ -677,24 +579,18 @@ export default function Register() {
               ================================================== */}
               {step === 2 && (
                 <View>
-                  {/* Google badge */}
-                  <View className="bg-blue-50 border border-blue-200 rounded-2xl p-3.5 mb-4 flex-row items-center">
-                    <ShieldCheck
-                      size={20}
-                      color="#2563EB"
-                    />
+                  {/* Registration Info */}
+                  <View className="bg-blue-50 border border-blue-200 rounded-2xl p-3.5 mb-4">
+                    <Text className="text-blue-900 text-xs font-medium">
+                      {t(
+                        "registering_account"
+                      ) ||
+                        "Registering Account"}
+                    </Text>
 
-                    <View className="ml-2.5 flex-1">
-                      <Text className="text-blue-900 text-xs font-medium">
-                        {googleAuth.userInfo
-                          ? "Authenticated via Google"
-                          : "Registering Account"}
-                      </Text>
-
-                      <Text className="text-blue-950 text-sm font-bold">
-                        {form.name} ({form.email})
-                      </Text>
-                    </View>
+                    <Text className="text-blue-950 text-sm font-bold mt-1">
+                      {form.name} ({form.email})
+                    </Text>
                   </View>
 
                   {/* Pincode */}
@@ -773,16 +669,13 @@ export default function Register() {
                               );
                             }
 
-                            setManualPincode(
-                              ""
-                            );
+                            setManualPincode("");
                             setErrorMsg(null);
                           }}
                           className="bg-blue-600 px-3 py-1.5 rounded-xl ml-2 active:bg-blue-700"
                         >
                           <Text className="text-white text-xs font-bold">
-                            {t("add") ||
-                              "Add"}
+                            {t("add") || "Add"}
                           </Text>
                         </TouchableOpacity>
                       )}
@@ -1057,7 +950,8 @@ export default function Register() {
                 </Text>
 
                 <Text className="text-xs text-gray-500">
-                  Choose pincodes where you want service
+                  Choose pincodes where you want
+                  service
                 </Text>
               </View>
 
@@ -1200,8 +1094,7 @@ export default function Register() {
             >
               <Text className="text-white text-base font-bold">
                 {t("done") || "Done"} (
-                {selectedPincodes.length}{" "}
-                Selected)
+                {selectedPincodes.length} Selected)
               </Text>
             </TouchableOpacity>
           </View>
