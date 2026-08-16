@@ -4,7 +4,7 @@
     "slug": "customers",
     "version": "1.0.34",
     "orientation": "portrait",
-    "icon": "./assets/sahachari.jpeg",
+    "icon": "./assets/sahachari.png",
     "scheme": "customers",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
@@ -17,20 +17,20 @@
       "package": "com.corestoneinnovation.sahachariuser",
       "versionCode": 34,
       "adaptiveIcon": {
-        "foregroundImage": "./assets/sahachari.jpeg",
+        "foregroundImage": "./assets/sahachari.png",
         "backgroundColor": "#ffffff"
       },
       "softwareKeyboardLayoutMode": "resize",
       "edgeToEdgeEnabled": true
     },
     "splash": {
-      "image": "./assets/sahachari.jpeg",
+      "image": "./assets/sahachari.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
     "web": {
       "bundler": "metro",
-      "favicon": "./assets/sahachari.jpeg"
+      "favicon": "./assets/sahachari.png"
     },
     "plugins": [
       "expo-router",
@@ -38,7 +38,7 @@
       [
         "expo-notifications",
         {
-          "icon": "./assets/sahachari.jpeg",
+          "icon": "./assets/sahachari.png",
           "color": "#2563EB"
         }
       ],
