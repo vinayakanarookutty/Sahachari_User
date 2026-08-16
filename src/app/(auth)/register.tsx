@@ -626,7 +626,7 @@ export default function Register() {
                         className="flex-1 text-base text-gray-900 ml-2.5 py-0.5"
                         placeholder={
                           t(
-                            "enter_pincode"
+                            "Enter 6-digit Pincode"
                           ) ||
                           "Enter 6-digit Pincode"
                         }
@@ -696,7 +696,7 @@ export default function Register() {
 
                         <Text className="text-xs font-semibold text-slate-600 ml-2">
                           {t(
-                            "browse_serviceable_areas"
+                            "Browse available service areas"
                           ) ||
                             "Browse available service areas"}
                         </Text>
@@ -883,7 +883,7 @@ export default function Register() {
                     ) : (
                       <Text className="text-white text-base font-bold tracking-wide">
                         {t(
-                          "complete_registration"
+                          "Complete Registration"
                         ) ||
                           "Complete Registration"}
                       </Text>
@@ -902,7 +902,7 @@ export default function Register() {
                       <Text className="text-blue-600 font-semibold text-xs">
                         ←{" "}
                         {t(
-                          "change_email_or_name"
+                          "Edit Name or Email"
                         ) ||
                           "Edit Name or Email"}
                       </Text>

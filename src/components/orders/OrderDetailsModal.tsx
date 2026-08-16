@@ -1,17 +1,25 @@
 import {
+  Calendar,
+  CheckCircle,
   ChevronLeft,
+  Clock,
   CreditCard,
+  Gift,
   MapPin,
   Package,
   Phone,
   StickyNote,
+  Sparkles,
+  Truck,
   X,
+  XCircle,
 } from "lucide-react-native";
 
 import {
   ActivityIndicator,
   Image,
   Modal,
+  Platform,
   Pressable,
   ScrollView,
   Text,
@@ -21,32 +29,30 @@ import {
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { getStatusColor } from "./OrderCard";
 import { getImageUrl } from "@/utils/image";
+import { useAppFonts } from "@/hooks/useAppFonts";
 
-const getStatusEmoji = (status: string) => {
-  const emojis: Record<string, string> = {
-    PLACED: "📦",
-    CONFIRMED: "✅",
-    SHIPPED: "🚚",
-    DELIVERED: "🎉",
-    CANCELLED: "❌",
-  };
-
-  return emojis[status] || "📋";
+// ─── Status Config ───
+const STATUS_CONFIG: Record<string, {
+  bgColors: [string, string];
+  textColor: string;
+  iconColor: string;
+  icon: any;
+}> = {
+  PLACED:    { bgColors: ["#FEF3C7", "#FDE68A"], textColor: "#92400E", iconColor: "#D97706", icon: Clock },
+  CONFIRMED: { bgColors: ["#DBEAFE", "#BFDBFE"], textColor: "#1E40AF", iconColor: "#2563EB", icon: CheckCircle },
+  SHIPPED:   { bgColors: ["#EDE9FE", "#DDD6FE"], textColor: "#5B21B6", iconColor: "#7C3AED", icon: Truck },
+  DELIVERED: { bgColors: ["#D1FAE5", "#A7F3D0"], textColor: "#065F46", iconColor: "#059669", icon: Gift },
+  CANCELLED: { bgColors: ["#FEE2E2", "#FECACA"], textColor: "#991B1B", iconColor: "#DC2626", icon: XCircle },
 };
 
-const getStatusTextColor = (status: string) => {
-  const colors: Record<string, string> = {
-    PLACED: "text-yellow-800",
-    CONFIRMED: "text-blue-800",
-    SHIPPED: "text-purple-800",
-    DELIVERED: "text-green-800",
-    CANCELLED: "text-red-800",
-  };
-
-  return colors[status] || "text-gray-800";
+const DEFAULT_STATUS = {
+  bgColors: ["#F1F5F9", "#E2E8F0"] as [string, string],
+  textColor: "#475569",
+  iconColor: "#64748B",
+  icon: Package,
 };
 
 export function OrderDetailsModal({
@@ -58,7 +64,22 @@ export function OrderDetailsModal({
   isCancelling,
 }: any) {
   const router = useRouter();
-  const {t} = useTranslation();
+  const insets = useSafeAreaInsets();
+  const { t } = useTranslation();
+  const { styleRegular, styleBold, styleMedium } = useAppFonts();
+
+  const formatDate = (dateString: string) => {
+    if (!dateString) return "";
+    const date = new Date(dateString);
+    return date.toLocaleDateString("en-IN", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    });
+  };
+
+  const statusConfig = order ? (STATUS_CONFIG[order.status] || DEFAULT_STATUS) : DEFAULT_STATUS;
+  const StatusIcon = statusConfig.icon;
 
   return (
     <Modal
@@ -66,268 +87,420 @@ export function OrderDetailsModal({
       animationType="slide"
       onRequestClose={onClose}
     >
-      <SafeAreaView edges={["top", "bottom"]} className="flex-1 bg-gray-50" >
-        {/* HEADER */}
+      <View style={{ flex: 1, backgroundColor: "#F8FAFC" }}>
+
+        {/* ══════════════════════════════════════════════════════════
+            HERO HEADER — Premium Gradient
+        ══════════════════════════════════════════════════════════ */}
         <LinearGradient
           colors={["#2563EB", "#1D4ED8"]}
-          style={{ paddingBottom: 16 }}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={{ paddingTop: insets.top + 12, paddingBottom: 24, zIndex: 10 }}
         >
-          <View className="flex-row items-center px-4 pt-4">
-
+          <View style={{ flexDirection: "row", alignItems: "center", paddingHorizontal: 18 }}>
             {/* BACK BUTTON */}
             <Pressable
               onPress={onClose}
-              className="bg-white/20 p-2 rounded-full"
+              style={({ pressed }) => ({
+                backgroundColor: pressed ? "rgba(255,255,255,0.25)" : "rgba(255,255,255,0.12)",
+                padding: 10, borderRadius: 16,
+                borderWidth: 1, borderColor: "rgba(255,255,255,0.15)",
+              })}
             >
               <ChevronLeft size={22} color="#fff" />
             </Pressable>
 
             {/* TITLE */}
-            <View className="flex-1 items-center">
-              <Text className="text-2xl font-bold text-white">
+            <View style={{ flex: 1, alignItems: "center" }}>
+              <Text style={[{
+                fontSize: 20, color: "#FFFFFF", letterSpacing: -0.2,
+              }, styleBold]}>
                 {t("order_details")}
               </Text>
-
-              <Text className="text-blue-100 text-sm mt-1">
-                {t("track_order")}
-              </Text>
+              <View style={{
+                backgroundColor: "rgba(255,255,255,0.12)",
+                borderRadius: 10, paddingHorizontal: 8, paddingVertical: 3,
+                flexDirection: "row", alignItems: "center", marginTop: 4,
+                borderWidth: 0.5, borderColor: "rgba(255,255,255,0.2)",
+              }}>
+                <Sparkles size={8} color="#FBBF24" style={{ marginRight: 4 }} />
+                <Text style={[{
+                  fontSize: 10, color: "rgba(255,255,255,0.9)",
+                  letterSpacing: 0.5,
+                }, styleMedium]}>
+                  {t("track_order")}
+                </Text>
+              </View>
             </View>
 
-            <View className="w-10" />
+            <View style={{ width: 42 }} />
           </View>
         </LinearGradient>
 
-        {!order || isLoading ? (
-          <View className="flex-1 items-center justify-center">
-            <View className="bg-white p-8 rounded-3xl shadow-lg items-center">
-              <ActivityIndicator
-                size="large"
-                color="#2563eb"
-              />
-
-              <Text className="text-gray-500 mt-4 font-medium">
-                {t("loading_details")}
-              </Text>
-            </View>
-          </View>
-        ) : (
-          <ScrollView
-            className="flex-1"
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={{ paddingBottom: 40 }}
-          >
-
-            {/* ORDER STATUS */}
-            <View className="mx-4 mt-4 bg-white rounded-2xl p-5 shadow-sm">
-              {/* ORDER ID */}
-              <View className="mb-4">
-                <Text className="text-gray-500 text-sm mb-1">
-                  {t("order_id")}
-                </Text>
-                <Text className="text-gray-800 font-bold text-lg" numberOfLines={1} >
-                  #{order.checkoutId}
+        {/* ══════════════════════════════════════════════════════════
+            BODY — Curved Content Sheet
+        ══════════════════════════════════════════════════════════ */}
+        <View style={{
+          flex: 1, backgroundColor: "#F8FAFC",
+          marginTop: -12, borderTopLeftRadius: 24, borderTopRightRadius: 24,
+          overflow: "hidden",
+        }}>
+          {!order || isLoading ? (
+            <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
+              <View style={{
+                backgroundColor: "#FFFFFF", paddingHorizontal: 48, paddingVertical: 40,
+                borderRadius: 28, alignItems: "center",
+                borderWidth: 1, borderColor: "#F1F5F9",
+                ...Platform.select({
+                  ios: { shadowColor: "#1D4ED8", shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.08, shadowRadius: 24 },
+                  android: { elevation: 6 },
+                }),
+              }}>
+                <View style={{
+                  width: 56, height: 56, borderRadius: 28,
+                  backgroundColor: "#EFF6FF", alignItems: "center",
+                  justifyContent: "center", marginBottom: 16,
+                }}>
+                  <ActivityIndicator size="large" color="#2563EB" />
+                </View>
+                <Text style={[{ color: "#64748B", fontSize: 14 }, styleMedium]}>
+                  {t("loading_details")}
                 </Text>
               </View>
+            </View>
+          ) : (
+            <ScrollView
+              style={{ flex: 1 }}
+              showsVerticalScrollIndicator={false}
+              contentContainerStyle={{ paddingBottom: insets.bottom + 40, paddingTop: 18 }}
+            >
 
-              {/* STATUS */}
-              <View>
-                <Text className="text-gray-500 text-sm mb-2">
-                  {t("order_status")}
-                </Text>
-                <View className={`px-4 py-2 rounded-full self-start ${getStatusColor(order.status)}`} >
-                  <Text className={`font-bold text-sm ${getStatusTextColor(order.status)}`} >
-                    {getStatusEmoji(order.status)} {order.status}
+              {/* ── Order ID + Status Card ── */}
+              <View style={{
+                marginHorizontal: 18, backgroundColor: "#FFFFFF",
+                borderRadius: 24, overflow: "hidden",
+                borderWidth: 1, borderColor: "#F1F5F9",
+                ...Platform.select({
+                  ios: { shadowColor: "#1D4ED8", shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.06, shadowRadius: 12 },
+                  android: { elevation: 4 },
+                }),
+              }}>
+                <LinearGradient
+                  colors={["#F8FAFC", "#F1F5F9"]}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={{ padding: 20 }}
+                >
+                  {/* Order ID */}
+                  <View style={{ marginBottom: 16 }}>
+                    <Text style={[{
+                      fontSize: 10, color: "#94A3B8",
+                      letterSpacing: 1.2, textTransform: "uppercase", marginBottom: 4,
+                    }, styleMedium]}>
+                      {t("order_id")}
+                    </Text>
+                    <Text style={[{
+                      fontSize: 18, color: "#0F172A", letterSpacing: -0.3,
+                    }, styleBold]} numberOfLines={1}>
+                      #{order.checkoutId}
+                    </Text>
+                  </View>
+
+                  {/* Status */}
+                  <View>
+                    <Text style={[{
+                      fontSize: 10, color: "#94A3B8",
+                      letterSpacing: 1.2, textTransform: "uppercase", marginBottom: 8,
+                    }, styleMedium]}>
+                      {t("order_status")}
+                    </Text>
+                    <LinearGradient
+                      colors={statusConfig.bgColors}
+                      start={{ x: 0, y: 0 }}
+                      end={{ x: 1, y: 1 }}
+                      style={{
+                        paddingHorizontal: 16, paddingVertical: 10, borderRadius: 20,
+                        flexDirection: "row", alignItems: "center", alignSelf: "flex-start",
+                        borderWidth: 1, borderColor: "rgba(255,255,255,0.6)",
+                        ...Platform.select({
+                          ios: { shadowColor: statusConfig.iconColor, shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.15, shadowRadius: 6 },
+                          android: { elevation: 2 },
+                        }),
+                      }}
+                    >
+                      <StatusIcon size={16} color={statusConfig.iconColor} strokeWidth={2.5} style={{ marginRight: 6 }} />
+                      <Text style={[{
+                        fontSize: 13, color: statusConfig.textColor, letterSpacing: 0.3,
+                      }, styleBold]}>
+                        {order.status}
+                      </Text>
+                    </LinearGradient>
+                  </View>
+
+                  {/* Order Date */}
+                  {order.createdAt && (
+                    <View style={{
+                      flexDirection: "row", alignItems: "center",
+                      marginTop: 16, paddingTop: 14,
+                      borderTopWidth: 1, borderTopColor: "#E2E8F0",
+                    }}>
+                      <LinearGradient
+                        colors={["#EDE9FE", "#DDD6FE"]}
+                        style={{
+                          width: 32, height: 32, borderRadius: 10,
+                          alignItems: "center", justifyContent: "center", marginRight: 10,
+                        }}
+                      >
+                        <Calendar size={14} color="#7C3AED" strokeWidth={2.5} />
+                      </LinearGradient>
+                      <Text style={[{ fontSize: 12, color: "#94A3B8", marginRight: 6 }, styleRegular]}>
+                        {t("order_date")}
+                      </Text>
+                      <Text style={[{ fontSize: 13, color: "#334155" }, styleBold]}>
+                        {formatDate(order.createdAt)}
+                      </Text>
+                    </View>
+                  )}
+                </LinearGradient>
+              </View>
+
+              {/* ── Order Items Card ── */}
+              <View style={{
+                marginHorizontal: 18, marginTop: 14, backgroundColor: "#FFFFFF",
+                borderRadius: 24, padding: 20,
+                borderWidth: 1, borderColor: "#F1F5F9",
+                ...Platform.select({
+                  ios: { shadowColor: "#1D4ED8", shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.06, shadowRadius: 12 },
+                  android: { elevation: 4 },
+                }),
+              }}>
+                {/* Section Header */}
+                <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 16 }}>
+                  <LinearGradient
+                    colors={["#D1FAE5", "#A7F3D0"]}
+                    style={{
+                      width: 36, height: 36, borderRadius: 12,
+                      alignItems: "center", justifyContent: "center", marginRight: 12,
+                    }}
+                  >
+                    <Package size={18} color="#059669" strokeWidth={2.5} />
+                  </LinearGradient>
+                  <Text style={[{ fontSize: 18, color: "#0F172A", letterSpacing: -0.2 }, styleBold]}>
+                    {t("order_items")}
                   </Text>
                 </View>
-              </View>
-            </View>
 
-            {/* ORDER ITEMS */}
-            <View className="mx-4 mt-4 bg-white rounded-2xl shadow-sm p-5">
-              <View className="flex-row items-center mb-4">
-                <View className="bg-green-100 p-2 rounded-lg mr-3">
-                  <Package size={20} color="#10B981" />
-                </View>
-
-                <Text className="font-bold text-xl text-gray-800">
-                  {t("order_items")}
-                </Text>
-              </View>
-
-              {order.items?.map(
-                (item: any, idx: number) => (
-                  <View key={idx} className="flex-row items-center bg-gray-50 rounded-2xl p-3 mb-3" >
-                    {/* <Image
-                      source={{
-                        // uri:
-                        //   item.productId?.images?.[0],
-                        uri:
-                          item.productId?.images?.[0]?.startsWith("http")
-                            ? item.productId.images[0]
-                            : `${process.env.EXPO_PUBLIC_S3_BASE_URL}/${item.productId?.images?.[0]}`,
-                      }}
-                      className="w-20 h-20 rounded-xl bg-gray-100"
-                    /> */}
+                {/* Item rows */}
+                {order.items?.map((item: any, idx: number) => (
+                  <View key={idx} style={{
+                    flexDirection: "row", alignItems: "center",
+                    backgroundColor: "#F8FAFC", borderRadius: 18, padding: 12,
+                    marginBottom: idx < order.items.length - 1 ? 10 : 0,
+                    borderWidth: 1, borderColor: "#F1F5F9",
+                  }}>
                     <Image
-                      source={{
-                        uri: getImageUrl(item.productId?.images?.[0])
-                      }}
+                      source={{ uri: getImageUrl(item.productId?.images?.[0]) }}
                       style={{
-                        width: 80,
-                        height: 80,
-                        borderRadius: 12,
-                        backgroundColor: "#f3f4f6",
+                        width: 72, height: 72, borderRadius: 16,
+                        backgroundColor: "#E2E8F0",
                       }}
                       resizeMode="cover"
                     />
-
-                    <View className="flex-1 ml-3 justify-between">
-
-                      <Text
-                        className="font-semibold text-gray-800 text-base"
-                        numberOfLines={2}
-                      >
+                    <View style={{ flex: 1, marginLeft: 14, justifyContent: "center" }}>
+                      <Text style={[{
+                        fontSize: 14, color: "#1E293B", marginBottom: 3,
+                      }, styleBold]} numberOfLines={2}>
                         {item.productId?.name}
                       </Text>
-
-                      <Text className="text-gray-500 mt-1">
+                      <Text style={[{
+                        fontSize: 12, color: "#94A3B8",
+                      }, styleRegular]}>
                         {t("qty")}: {item.quantity}
                       </Text>
-
-                      <Text className="text-blue-600 font-bold text-lg mt-2">
+                      <Text style={[{
+                        fontSize: 16, color: "#1D4ED8", marginTop: 4,
+                      }, styleBold]}>
                         ₹{(item.quantity * item.price)?.toFixed(2)}
                       </Text>
                     </View>
                   </View>
-                )
-              )}
-            </View>
-
-            {/* DELIVERY ADDRESS */}
-            <View className="mx-4 mt-4 bg-white rounded-2xl shadow-sm p-5">
-              <View className="flex-row items-center mb-4">
-                <View className="bg-red-100 p-2 rounded-lg mr-3">
-                  <MapPin size={20} color="#EF4444" />
-                </View>
-
-                <Text className="font-bold text-xl text-gray-800">
-                  {t("delivery_address")}
-                </Text>
+                ))}
               </View>
 
-              <View className="bg-gray-50 rounded-2xl p-4">
-
-                <Text className="text-gray-800 leading-6 text-base mb-3">
-                  {order.deliveryAddress?.street}
-                </Text>
-
-                <Text className="text-gray-700 font-medium mb-2">
-                  {order.deliveryAddress?.place}
-                </Text>
-
-                <Text className="text-gray-700 font-medium mb-3">
-                  {order.deliveryAddress?.city},{" "}
-                  {order.deliveryAddress?.zipCode}
-                </Text>
-
-                <View className="flex-row items-center pt-3 border-t border-gray-200">
-                  <View className="bg-blue-100 p-2 rounded-lg mr-3">
-                    <Phone size={16} color="#3B82F6" />
-                  </View>
-
-                  <Text className="text-gray-700 font-semibold">
-                    {order.deliveryAddress?.phone}
+              {/* ── Delivery Address Card ── */}
+              <View style={{
+                marginHorizontal: 18, marginTop: 14, backgroundColor: "#FFFFFF",
+                borderRadius: 24, padding: 20,
+                borderWidth: 1, borderColor: "#F1F5F9",
+                ...Platform.select({
+                  ios: { shadowColor: "#1D4ED8", shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.06, shadowRadius: 12 },
+                  android: { elevation: 4 },
+                }),
+              }}>
+                {/* Section Header */}
+                <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 16 }}>
+                  <LinearGradient
+                    colors={["#FEE2E2", "#FECACA"]}
+                    style={{
+                      width: 36, height: 36, borderRadius: 12,
+                      alignItems: "center", justifyContent: "center", marginRight: 12,
+                    }}
+                  >
+                    <MapPin size={18} color="#EF4444" strokeWidth={2.5} />
+                  </LinearGradient>
+                  <Text style={[{ fontSize: 18, color: "#0F172A", letterSpacing: -0.2 }, styleBold]}>
+                    {t("delivery_address")}
                   </Text>
                 </View>
 
-                {order.deliveryAddress?.notes && (
-                  <View className="mt-3 pt-3 border-t border-gray-200">
-                    <View className="flex-row items-start">
-                      <StickyNote size={16} color="#F59E0B" />
+                {/* Address body */}
+                <View style={{
+                  backgroundColor: "#F8FAFC", borderRadius: 18, padding: 16,
+                  borderWidth: 1, borderColor: "#F1F5F9",
+                }}>
+                  <Text style={[{
+                    fontSize: 14, color: "#1E293B", lineHeight: 22, marginBottom: 6,
+                  }, styleMedium]}>
+                    {order.deliveryAddress?.street}
+                  </Text>
 
-                      <View className="flex-1 ml-2">
-                        <Text className="text-gray-500 text-xs font-semibold mb-1 uppercase tracking-wide">
-                          {t("delivery_note")}
-                        </Text>
-                        <Text className="text-gray-700 italic">
-                          {order.deliveryAddress.notes}
-                        </Text>
+                  <Text style={[{ fontSize: 13, color: "#475569", marginBottom: 4 }, styleRegular]}>
+                    {order.deliveryAddress?.place}
+                  </Text>
+
+                  <Text style={[{ fontSize: 13, color: "#475569", marginBottom: 12 }, styleRegular]}>
+                    {order.deliveryAddress?.city},{" "}
+                    {order.deliveryAddress?.zipCode}
+                  </Text>
+
+                  {/* Phone */}
+                  <View style={{
+                    paddingTop: 12, borderTopWidth: 1, borderTopColor: "#E2E8F0",
+                    flexDirection: "row", alignItems: "center",
+                  }}>
+                    <LinearGradient
+                      colors={["#DBEAFE", "#BFDBFE"]}
+                      style={{
+                        width: 32, height: 32, borderRadius: 10,
+                        alignItems: "center", justifyContent: "center", marginRight: 10,
+                      }}
+                    >
+                      <Phone size={14} color="#2563EB" strokeWidth={2.5} />
+                    </LinearGradient>
+                    <Text style={[{ fontSize: 14, color: "#1E293B" }, styleBold]}>
+                      {order.deliveryAddress?.phone}
+                    </Text>
+                  </View>
+
+                  {/* Notes */}
+                  {order.deliveryAddress?.notes && (
+                    <View style={{
+                      marginTop: 12, paddingTop: 12,
+                      borderTopWidth: 1, borderTopColor: "#E2E8F0",
+                    }}>
+                      <View style={{ flexDirection: "row", alignItems: "flex-start" }}>
+                        <LinearGradient
+                          colors={["#FEF3C7", "#FDE68A"]}
+                          style={{
+                            width: 28, height: 28, borderRadius: 8,
+                            alignItems: "center", justifyContent: "center", marginRight: 10,
+                          }}
+                        >
+                          <StickyNote size={13} color="#D97706" strokeWidth={2.5} />
+                        </LinearGradient>
+                        <View style={{ flex: 1 }}>
+                          <Text style={[{
+                            fontSize: 9, color: "#94A3B8",
+                            letterSpacing: 1.2, textTransform: "uppercase", marginBottom: 3,
+                          }, styleMedium]}>
+                            {t("delivery_note")}
+                          </Text>
+                          <Text style={[{
+                            fontSize: 13, color: "#475569", fontStyle: "italic", lineHeight: 20,
+                          }, styleRegular]}>
+                            {order.deliveryAddress.notes}
+                          </Text>
+                        </View>
                       </View>
                     </View>
+                  )}
+                </View>
+              </View>
+
+              {/* ── Total Summary Card ── */}
+              <View style={{
+                marginHorizontal: 18, marginTop: 14,
+                borderRadius: 24, overflow: "hidden",
+                ...Platform.select({
+                  ios: { shadowColor: "#1D4ED8", shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.2, shadowRadius: 20 },
+                  android: { elevation: 8 },
+                }),
+              }}>
+                <LinearGradient
+                  colors={["#2563EB", "#1D4ED8"]}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={{ padding: 24, borderRadius: 24 }}
+                >
+                  {/* Items subtotal */}
+                  <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
+                    <Text style={[{ fontSize: 14, color: "rgba(255,255,255,0.7)" }, styleRegular]}>
+                      {t("items_subtotal")}
+                    </Text>
+                    <Text style={[{ fontSize: 16, color: "#FFFFFF" }, styleBold]}>
+                      ₹{order.itemsSubtotal?.toFixed(2)}
+                    </Text>
                   </View>
-                )}
-              </View>
-            </View>
 
-            {/* TOTAL */}
-            {/* <View className="mx-4 mt-4 mb-6 bg-blue-600 rounded-2xl p-6">
-              <View className="flex-row items-center justify-between">
+                  {/* Delivery charge */}
+                  <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 18 }}>
+                    <Text style={[{ fontSize: 14, color: "rgba(255,255,255,0.7)" }, styleRegular]}>
+                      {t("Delivery_Charge")}
+                    </Text>
+                    <Text style={[{ fontSize: 16, color: "#FFFFFF" }, styleBold]}>
+                      ₹{order.deliveryCharge?.toFixed(2)}
+                    </Text>
+                  </View>
 
-                <View>
-                  <Text className="text-blue-100 text-sm">
-                    Total Amount
-                  </Text>
-                  <Text className="text-white text-3xl font-bold mt-1">
-                    ₹{order.totalAmount?.toFixed(2)}
-                  </Text>
-                </View>
+                  {/* Divider */}
+                  <View style={{
+                    borderTopWidth: 1, borderTopColor: "rgba(255,255,255,0.2)",
+                    paddingTop: 18, flexDirection: "row",
+                    alignItems: "center", justifyContent: "space-between",
+                  }}>
+                    <View>
+                      <Text style={[{
+                        fontSize: 11, color: "rgba(255,255,255,0.6)",
+                        letterSpacing: 0.5, textTransform: "uppercase",
+                      }, styleMedium]}>
+                        {t("Total_Amount")}
+                      </Text>
+                      <Text style={[{
+                        fontSize: 30, color: "#FFFFFF", marginTop: 4, letterSpacing: -0.5,
+                      }, styleBold]}>
+                        ₹{order.totalAmount?.toFixed(2)}
+                      </Text>
+                    </View>
 
-                <View className="bg-white/20 p-3 rounded-full">
-                  <CreditCard size={24} color="white" />
-                </View>
-              </View>
-            </View> */}
-            {/* TOTAL SUMMARY */}
-            <View className="mx-4 mt-4 mb-6 bg-blue-600 rounded-2xl p-6">
-
-              {/* Items subtotal */}
-              <View className="flex-row justify-between items-center mb-3">
-                <Text className="text-blue-100 text-base">
-                  {t("items_subtotal")}
-                </Text>
-
-                <Text className="text-white font-bold text-lg">
-                  ₹{order.itemsSubtotal?.toFixed(2)}
-                </Text>
-              </View>
-
-              {/* Delivery charge */}
-              <View className="flex-row justify-between items-center mb-4">
-                <Text className="text-blue-100 text-base">
-                  {t("Delivery_Charge")}
-                </Text>
-
-                <Text className="text-white font-bold text-lg">
-                  ₹{order.deliveryCharge?.toFixed(2)}
-                </Text>
+                    <View style={{
+                      width: 48, height: 48, borderRadius: 24,
+                      backgroundColor: "rgba(255,255,255,0.12)",
+                      borderWidth: 1, borderColor: "rgba(255,255,255,0.2)",
+                      alignItems: "center", justifyContent: "center",
+                    }}>
+                      <CreditCard size={22} color="white" strokeWidth={1.8} />
+                    </View>
+                  </View>
+                </LinearGradient>
               </View>
 
-              {/* Divider */}
-              <View className="border-t border-white/20 pt-4 flex-row items-center justify-between">
-
-                <View>
-                  <Text className="text-blue-100 text-sm">
-                    {t("Total_Amount")}
-                  </Text>
-
-                  <Text className="text-white text-3xl font-bold mt-1">
-                    ₹{order.totalAmount?.toFixed(2)}
-                  </Text>
-                </View>
-
-                <View className="bg-white/20 p-3 rounded-full">
-                  <CreditCard size={24} color="white" />
-                </View>
-              </View>
-            </View>
-
-            {/* CANCEL BUTTON */}
-            {(order.status?.toUpperCase() === "PLACED" ||
-              order.status?.toUpperCase() === "READY" ||
-              order.status?.toUpperCase() === "ACCEPTED") && (
-                <View className="px-4 pb-6">
+              {/* ── Cancel Button ── */}
+              {(order.status?.toUpperCase() === "PLACED" ||
+                order.status?.toUpperCase() === "READY" ||
+                order.status?.toUpperCase() === "ACCEPTED") && (
+                <View style={{ paddingHorizontal: 18, paddingTop: 14, paddingBottom: 20 }}>
                   <Pressable
-                    // onPress={() => onCancel(order._id)}
                     onPress={() =>
                       router.push({
                         pathname: "/settings/complaints",
@@ -338,26 +511,44 @@ export function OrderDetailsModal({
                       })
                     }
                     disabled={isCancelling}
-                    className="rounded-2xl items-center justify-center"
-                    style={{
-                      backgroundColor: "#ed5e68",
-                      paddingVertical: 16,
-                    }}
+                    style={({ pressed }) => ({
+                      transform: [{ scale: pressed ? 0.97 : 1 }],
+                      opacity: pressed ? 0.9 : 1,
+                    })}
                   >
-                    {isCancelling ? (<ActivityIndicator color="white" />) : (
-                      <View className="flex-row items-center justify-center">
-                        <X size={20} color="white" />
-                        <Text className="text-white text-center font-bold text-lg ml-2">
-                          {t("cancel_order")}
-                        </Text>
-                      </View>
-                    )}
+                    <LinearGradient
+                      colors={["#EF4444", "#DC2626"]}
+                      start={{ x: 0, y: 0 }}
+                      end={{ x: 1, y: 1 }}
+                      style={{
+                        paddingVertical: 16, borderRadius: 20,
+                        flexDirection: "row", alignItems: "center", justifyContent: "center",
+                        ...Platform.select({
+                          ios: { shadowColor: "#DC2626", shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.3, shadowRadius: 12 },
+                          android: { elevation: 6 },
+                        }),
+                      }}
+                    >
+                      {isCancelling ? (
+                        <ActivityIndicator color="white" />
+                      ) : (
+                        <View style={{ flexDirection: "row", alignItems: "center" }}>
+                          <X size={20} color="white" strokeWidth={2.5} />
+                          <Text style={[{
+                            color: "#FFFFFF", fontSize: 16, marginLeft: 8,
+                          }, styleBold]}>
+                            {t("cancel_order")}
+                          </Text>
+                        </View>
+                      )}
+                    </LinearGradient>
                   </Pressable>
                 </View>
               )}
-          </ScrollView>
-        )}
-      </SafeAreaView>
-    </Modal >
+            </ScrollView>
+          )}
+        </View>
+      </View>
+    </Modal>
   );
 }

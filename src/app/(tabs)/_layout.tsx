@@ -3,7 +3,6 @@ import { Redirect, Tabs } from "expo-router";
 import {
   CalendarDays,
   Home,
-  Receipt,
   ShoppingBag,
   ShoppingCart,
   Briefcase
@@ -13,6 +12,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as NavigationBar from "expo-navigation-bar";
 
 import { PolicyGuard } from "../../components/policy/PolicyGuard";
+import { IndianRupee } from "../../components/common/RupeeIcon";
 import { useAuthStore } from "../../store/auth.store";
 import { Role } from "../../types/user";
 
@@ -112,7 +112,7 @@ const TABS = [
   // { name: "products", label: "Products", Icon: ShoppingBag },
   { name: "market", label: "Market", Icon: ShoppingBag},
   { name: "cart", label: "cart", Icon: ShoppingCart },
-  { name: "orders", label: "orders", Icon: Receipt },
+  { name: "orders", label: "orders", Icon: IndianRupee },
   { name: "booking", label: "Bookings", Icon: CalendarDays },
   // { name: "services", label: "services", Icon: Briefcase,},
 ] as const;

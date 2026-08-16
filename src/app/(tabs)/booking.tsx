@@ -1,45 +1,82 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import {
   AlertCircle,
   ArrowLeft,
   Calendar,
+  CalendarDays,
+  CalendarSearch,
+  ChevronRight,
   RefreshCw,
   Search,
+  Sparkles,
+  Wrench,
   X,
-  CalendarSearch,
 } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 import {
   ActivityIndicator,
+  Animated,
   FlatList,
+  Keyboard,
+  Platform,
   Pressable,
   RefreshControl,
   Text,
   TextInput,
   View,
-  Keyboard,
+  useWindowDimensions,
 } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { useBookings } from "../../hooks/useBookings";
 import { BookingCard } from "../../components/bookings/BookingCard";
+import { useAppFonts } from "../../hooks/useAppFonts";
+
+const FILTERS = [
+  { label: "All", value: "ALL" },
+  { label: "Services", value: "SERVICE" },
+  { label: "Rentals", value: "RENTAL" },
+] as const;
 
 export default function BookingScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const { width } = useWindowDimensions();
+  const { styleRegular, styleBold, styleMedium } = useAppFonts();
   const { t } = useTranslation();
 
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedFilter, setSelectedFilter] = useState<'ALL' | 'SERVICE' | 'RENTAL'>('ALL');
+  const [selectedFilter, setSelectedFilter] = useState<"ALL" | "SERVICE" | "RENTAL">("ALL");
 
   const { data = [], isLoading, isError, refetch } = useBookings();
+
+  const isSmall = width <= 360;
+  const isTablet = width > 768;
+  const horizontalPadding = isTablet ? 32 : isSmall ? 14 : 18;
+
+  // Scale animation for cards
+  const scaleAnims = useRef(
+    Array(50).fill(0).map(() => new Animated.Value(1))
+  ).current;
+
+  const handleCardPressIn = (index: number) => {
+    if (scaleAnims[index]) {
+      Animated.spring(scaleAnims[index], { toValue: 0.97, useNativeDriver: true }).start();
+    }
+  };
+
+  const handleCardPressOut = (index: number) => {
+    if (scaleAnims[index]) {
+      Animated.spring(scaleAnims[index], { toValue: 1, friction: 4, tension: 45, useNativeDriver: true }).start();
+    }
+  };
 
   const queryWords = searchQuery.toLowerCase().split(/\s+/).filter(Boolean);
 
   const filteredBookings = data.filter((booking: any) => {
-    if (selectedFilter !== 'ALL' && booking.bookingType !== selectedFilter) {
+    if (selectedFilter !== "ALL" && booking.bookingType !== selectedFilter) {
       return false;
     }
     if (queryWords.length === 0) return true;
@@ -55,239 +92,396 @@ export default function BookingScreen() {
     );
   });
 
-  const FILTERS = [
-    { label: t("all") || "All", value: "ALL" },
-    { label: t("services") || "Services", value: "SERVICE" },
-    { label: t("rentals") || "Rentals", value: "RENTAL" },
-  ] as const;
-
   // ---------- LOADING STATE ----------
   if (isLoading) {
     return (
-      <SafeAreaView style={{ flex: 1, backgroundColor: "#F8FAFC" }}>
-        <View className="flex-1 items-center justify-center">
-          <View className="bg-white px-10 py-8 rounded-3xl shadow-sm border border-gray-100 items-center">
-            <ActivityIndicator size="large" color="#2563eb" />
-            <Text className="mt-4 text-gray-500 font-medium">
+      <View style={{ flex: 1, backgroundColor: "#F8FAFC" }}>
+        <LinearGradient
+          colors={["#2563EB", "#1D4ED8"]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={{ paddingTop: insets.top + 8, paddingBottom: 28 }}
+        >
+          <View style={{ alignItems: "center", paddingTop: 16 }}>
+            <Text style={[{ fontSize: 20, color: "#FFFFFF", letterSpacing: -0.2 }, styleBold]}>
+              {t("my_bookings") || "My Bookings"}
+            </Text>
+          </View>
+        </LinearGradient>
+
+        <View style={{
+          flex: 1, alignItems: "center", justifyContent: "center",
+          marginTop: -16, borderTopLeftRadius: 24, borderTopRightRadius: 24,
+          backgroundColor: "#F8FAFC",
+        }}>
+          <View style={{
+            backgroundColor: "#FFFFFF", paddingHorizontal: 48, paddingVertical: 40,
+            borderRadius: 28, alignItems: "center",
+            borderWidth: 1, borderColor: "#F1F5F9",
+            ...Platform.select({
+              ios: { shadowColor: "#1D4ED8", shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.08, shadowRadius: 24 },
+              android: { elevation: 6 },
+            }),
+          }}>
+            <View style={{
+              width: 56, height: 56, borderRadius: 28,
+              backgroundColor: "#EFF6FF", alignItems: "center", justifyContent: "center",
+              marginBottom: 16,
+            }}>
+              <ActivityIndicator size="large" color="#2563EB" />
+            </View>
+            <Text style={[{ color: "#64748B", fontSize: 14 }, styleMedium]}>
               {t("loading_bookings") || "Loading bookings..."}
             </Text>
           </View>
         </View>
-      </SafeAreaView>
+      </View>
     );
   }
 
   // ---------- ERROR / EMPTY STATE ----------
   if (isError || !data.length) {
     return (
-      <SafeAreaView style={{ flex: 1, backgroundColor: "#2563EB" }} edges={["top"]}>
+      <View style={{ flex: 1, backgroundColor: "#2563EB" }}>
         <LinearGradient
           colors={["#2563EB", "#1D4ED8"]}
-          style={{ paddingTop: insets.top + 6, paddingBottom: 28 }}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={{ paddingTop: insets.top + 8, paddingBottom: 32 }}
         >
-          <View className="flex-row items-center px-4 pt-4">
+          <View style={{
+            flexDirection: "row", alignItems: "center",
+            paddingHorizontal: horizontalPadding, paddingTop: 16,
+          }}>
             <Pressable
               onPress={() => router.back()}
-              className="bg-white/15 p-2.5 rounded-full active:bg-white/25"
+              style={({ pressed }) => ({
+                backgroundColor: pressed ? "rgba(255,255,255,0.25)" : "rgba(255,255,255,0.12)",
+                padding: 10, borderRadius: 16,
+                borderWidth: 1, borderColor: "rgba(255,255,255,0.15)",
+              })}
               hitSlop={8}
             >
               <ArrowLeft size={20} color="#fff" />
             </Pressable>
-            <View className="flex-1 items-center">
-              <Text className="text-xl font-bold text-white">
-                {t("my_bookings")}
+            <View style={{ flex: 1, alignItems: "center" }}>
+              <Text style={[{ fontSize: 20, color: "#FFFFFF", letterSpacing: -0.2 }, styleBold]}>
+                {t("my_bookings") || "My Bookings"}
               </Text>
             </View>
-            <View className="w-10" />
+            <View style={{ width: 40 }} />
           </View>
         </LinearGradient>
 
-        <View className="flex-1 bg-gray-50 items-center justify-center px-6 -mt-6">
-          <View className="bg-white rounded-3xl shadow-sm border border-gray-100 p-8 items-center w-full max-w-sm">
-            <View className={`${isError ? "bg-red-50" : "bg-blue-50"} w-20 h-20 rounded-full items-center justify-center mb-5`}>
-              {isError ? (
-                <AlertCircle size={36} color="#dc2626" />
-              ) : (
-                <Calendar size={36} color="#2563eb" />
-              )}
+        <View style={{
+          flex: 1, backgroundColor: "#F8FAFC", alignItems: "center",
+          justifyContent: "center", paddingHorizontal: 24,
+          marginTop: -16, borderTopLeftRadius: 24, borderTopRightRadius: 24,
+        }}>
+          <View style={{
+            backgroundColor: "#FFFFFF", borderRadius: 28, padding: 32,
+            alignItems: "center", width: "100%", maxWidth: 360,
+            borderWidth: 1, borderColor: "#F1F5F9",
+            ...Platform.select({
+              ios: { shadowColor: "#1D4ED8", shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.08, shadowRadius: 24 },
+              android: { elevation: 6 },
+            }),
+          }}>
+            <View style={{
+              width: 80, height: 80, borderRadius: 40, alignItems: "center", justifyContent: "center",
+              marginBottom: 20,
+              backgroundColor: isError ? "#FEF2F2" : "#EFF6FF",
+            }}>
+              <LinearGradient
+                colors={isError ? ["#FEE2E2", "#FECACA"] : ["#DBEAFE", "#BFDBFE"]}
+                style={{ width: 80, height: 80, borderRadius: 40, alignItems: "center", justifyContent: "center" }}
+              >
+                {isError ? (
+                  <AlertCircle size={36} color="#DC2626" />
+                ) : (
+                  <CalendarDays size={36} color="#2563EB" />
+                )}
+              </LinearGradient>
             </View>
 
-            <Text className="text-xl font-bold text-gray-900 mb-2 text-center">
-              {isError ? t("failed_to_load_bookings") : t("no_bookings_yet") || "No Bookings Yet"}
+            <Text style={[{ fontSize: 20, color: "#0F172A", marginBottom: 8, textAlign: "center" }, styleBold]}>
+              {isError ? (t("failed_to_load_bookings") || "Failed to Load Bookings") : (t("no_bookings_yet") || "No Bookings Yet")}
             </Text>
 
-            {isError && (
-              <Text className="text-gray-500 text-center mb-6 leading-5 text-[15px]">
-                {t("bookings_load_failed") || "Something went wrong while loading your bookings."}
-              </Text>
-            )}
+            <Text style={[{ color: "#64748B", textAlign: "center", marginBottom: 24, lineHeight: 22, fontSize: 14 }, styleRegular]}>
+              {isError ? (t("bookings_load_failed") || "Something went wrong while loading your bookings.") : (t("explore_services_rentals") || "Explore our top-rated services and rental equipment today.")}
+            </Text>
 
-            {isError && (
-              <Pressable
-                onPress={refetch}
-                className="bg-blue-600 px-8 py-3.5 rounded-2xl active:bg-blue-700 flex-row items-center justify-center w-full"
+            <Pressable
+              onPress={() => (isError ? refetch() : router.push("/(tabs)/market"))}
+              style={({ pressed }) => ({
+                width: "100%",
+                transform: [{ scale: pressed ? 0.97 : 1 }],
+                opacity: pressed ? 0.9 : 1,
+              })}
+            >
+              <LinearGradient
+                colors={["#3B82F6", "#1D4ED8"]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
                 style={{
-                  shadowColor: "#2563eb",
-                  shadowOpacity: 0.25,
-                  shadowRadius: 10,
-                  shadowOffset: { width: 0, height: 4 },
-                  elevation: 3,
+                  paddingVertical: 16, borderRadius: 18,
+                  flexDirection: "row", alignItems: "center", justifyContent: "center",
+                  ...Platform.select({
+                    ios: { shadowColor: "#2563EB", shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.3, shadowRadius: 12 },
+                    android: { elevation: 6 },
+                  }),
                 }}
               >
-                <RefreshCw size={18} color="white" style={{ marginRight: 8 }} />
-                <Text className="text-white font-semibold text-base">
-                  {t("retry")}
+                {isError && <RefreshCw size={18} color="white" style={{ marginRight: 8 }} />}
+                <Text style={[{ color: "#FFFFFF", fontSize: 15 }, styleBold]}>
+                  {isError ? (t("retry") || "Try Again") : (t("explore_services") || "Explore Services")}
                 </Text>
-              </Pressable>
-            )}
+                {!isError && <ChevronRight size={18} color="white" style={{ marginLeft: 4 }} />}
+              </LinearGradient>
+            </Pressable>
           </View>
         </View>
-      </SafeAreaView>
+      </View>
     );
   }
 
   // ---------- MAIN STATE ----------
   return (
-    <SafeAreaView edges={["top"]} style={{ flex: 1, backgroundColor: "#2563EB" }}>
-      <View className="flex-1 bg-gray-50">
+    <View style={{ flex: 1, backgroundColor: "#F8FAFC" }}>
 
-        {/* HEADER */}
-        <LinearGradient
-          colors={["#2563EB", "#1D4ED8"]}
-          style={{ paddingTop: insets.top + 6, paddingBottom: 20 }}
-        >
-          <View className="flex-row items-center px-4 pt-4">
+      {/* ══════════════════════════════════════════════════════════
+          HERO HEADER — Premium Gradient (matches Home & Orders)
+      ══════════════════════════════════════════════════════════ */}
+      <LinearGradient
+        colors={["#2563EB", "#1D4ED8"]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={{ paddingTop: insets.top + 8, paddingBottom: 22, zIndex: 10 }}
+      >
+        <View style={{ paddingHorizontal: horizontalPadding }}>
+
+          {/* ── Top Bar: Back + Title + Booking Count ── */}
+          <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 12 }}>
             <Pressable
               onPress={() => router.back()}
-              className="bg-white/15 p-2.5 rounded-full active:bg-white/25"
+              style={({ pressed }) => ({
+                backgroundColor: pressed ? "rgba(255,255,255,0.25)" : "rgba(255,255,255,0.12)",
+                padding: 10, borderRadius: 16,
+                borderWidth: 1, borderColor: "rgba(255,255,255,0.15)",
+              })}
               hitSlop={8}
             >
               <ArrowLeft size={20} color="#fff" />
             </Pressable>
 
-            <View className="flex-1 items-center">
-              <Text className="text-xl font-bold text-white tracking-tight">
-                {t("my_bookings")}
+            <View style={{ flex: 1, alignItems: "center" }}>
+              <Text style={[{
+                fontSize: isTablet ? 22 : isSmall ? 18 : 20,
+                color: "#FFFFFF", letterSpacing: -0.2,
+              }, styleBold]}>
+                {t("my_bookings") || "My Bookings"}
               </Text>
-              <Text className="text-blue-100/90 text-xs font-medium mt-0.5">
-                {filteredBookings.length} {filteredBookings.length === 1 ? t("booking") : t("bookings")}
-              </Text>
+
+              <View style={{
+                backgroundColor: "rgba(255,255,255,0.12)",
+                borderRadius: 10, paddingHorizontal: 8, paddingVertical: 3,
+                flexDirection: "row", alignItems: "center", marginTop: 4,
+                borderWidth: 0.5, borderColor: "rgba(255,255,255,0.2)",
+              }}>
+                <Sparkles size={8} color="#FBBF24" style={{ marginRight: 4 }} />
+                <Text style={[{
+                  fontSize: isSmall ? 9 : 10, color: "rgba(255,255,255,0.9)",
+                  letterSpacing: 0.5,
+                }, styleMedium]}>
+                  {filteredBookings.length}{" "}
+                  {filteredBookings.length === 1 ? (t("booking") || "booking") : (t("bookings") || "bookings")}
+                </Text>
+              </View>
             </View>
 
-            <View className="w-10" />
+            <View style={{ width: 40 }} />
           </View>
 
-          {/* Search Bar */}
-          <View
-            className="flex-row items-center bg-white rounded-2xl pl-4 pr-1.5 py-1 mt-4 mx-4 border border-white/10"
-            style={{
-              shadowColor: "#000",
-              shadowOpacity: 0.08,
-              shadowRadius: 6,
-              shadowOffset: { width: 0, height: 2 },
-              elevation: 2,
-            }}
-          >
-            <Search size={17} color="#6B7280" strokeWidth={2.25} />
+          {/* ── Luxury Glassmorphic Search Bar ── */}
+          <View style={{
+            flexDirection: "row", alignItems: "center",
+            backgroundColor: "rgba(255,255,255,0.98)",
+            borderRadius: 18, paddingLeft: 8, paddingRight: 5,
+            height: isTablet ? 50 : 44,
+            borderWidth: 1, borderColor: "rgba(255,255,255,0.9)",
+            ...Platform.select({
+              ios: {
+                shadowColor: "#0F172A",
+                shadowOffset: { width: 0, height: 8 },
+                shadowOpacity: 0.16, shadowRadius: 16,
+              },
+              android: { elevation: 10 },
+            }),
+          }}>
+            {/* Search Icon Badge */}
+            <View style={{
+              width: 30, height: 30, borderRadius: 15,
+              backgroundColor: "#EFF6FF",
+              alignItems: "center", justifyContent: "center", marginLeft: 4,
+            }}>
+              <Search size={16} color="#2563EB" strokeWidth={2.5} />
+            </View>
+
             <TextInput
               value={searchQuery}
               onChangeText={setSearchQuery}
               placeholder={t("search") || "Search bookings..."}
-              placeholderTextColor="#9CA3AF"
-              className="flex-1 ml-2.5 text-gray-900 text-sm font-medium py-2.5"
+              placeholderTextColor="#94A3B8"
+              style={[{
+                flex: 1, marginLeft: 10, color: "#0F172A",
+                fontSize: isSmall ? 13 : 14, paddingVertical: 0,
+              }, styleRegular]}
               returnKeyType="search"
               onSubmitEditing={() => Keyboard.dismiss()}
             />
             {searchQuery.length > 0 && (
               <Pressable
                 onPress={() => setSearchQuery("")}
-                className="p-2 rounded-full active:bg-gray-100"
-                hitSlop={6}
+                style={{ padding: 6 }}
               >
-                <X size={16} color="#6B7280" />
+                <X size={14} color="#94A3B8" />
               </Pressable>
             )}
           </View>
 
-          {/* Category Filter Pills */}
-          <View className="flex-row items-center justify-center gap-2 px-4 mt-3.5">
+          {/* ── Category Filter Pills ── */}
+          <View style={{
+            flexDirection: "row", alignItems: "center", justifyContent: "center",
+            gap: 10, marginTop: 14,
+          }}>
             {FILTERS.map((tab) => {
               const isSelected = selectedFilter === tab.value;
               return (
                 <Pressable
                   key={tab.value}
                   onPress={() => setSelectedFilter(tab.value as any)}
-                  className={`px-5 py-2 rounded-full border ${
-                    isSelected
-                      ? "bg-white border-white"
-                      : "bg-white/15 border-white/20 active:bg-white/25"
-                  }`}
-                  style={
-                    isSelected
-                      ? {
-                          shadowColor: "#000",
-                          shadowOpacity: 0.1,
-                          shadowRadius: 4,
-                          shadowOffset: { width: 0, height: 2 },
-                          elevation: 1,
-                        }
-                      : undefined
-                  }
+                  style={({ pressed }) => ({
+                    transform: [{ scale: pressed ? 0.95 : 1 }],
+                  })}
                 >
-                  <Text
-                    className={`text-xs font-bold ${
-                      isSelected ? "text-blue-700" : "text-white"
-                    }`}
-                  >
-                    {tab.label}
-                  </Text>
+                  {isSelected ? (
+                    <LinearGradient
+                      colors={["#FFFFFF", "#F1F5F9"]}
+                      start={{ x: 0, y: 0 }}
+                      end={{ x: 1, y: 1 }}
+                      style={{
+                        paddingHorizontal: 20, paddingVertical: 8, borderRadius: 20,
+                        borderWidth: 1, borderColor: "rgba(255,255,255,0.6)",
+                        ...Platform.select({
+                          ios: { shadowColor: "#000", shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.12, shadowRadius: 4 },
+                          android: { elevation: 3 },
+                        }),
+                      }}
+                    >
+                      <Text style={[{
+                        fontSize: 12, color: "#1D4ED8",
+                        letterSpacing: 0.3,
+                      }, styleBold]}>
+                        {t(tab.label.toLowerCase()) || tab.label}
+                      </Text>
+                    </LinearGradient>
+                  ) : (
+                    <View style={{
+                      paddingHorizontal: 20, paddingVertical: 8, borderRadius: 20,
+                      backgroundColor: "rgba(255,255,255,0.15)",
+                      borderWidth: 1, borderColor: "rgba(255,255,255,0.12)",
+                    }}>
+                      <Text style={[{
+                        fontSize: 12, color: "#FFFFFF",
+                        letterSpacing: 0.3,
+                      }, styleMedium]}>
+                        {t(tab.label.toLowerCase()) || tab.label}
+                      </Text>
+                    </View>
+                  )}
                 </Pressable>
               );
             })}
           </View>
-        </LinearGradient>
+        </View>
+      </LinearGradient>
 
-        {/* LIST */}
+      {/* ══════════════════════════════════════════════════════════
+          BODY — Curved Content Sheet (matches Home & Orders)
+      ══════════════════════════════════════════════════════════ */}
+      <View style={{
+        flex: 1, backgroundColor: "#F8FAFC",
+        marginTop: -12, borderTopLeftRadius: 24, borderTopRightRadius: 24,
+        overflow: "hidden",
+      }}>
         {filteredBookings.length === 0 ? (
-          <View className="flex-1 items-center justify-center px-8 -mt-4">
-            <View className="bg-white rounded-2xl border border-gray-100 p-8 items-center w-full max-w-sm">
-              <View className="bg-gray-50 w-16 h-16 rounded-full items-center justify-center mb-4">
-                <CalendarSearch size={28} color="#9CA3AF" />
+          /* ── Empty Search Results ── */
+          <View style={{ flex: 1, alignItems: "center", justifyContent: "center", paddingHorizontal: 32 }}>
+            <View style={{
+              backgroundColor: "#FFFFFF", borderRadius: 28, padding: 32,
+              alignItems: "center", width: "100%", maxWidth: 340,
+              borderWidth: 1, borderColor: "#F1F5F9",
+              ...Platform.select({
+                ios: { shadowColor: "#1D4ED8", shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.06, shadowRadius: 16 },
+                android: { elevation: 4 },
+              }),
+            }}>
+              <View style={{
+                width: 64, height: 64, borderRadius: 32, marginBottom: 16,
+              }}>
+                <LinearGradient
+                  colors={["#F1F5F9", "#E2E8F0"]}
+                  style={{ width: 64, height: 64, borderRadius: 32, alignItems: "center", justifyContent: "center" }}
+                >
+                  <CalendarSearch size={28} color="#94A3B8" />
+                </LinearGradient>
               </View>
-              <Text className="text-gray-800 font-semibold text-base mb-1">
+              <Text style={[{ color: "#1E293B", fontSize: 16, marginBottom: 4 }, styleBold]}>
                 {t("no_results_found") || "No matching bookings"}
               </Text>
-              <Text className="text-gray-500 text-sm text-center">
+              <Text style={[{ color: "#94A3B8", fontSize: 13, textAlign: "center" }, styleRegular]}>
                 {t("try_different_search") || "Try a different search or filter"}
               </Text>
             </View>
           </View>
         ) : (
+          /* ── Bookings List ── */
           <FlatList
             data={filteredBookings}
             keyExtractor={(item) => item._id}
-            contentContainerStyle={{ padding: 16, paddingTop: 18, paddingBottom: 32 }}
+            contentContainerStyle={{
+              padding: horizontalPadding,
+              paddingTop: 22,
+              paddingBottom: 100,
+            }}
             showsVerticalScrollIndicator={false}
-            ItemSeparatorComponent={() => <View className="h-3" />}
-            renderItem={({ item }) => (
-              <BookingCard
-                item={item}
-                onPress={(booking: any) =>
-                  router.push(`/booking/${booking._id}`)
-                }
-              />
+            ItemSeparatorComponent={() => <View style={{ height: 14 }} />}
+            renderItem={({ item, index }) => (
+              <Animated.View style={{ transform: [{ scale: scaleAnims[index] || 1 }] }}>
+                <Pressable
+                  onPressIn={() => handleCardPressIn(index)}
+                  onPressOut={() => handleCardPressOut(index)}
+                  onPress={() => router.push(`/booking/${item._id}`)}
+                >
+                  <BookingCard
+                    item={item}
+                    onPress={(booking: any) => router.push(`/booking/${booking._id}`)}
+                  />
+                </Pressable>
+              </Animated.View>
             )}
             refreshControl={
               <RefreshControl
                 refreshing={isLoading}
                 onRefresh={refetch}
-                tintColor="#2563eb"
-                colors={["#2563eb"]}
+                tintColor="#2563EB"
+                colors={["#2563EB"]}
               />
             }
           />
         )}
       </View>
-    </SafeAreaView>
+    </View>
   );
 }

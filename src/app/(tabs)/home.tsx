@@ -95,13 +95,15 @@ const FEATURED_BANNERS = [
     title: "Quality Local Services",
     subtitle: "Book verified local experts & artisans near you",
     tag: "FEATURED",
+    category: "Service",
   },
   {
     id: "banner-2",
     source: require("../../../assets/im2.jpeg"),
-    title: "Fresh Vegetables & Groceries",
+    title: "Fresh Vegetables & Fruits",
     subtitle: "Farm fresh produce delivered straight to your door",
     tag: "POPULAR",
+    category: "vegetables and fruits",
   },
   {
     id: "banner-3",
@@ -109,6 +111,7 @@ const FEATURED_BANNERS = [
     title: "Authentic Homemade Foods",
     subtitle: "Delicious regional snacks & home cooked delicacies",
     tag: "SPECIAL",
+    category: "home made",
   },
   {
     id: "banner-4",
@@ -116,6 +119,7 @@ const FEATURED_BANNERS = [
     title: "Rentals & Electronics",
     subtitle: "Affordable rates & flexible short-term rentals",
     tag: "TOP RATED",
+    category: "rent",
   },
 ];
 
@@ -138,7 +142,7 @@ export default function Home() {
   const cardWidth = (width - horizontalPadding * 2 - (numColumns - 1) * gridGap) / numColumns;
   const cardHeight = Math.max(135, Math.min(195, cardWidth * 1.02));
   const heroImageHeight = isTablet ? 240 : Math.min(210, Math.max(150, width * 0.46));
-  const carouselImageHeight = isTablet ? 230 : Math.min(215, Math.max(155, width * 0.47));
+  const carouselImageHeight = isTablet ? 320 : isMedium ? 275 : isSmall ? 220 : 255;
 
   const { data: carouselData = [] } = useCarousel();
   const { profile, refetch: refetchProfile } = useProfile();
@@ -242,7 +246,8 @@ export default function Home() {
           source: src,
           title: item.title || FEATURED_BANNERS[idx % FEATURED_BANNERS.length].title,
           subtitle: item.subtitle || FEATURED_BANNERS[idx % FEATURED_BANNERS.length].subtitle,
-        
+          tag: item.tag || FEATURED_BANNERS[idx % FEATURED_BANNERS.length].tag,
+          category: item.category || FEATURED_BANNERS[idx % FEATURED_BANNERS.length].category,
         };
       });
     }
@@ -674,20 +679,36 @@ export default function Home() {
           {/* ══════════════════════════════════════════════════════════
               FEATURED CAROUSEL BANNERS (UNDER SEARCH BAR)
           ══════════════════════════════════════════════════════════ */}
-          <View style={{ marginTop: 10 }}>
+          <View style={{ marginTop: 12 }}>
             
             {/* Carousel Section Header */}
             <View style={{
               flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-              paddingHorizontal: horizontalPadding, marginBottom: 10,
+              paddingHorizontal: horizontalPadding, marginBottom: 12,
             }}>
               <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                <Text style={[{ fontSize: isSmall ? 14 : 16, color: '#0F172A', letterSpacing: -0.2 }, styleBold]}>
-                  Featured Highlights
+                <Text style={[{ fontSize: isTablet ? 19 : isSmall ? 15 : 17, color: '#0F172A', letterSpacing: -0.3 }, styleBold]}>
+                  {t("Featured Highlights") || "Featured Highlights"}
                 </Text>
+                <View style={{
+                  marginLeft: 8, backgroundColor: '#EFF6FF',
+                  paddingHorizontal: 8, paddingVertical: 2, borderRadius: 10,
+                  borderWidth: 1, borderColor: '#DBEAFE',
+                }}>
+               
+                </View>
               </View>
 
-             
+              {/* Slide Counter indicator */}
+              <View style={{
+                backgroundColor: 'rgba(241,245,249,0.9)',
+                borderRadius: 12, paddingHorizontal: 9, paddingVertical: 3,
+                borderWidth: 1, borderColor: '#E2E8F0',
+              }}>
+                <Text style={[{ fontSize: 11, color: '#64748B' }, styleMedium]}>
+                  {activeSlide + 1} / {displayCarousel.length}
+                </Text>
+              </View>
             </View>
 
             {/* Horizontal Scroll Carousel */}
@@ -701,135 +722,177 @@ export default function Home() {
             >
               {displayCarousel.map((item, index) => (
                 <View key={item.id || index} style={{ width, paddingHorizontal: horizontalPadding }}>
-                  <View style={{
-                    borderRadius: 20,
-                    overflow: 'hidden',
-                    height: carouselImageHeight,
-                    backgroundColor: '#EFF6FF',
-                    ...Platform.select({
-                      ios: {
-                        shadowColor: '#1D4ED8',
-                        shadowOffset: { width: 0, height: 8 },
-                        shadowOpacity: 0.2,
-                        shadowRadius: 16,
-                      },
-                      android: { elevation: 8 },
-                    }),
-                  }}>
-                    {/* Banner Image */}
-                    <Image
-                      source={item.source}
-                      style={{ width: width - horizontalPadding * 2, height: carouselImageHeight }}
-                      resizeMode="cover"
-                    />
-
-                    {/* Premium blue gradient overlay */}
-                    <LinearGradient
-                      colors={['transparent', 'rgba(29,78,216,0.10)', 'rgba(29,78,216,0.55)', 'rgba(30,64,175,0.90)']}
-                      locations={[0, 0.35, 0.7, 1]}
-                      style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
-                    />
-
-                    {/* Top-left Glassmorphic Tag Badge Pill */}
-                    {item.tag && (
-                      <View style={{
-                        position: 'absolute', top: isSmall ? 10 : 14, left: isSmall ? 10 : 14,
-                        backgroundColor: 'rgba(37,99,235,0.75)',
-                        borderRadius: 20, paddingHorizontal: isSmall ? 8 : 10, paddingVertical: 4,
-                        flexDirection: 'row', alignItems: 'center',
-                        borderWidth: 1, borderColor: 'rgba(255,255,255,0.35)',
-                      }}>
-                        <Sparkles size={9} color="#FBBF24" style={{ marginRight: 4 }} />
-                        <Text style={[{ fontSize: isSmall ? 8 : 9, color: '#FFFFFF', letterSpacing: 1 }, styleBold]}>
-                          {item.tag}
-                        </Text>
-                      </View>
-                    )}
-
-                    {/* Title & Subtitle + Action Button (Bottom) */}
-                    {(item.title || item.subtitle) && (
-                      <View style={{
-                        position: 'absolute', bottom: isSmall ? 10 : 14,
-                        left: isSmall ? 12 : 16, right: isSmall ? 12 : 16,
-                        flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-                      }}>
-                       
-
-                        <View style={{
-                          width: 32, height: 32, borderRadius: 16,
-                          backgroundColor: 'rgba(255,255,255,0.2)',
-                          alignItems: 'center', justifyContent: 'center',
-                          borderWidth: 1, borderColor: 'rgba(255,255,255,0.3)',
-                        }}>
-                          <ChevronRight size={16} color="#FFFFFF" strokeWidth={2.5} />
-                        </View>
-                      </View>
-                    )}
-                  </View>
+                  <Pressable
+                    onPress={() => {
+                      if (item.category) {
+                        handleCategoryPress(item.category);
+                      } else {
+                        router.push("/(tabs)/market");
+                      }
+                    }}
+                    style={({ pressed }) => ({
+                      transform: [{ scale: pressed ? 0.99 : 1 }],
+                      opacity: pressed ? 0.96 : 1,
+                    })}
+                  >
+                    <View style={{
+                      borderRadius: 24,
+                      overflow: 'hidden',
+                      height: carouselImageHeight,
+                      backgroundColor: '#EFF6FF',
+                      borderWidth: 1,
+                      borderColor: 'rgba(0,0,0,0.06)',
+                      ...Platform.select({
+                        ios: {
+                          shadowColor: '#1D4ED8',
+                          shadowOffset: { width: 0, height: 8 },
+                          shadowOpacity: 0.18,
+                          shadowRadius: 18,
+                        },
+                        android: { elevation: 8 },
+                      }),
+                    }}>
+                      {/* Banner Image — Clean pure image without text or overlays */}
+                      <Image
+                        source={item.source}
+                        style={{ width: width - horizontalPadding * 2, height: carouselImageHeight }}
+                        resizeMode="cover"
+                      />
+                    </View>
+                  </Pressable>
                 </View>
               ))}
             </ScrollView>
 
-            {/* Pagination Indicators */}
-            <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center', marginTop: 10 }}>
+            {/* Pagination Indicators — Sleek animated pill indicators */}
+            <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center', marginTop: 12 }}>
               {displayCarousel.map((_, index) => (
                 <View key={index} style={{
-                  height: 4,
-                  borderRadius: 2,
+                  height: 5,
+                  borderRadius: 3,
                   marginHorizontal: 3,
-                  width: activeSlide === index ? 20 : 4,
-                  backgroundColor: activeSlide === index ? "#3B82F6" : "#D1D5DB",
+                  width: activeSlide === index ? 24 : 6,
+                  backgroundColor: activeSlide === index ? "#2563EB" : "#CBD5E1",
                 }} />
               ))}
             </View>
           </View>
 
-          {/* ── Exclusive Plan Banner: Happy 60 ── */}
+          {/* ── Exclusive Plan Banner: Happy 60 (Ultra-Responsive & Attractive) ── */}
           {isHappy60Enabled && (
             <Pressable
               onPress={handleCallHappy60}
               style={({ pressed }) => ({
-                marginHorizontal: horizontalPadding, marginTop: 16,
-                transform: [{ scale: pressed ? 0.98 : 1 }],
+                marginHorizontal: horizontalPadding,
+                marginTop: 18,
+                transform: [{ scale: pressed ? 0.97 : 1 }],
                 opacity: pressed ? 0.95 : 1,
               })}
             >
               <View style={{
-                borderRadius: 20, overflow: 'hidden',
+                borderRadius: 24,
+                overflow: 'hidden',
                 backgroundColor: '#FFFFFF',
-                borderWidth: 1, borderColor: '#E2E8F0',
+                borderWidth: 1,
+                borderColor: 'rgba(59,130,246,0.2)',
                 ...Platform.select({
                   ios: {
-                    shadowColor: '#0F172A', shadowOffset: { width: 0, height: 4 },
-                    shadowOpacity: 0.08, shadowRadius: 12,
+                    shadowColor: '#1D4ED8',
+                    shadowOffset: { width: 0, height: 8 },
+                    shadowOpacity: 0.18,
+                    shadowRadius: 18,
                   },
-                  android: { elevation: 4 },
+                  android: { elevation: 6 },
                 }),
               }}>
                 <LinearGradient
-                  colors={["#2563EB", "#1D4ED8"]}
+                  colors={["#1E40AF", "#2563EB", "#3B82F6"]}
                   start={{ x: 0, y: 0 }}
                   end={{ x: 1, y: 1 }}
-                  style={{ padding: isSmall ? 16 : 20, borderRadius: 20 }}
+                  style={{ padding: isSmall ? 18 : 22, borderRadius: 24 }}
                 >
-                  <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <View style={{ flex: 1, marginRight: 14 }}>
-                      <Text style={[{ fontSize: isTablet ? 26 : isSmall ? 20 : 23, color: '#FFFFFF', letterSpacing: -0.3 }, styleBold]}>
-                        {t("Happy_60")}
+                  {/* Decorative glowing background circles for visual depth */}
+                  <View style={{
+                    position: 'absolute', right: -30, top: -30,
+                    width: 140, height: 140, borderRadius: 70,
+                    backgroundColor: 'rgba(255,255,255,0.1)',
+                  }} />
+                  <View style={{
+                    position: 'absolute', right: 60, bottom: -40,
+                    width: 100, height: 100, borderRadius: 50,
+                    backgroundColor: 'rgba(255,255,255,0.06)',
+                  }} />
+
+                  {/* Top Pill Tag */}
+                  <View style={{
+                    flexDirection: 'row', alignItems: 'center', alignSelf: 'flex-start',
+                    backgroundColor: 'rgba(255,255,255,0.18)',
+                    borderRadius: 12, paddingHorizontal: 10, paddingVertical: 4,
+                    marginBottom: 12,
+                    borderWidth: 1, borderColor: 'rgba(255,255,255,0.25)',
+                  }}>
+                    <Sparkles size={10} color="#FBBF24" style={{ marginRight: 5 }} />
+                    <Text style={[{
+                      fontSize: isSmall ? 9 : 10, color: '#FFFFFF',
+                      letterSpacing: 0.8, textTransform: 'uppercase',
+                    }, styleBold]}>
+                      {t("SENIOR CITIZEN CARE") || "SENIOR CITIZEN CARE"}
+                    </Text>
+                  </View>
+
+                  {/* Main Content Area */}
+                  <View style={{
+                    flexDirection: isSmall ? 'column' : 'row',
+                    alignItems: isSmall ? 'flex-start' : 'center',
+                    justifyContent: 'space-between',
+                    gap: 14,
+                  }}>
+                    <View style={{ flex: 1 }}>
+                      <Text style={[{
+                        fontSize: isTablet ? 26 : isSmall ? 21 : 24,
+                        color: '#FFFFFF', letterSpacing: -0.3,
+                      }, styleBold]}>
+                        {t("Happy_60") || "Happy 60"}
                       </Text>
                       
-                      <Text style={[{ color: 'rgba(255,255,255,0.75)', fontSize: isSmall ? 11 : 12.5, marginTop: 4, lineHeight: 18 }, styleRegular]}>
-                        {t("Exclusive_for_senior_citizens")} 
+                      <Text style={[{
+                        color: 'rgba(255,255,255,0.88)',
+                        fontSize: isSmall ? 12 : 13,
+                        marginTop: 4, lineHeight: 19,
+                      }, styleRegular]}>
+                        {t("Exclusive_for_senior_citizens") || "Priority support & doorstep delivery for elders"} 
                       </Text>
                     </View>
 
+                    {/* Interactive Call Button (No raw phone number shown) */}
                     <View style={{
-                      width: isSmall ? 44 : 50, height: isSmall ? 44 : 50, borderRadius: 25,
-                      backgroundColor: 'rgba(255,255,255,0.08)',
-                      borderWidth: 1, borderColor: 'rgba(255,255,255,0.15)',
-                      alignItems: 'center', justifyContent: 'center',
+                      backgroundColor: '#FFFFFF',
+                      borderRadius: 18,
+                      paddingHorizontal: isSmall ? 16 : 20,
+                      paddingVertical: isSmall ? 11 : 13,
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      alignSelf: isSmall ? 'stretch' : 'auto',
+                      justifyContent: 'center',
+                      ...Platform.select({
+                        ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.15, shadowRadius: 8 },
+                        android: { elevation: 4 },
+                      }),
                     }}>
-                      <Phone size={isSmall ? 20 : 22} color="#FFFFFF" strokeWidth={1.8} />
+                      <View style={{
+                        width: 30, height: 30, borderRadius: 15,
+                        backgroundColor: '#EFF6FF',
+                        alignItems: 'center', justifyContent: 'center',
+                        marginRight: 8,
+                      }}>
+                        <Phone size={16} color="#2563EB" strokeWidth={2.5} />
+                      </View>
+                      <Text style={[{
+                        fontSize: isSmall ? 13 : 14, color: '#1E40AF',
+                        letterSpacing: 0.2,
+                      }, styleBold]}>
+                        {t("Call Now") || "Call Helpline"}
+                      </Text>
                     </View>
                   </View>
                 </LinearGradient>
