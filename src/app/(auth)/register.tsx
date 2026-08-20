@@ -754,6 +754,20 @@ export default function Register() {
                     )}
                   </View>
 
+                  
+                  {/* Spam folder note */}
+                  <View className="bg-amber-50 border border-amber-200 rounded-2xl p-3 flex-row items-start mb-3">
+                    <Info size={15} color="#D97706" style={{ marginTop: 2 }} />
+                    <View className="ml-2 flex-1">
+                      <Text className="text-amber-900 text-xs font-bold">
+                        Verification & Security Note
+                      </Text>
+                      <Text className="text-amber-800 text-[11px] mt-0.5 leading-4">
+                        Any verification emails or notifications may sometimes arrive in your <Text className="font-bold">Spam</Text> or <Text className="font-bold">Junk</Text> folder. Please check there if needed.
+                      </Text>
+                    </View>
+                  </View>
+                  
                   {/* Password */}
                   <View className="mb-4">
                     <Text className="text-xs font-semibold text-gray-700 mb-1.5 ml-1">

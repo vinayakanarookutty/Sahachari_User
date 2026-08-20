@@ -582,7 +582,7 @@ export default function Settings() {
                 <BanIcon size={20} color="#2563EB" strokeWidth={2} />
               </View>
               <Text className="text-gray-900 font-semibold flex-1">
-                {t("complaints")}
+                {t("Complaints and Requests")}
               </Text>
               <ChevronRight size={18} color="#9CA3AF" strokeWidth={2} />
             </View>
