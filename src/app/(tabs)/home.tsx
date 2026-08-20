@@ -140,7 +140,7 @@ export default function Home() {
   const heroImageHeight = isTablet ? 240 : Math.min(210, Math.max(150, width * 0.46));
   const carouselImageHeight = isTablet ? 230 : Math.min(215, Math.max(155, width * 0.47));
 
-  const { data: carouselData = [] } = useCarousel();
+  //const { data: carouselData = [] } = useCarousel();
   const { profile, refetch: refetchProfile } = useProfile();
 
   // Check if profile phone or address is missing/dummy after login
@@ -190,7 +190,11 @@ export default function Home() {
     }
     return "";
   }, [profile]);
-
+  const {
+  data: carouselData = [],
+  isLoading: carouselLoading,
+  error: carouselError,
+} = useCarousel(userPincode);
   const { data: happy60Data } = useHappy60(userPincode);
   const isHappy60Enabled = happy60Data?.isEnabled !== false;
   const happy60PhoneNumber = happy60Data?.phoneNumber || "7025548470";
@@ -220,35 +224,119 @@ export default function Home() {
 
   const isLoading = productsLoading || servicesLoading || rentalsLoading;
   const [refreshing, setRefreshing] = useState(false);
+  
+  const getCarouselImage = (image?: string) => {
+  if (!image) {
+    return null;
+  }
 
+  // New carousel
+  // Full URL or data URL
+  if (
+    image.startsWith("http://") ||
+    image.startsWith("https://") ||
+    image.startsWith("data:image/")
+  ) {
+    return image;
+  }
+
+  // Old carousel stored as S3 path
+  return `${S3_BASE_URL}/${image.replace(/^\/+/, "")}`;
+};
   // Seamless carousel data formatting (API items or Local High-Def Banners)
   const displayCarousel = useMemo(() => {
-    if (carouselData && carouselData.length > 0) {
-      return carouselData.map((item, idx) => {
-        let src = null;
-        if (item.imageUrl) {
-          src = { uri: item.imageUrl };
-        } else if (item.image) {
-          const uri = item.image.startsWith("http")
-            ? item.image
-            : (S3_BASE_URL + "/" + item.image);
-          src = { uri };
-        } else {
-          src = FEATURED_BANNERS[idx % FEATURED_BANNERS.length].source;
-        }
-
-        return {
-          id: item._id || ("api-carousel-" + idx),
-          source: src,
-          title: item.title || FEATURED_BANNERS[idx % FEATURED_BANNERS.length].title,
-          subtitle: item.subtitle || FEATURED_BANNERS[idx % FEATURED_BANNERS.length].subtitle,
-        
-        };
-      });
-    }
+  if (!carouselData || carouselData.length === 0) {
     return FEATURED_BANNERS;
-  }, [carouselData]);
+  }
 
+  return carouselData.map((item, idx) => {
+    let src = null;
+
+    /*
+     * NEW CAROUSELS
+     *
+     * New images are stored directly as:
+     *
+     * data:image/webp;base64,...
+     *
+     * So use them directly.
+     */
+    if (item.image) {
+      if (
+        item.image.startsWith("data:image/") ||
+        item.image.startsWith("http://") ||
+        item.image.startsWith("https://")
+      ) {
+        src = {
+          uri: item.image,
+        };
+      }
+
+      /*
+       * OLD CAROUSELS
+       *
+       * Existing records still contain S3 keys such as:
+       *
+       * carousel/abc.jpg
+       *
+       * Keep these working.
+       */
+      else {
+        const uri =
+          `${S3_BASE_URL}/${item.image}`;
+
+        src = {
+          uri,
+        };
+      }
+    }
+
+    /*
+     * Old API may still provide imageUrl.
+     */
+    if (!src && item.imageUrl) {
+      src = {
+        uri: item.imageUrl,
+      };
+    }
+
+    /*
+     * Fallback banner.
+     */
+    if (!src) {
+      src =
+        FEATURED_BANNERS[
+          idx % FEATURED_BANNERS.length
+        ].source;
+    }
+
+    return {
+      id:
+        item._id ||
+        `api-carousel-${idx}`,
+
+      source: src,
+
+      title:
+        item.title ||
+        FEATURED_BANNERS[
+          idx % FEATURED_BANNERS.length
+        ].title,
+
+      subtitle:
+        item.subtitle ||
+        FEATURED_BANNERS[
+          idx % FEATURED_BANNERS.length
+        ].subtitle,
+
+      type:
+        item.type || "global",
+
+      order:
+        item.order ?? idx,
+    };
+  });
+}, [carouselData]);
   // Carousel Auto-Scroll Timer
   useEffect(() => {
     if (displayCarousel.length <= 1) return;
