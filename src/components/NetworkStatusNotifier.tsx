@@ -63,9 +63,13 @@ export function NetworkStatusNotifier() {
 
   useEffect(() => {
     const handleNetworkChange = (state: NetInfoState) => {
+      // On Web, NetInfo's reachability test (fetch) gets blocked by CORS, causing isInternetReachable to falsely report false.
+      // Therefore, on Web we rely on navigator.onLine and state.isConnected.
       const offline =
-        state.isConnected === false ||
-        (state.isConnected === true && state.isInternetReachable === false);
+        Platform.OS === "web"
+          ? state.isConnected === false || (typeof navigator !== "undefined" && !navigator.onLine)
+          : state.isConnected === false ||
+            (state.isConnected === true && state.isInternetReachable === false);
 
       if (offline) {
         if (hideTimerRef.current) {
@@ -104,8 +108,37 @@ export function NetworkStatusNotifier() {
     // Subscribe to network changes
     const unsubscribe = NetInfo.addEventListener(handleNetworkChange);
 
+    // On Web, also listen to native browser online/offline events for instant response
+    let handleWebOnline: (() => void) | null = null;
+    let handleWebOffline: (() => void) | null = null;
+
+    if (Platform.OS === "web" && typeof window !== "undefined") {
+      handleWebOnline = () => {
+        handleNetworkChange({
+          isConnected: true,
+          isInternetReachable: true,
+          type: "other" as any,
+          details: null as any,
+        });
+      };
+      handleWebOffline = () => {
+        handleNetworkChange({
+          isConnected: false,
+          isInternetReachable: false,
+          type: "none" as any,
+          details: null as any,
+        });
+      };
+      window.addEventListener("online", handleWebOnline);
+      window.addEventListener("offline", handleWebOffline);
+    }
+
     return () => {
       unsubscribe();
+      if (Platform.OS === "web" && typeof window !== "undefined") {
+        if (handleWebOnline) window.removeEventListener("online", handleWebOnline);
+        if (handleWebOffline) window.removeEventListener("offline", handleWebOffline);
+      }
       if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
     };
   }, []);
@@ -114,23 +147,40 @@ export function NetworkStatusNotifier() {
     if (isChecking) return;
     setIsChecking(true);
     try {
-      const state = await NetInfo.fetch();
-      const offline =
-        state.isConnected === false ||
-        (state.isConnected === true && state.isInternetReachable === false);
+      if (Platform.OS === "web") {
+        const isOnline = typeof navigator !== "undefined" ? navigator.onLine : true;
+        if (isOnline) {
+          wasOfflineRef.current = false;
+          setIsOffline(false);
+          setShowRestored(true);
+          showNotification();
 
-      if (!offline) {
-        wasOfflineRef.current = false;
-        setIsOffline(false);
-        setShowRestored(true);
-        showNotification();
+          if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
+          hideTimerRef.current = setTimeout(() => {
+            hideNotification(() => {
+              setShowRestored(false);
+            });
+          }, 3000);
+        }
+      } else {
+        const state = await NetInfo.fetch();
+        const offline =
+          state.isConnected === false ||
+          (state.isConnected === true && state.isInternetReachable === false);
 
-        if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
-        hideTimerRef.current = setTimeout(() => {
-          hideNotification(() => {
-            setShowRestored(false);
-          });
-        }, 3000);
+        if (!offline) {
+          wasOfflineRef.current = false;
+          setIsOffline(false);
+          setShowRestored(true);
+          showNotification();
+
+          if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
+          hideTimerRef.current = setTimeout(() => {
+            hideNotification(() => {
+              setShowRestored(false);
+            });
+          }, 3000);
+        }
       }
     } catch (e) {
       console.log("NetInfo check failed:", e);

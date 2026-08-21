@@ -2,7 +2,7 @@
   "expo": {
     "name": "Sahachari",
     "slug": "customers",
-    "version": "1.0.35",
+    "version": "1.0.37",
     "orientation": "portrait",
     "icon": "./assets/sahachari.png",
     "scheme": "customers",
@@ -11,11 +11,11 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.corestoneinnovation.sahachariuser",
-      "buildNumber": "35"
+      "buildNumber": "37"
     },
     "android": {
       "package": "com.corestoneinnovation.sahachariuser",
-      "versionCode": 35,
+      "versionCode": 37,
       "adaptiveIcon": {
         "foregroundImage": "./assets/sahachari.png",
         "backgroundColor": "#ffffff"
